@@ -1,0 +1,11 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Depanku.id Logo - Compass/Discovery Symbol -->
+  <circle cx="100" cy="100" r="80" stroke="oklch(65% 0.15 230)" stroke-width="8" fill="none"/>
+  <circle cx="100" cy="100" r="12" fill="oklch(65% 0.15 230)"/>
+  <path d="M100 20 L100 50" stroke="oklch(65% 0.15 230)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M100 150 L100 180" stroke="oklch(65% 0.15 230)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M20 100 L50 100" stroke="oklch(65% 0.15 230)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M150 100 L180 100" stroke="oklch(65% 0.15 230)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M100 100 L140 60" stroke="oklch(72% 0.14 50)" stroke-width="8" stroke-linecap="round"/>
+</svg>
+
