@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from './AuthProvider';
-import { UserCircleIcon, MagnifyingGlassIcon, SparklesIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, MagnifyingGlassIcon, SparklesIcon, HomeIcon, CogIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -18,8 +18,8 @@ export default function Header() {
         { href: '/', label: 'Home', icon: HomeIcon },
         { href: '/search', label: 'Browse', icon: MagnifyingGlassIcon },
         { href: '/ai', label: 'AI Discovery', icon: SparklesIcon },
-        { href: '/features', label: 'Features', icon: null },
-        { href: '/about', label: 'About Us', icon: null },
+        { href: '/features', label: 'Features', icon: CogIcon },
+        { href: '/about', label: 'About Us', icon: InformationCircleIcon },
     ];
 
     const isActive = (path: string) => pathname === path;

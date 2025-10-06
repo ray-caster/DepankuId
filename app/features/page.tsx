@@ -2,6 +2,7 @@
 
 import { AuthProvider } from '@/components/AuthProvider';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import {
     MagnifyingGlassIcon,
@@ -18,50 +19,50 @@ export default function FeaturesPage() {
     const features = [
         {
             icon: MagnifyingGlassIcon,
-            title: 'Instant Search',
-            description: 'Lightning-fast search powered by Algolia. Get results as you type with intelligent ranking and typo tolerance.',
+            title: 'Find Opportunities in Seconds',
+            description: 'Type what you\'re interested in and instantly see relevant research programs, competitions, and opportunities.',
             color: 'from-blue-500 to-cyan-500'
         },
         {
             icon: SparklesIcon,
-            title: 'AI-Powered Discovery',
-            description: 'Our Socratic AI guide asks the right questions to uncover opportunities that match your unique interests and goals.',
+            title: 'AI Helps You Discover',
+            description: 'Our AI asks you questions to understand your interests, then finds opportunities you never knew existed.',
             color: 'from-purple-500 to-pink-500'
         },
         {
             icon: AcademicCapIcon,
-            title: 'Curated Opportunities',
-            description: 'Every opportunity is hand-picked and verified by our team. Research programs, competitions, and youth initiatives worldwide.',
+            title: 'Only Quality Opportunities',
+            description: 'Every opportunity is checked and verified. No spam, no fake programs. Just real opportunities that matter.',
             color: 'from-green-500 to-emerald-500'
         },
         {
             icon: ClockIcon,
-            title: 'Real-Time Updates',
-            description: 'Daily database updates ensure you never miss a deadline. Get the latest opportunities as soon as they\'re available.',
+            title: 'Never Miss Deadlines',
+            description: 'Get the latest opportunities as soon as they\'re available. We update daily so you don\'t miss out.',
             color: 'from-orange-500 to-amber-500'
         },
         {
             icon: GlobeAltIcon,
-            title: 'Global Coverage',
-            description: 'Opportunities from 20+ countries across 50+ universities and institutions. Access international programs from anywhere.',
+            title: 'Opportunities Worldwide',
+            description: 'Find programs from top universities and organizations around the world, not just in Indonesia.',
             color: 'from-indigo-500 to-blue-500'
         },
         {
             icon: ShieldCheckIcon,
-            title: 'Verified & Safe',
-            description: 'All opportunities verified for legitimacy. We check organizers, deadlines, and ensure all information is accurate.',
+            title: 'Safe & Trusted',
+            description: 'All opportunities are verified for safety. We check that organizers are legitimate and deadlines are real.',
             color: 'from-red-500 to-rose-500'
         },
         {
             icon: BoltIcon,
-            title: 'Lightning Fast',
-            description: 'Built with Next.js and optimized for performance. Sub-second load times and smooth 60fps animations.',
+            title: 'Super Fast & Easy',
+            description: 'Everything loads instantly and works smoothly. No waiting, no complicated steps - just find what you need.',
             color: 'from-yellow-500 to-orange-500'
         },
         {
             icon: UserGroupIcon,
-            title: '100% Free',
-            description: 'No hidden fees, no premium tiers. Our mission is to make opportunities accessible to everyone, regardless of background.',
+            title: 'Completely Free',
+            description: 'No hidden costs, no premium features locked away. Everything is free because opportunity should be accessible to everyone.',
             color: 'from-teal-500 to-cyan-500'
         }
     ];
@@ -80,13 +81,13 @@ export default function FeaturesPage() {
                             className="text-center mb-12 sm:mb-16"
                         >
                             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground mb-4 sm:mb-6">
-                                Powerful Features to Help You{' '}
+                                Everything You Need to{' '}
                                 <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-                                    Succeed
+                                    Find Your Path
                                 </span>
                             </h1>
                             <p className="text-lg sm:text-xl text-foreground-light max-w-3xl mx-auto">
-                                Everything you need to discover, explore, and apply to life-changing opportunities
+                                Discover opportunities that match your interests and goals, all in one place
                             </p>
                         </motion.div>
 
@@ -127,10 +128,10 @@ export default function FeaturesPage() {
                             }}
                         >
                             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                                Ready to Get Started?
+                                Ready to Find Your Opportunity?
                             </h2>
                             <p className="text-lg sm:text-xl text-white/90 mb-8">
-                                Join thousands of students discovering their perfect opportunity
+                                Start discovering opportunities that can change your life
                             </p>
                             <motion.a
                                 href="/"
@@ -147,6 +148,8 @@ export default function FeaturesPage() {
                         </motion.div>
                     </div>
                 </main>
+
+                <Footer />
             </div>
         </AuthProvider>
     );
