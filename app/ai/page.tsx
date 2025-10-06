@@ -23,7 +23,7 @@ export default function AIAnalysisPage() {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages, shouldScrollToBottom]);
+    }, [messages, shouldScrollToBottom, scrollToBottom]);
 
     useEffect(() => {
         // Send initial greeting

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchBox, useHits } from 'react-instantsearch';
+import { useSearchBox, useHits } from 'react-instantsearch-nextjs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';

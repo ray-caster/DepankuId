@@ -7,11 +7,10 @@ from firebase_admin import credentials, firestore, auth
 import requests
 from algoliasearch.search.client import SearchClientSync
 import json
-import brevo_python
-from brevo_python.api import transactional_emails_api
-from brevo_python.model.send_smtp_email import SendSmtpEmail
-from brevo_python.model.send_smtp_email_to import SendSmtpEmailTo
-from brevo_python.model.send_smtp_email_sender import SendSmtpEmailSender
+from brevo import Brevo
+from brevo.models import SendSmtpEmail
+from brevo.models import SendSmtpEmailTo
+from brevo.models import SendSmtpEmailSender
 import secrets
 from datetime import datetime, timedelta
 
@@ -50,9 +49,7 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Brevo configuration
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-configuration = brevo_python.Configuration()
-configuration.api_key['api-key'] = BREVO_API_KEY
-brevo_api_instance = transactional_emails_api.TransactionalEmailsApi(brevo_python.ApiClient(configuration))
+brevo_client = Brevo(api_key=BREVO_API_KEY)
 
 
 @app.route('/health', methods=['GET'])
@@ -429,7 +426,7 @@ def signup():
         )
         
         try:
-            brevo_api_instance.send_transac_email(send_smtp_email)
+            brevo_client.send_transactional_email(send_smtp_email)
         except Exception as e:
             print(f"Error sending email: {str(e)}")
             # Don't fail the signup if email fails

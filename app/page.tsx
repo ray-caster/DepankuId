@@ -1,7 +1,7 @@
 'use client';
 
 import { InstantSearchNext } from 'react-instantsearch-nextjs';
-import { Configure } from 'react-instantsearch';
+import { Configure } from 'react-instantsearch-nextjs';
 import { searchClient, ALGOLIA_INDEX_NAME } from '@/lib/algolia';
 import SearchWithButtons from '@/components/SearchWithButtons';
 import SearchSection from '@/components/SearchSection';

@@ -146,7 +146,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                                                 </div>
                                                 <h3 className="text-2xl font-bold text-foreground mb-3">Check Your Email</h3>
                                                 <p className="text-foreground-light mb-6">
-                                                    We've sent a verification link to <strong>{email}</strong>
+                                                    We&apos;ve sent a verification link to <strong>{email}</strong>
                                                 </p>
                                                 <p className="text-sm text-foreground-lighter">
                                                     Please verify your email to complete your registration

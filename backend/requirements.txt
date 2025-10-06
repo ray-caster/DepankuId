@@ -6,5 +6,5 @@ requests==2.32.3
 python-dotenv==1.0.1
 algoliasearch>=4.0,<5.0
 gunicorn==22.0.0
-brevo-python>=2.0.0
+brevo>=1.0.0
 
