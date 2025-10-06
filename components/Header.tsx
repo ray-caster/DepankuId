@@ -176,7 +176,7 @@ export default function Header() {
                                             initial={{ opacity: 0, y: -10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -10 }}
-                                            className="absolute right-0 mt-2 w-56 bg-white rounded-soft border-2 border-neutral-300 shadow-card overflow-hidden z-50"
+                                            className="absolute right-0 mt-2 w-56 bg-background-light rounded-soft border-2 border-neutral-300 shadow-card overflow-hidden z-50"
                                         >
                                             {/* User Info */}
                                             <div className="px-4 py-3 border-b-2 border-neutral-200 bg-neutral-50">
