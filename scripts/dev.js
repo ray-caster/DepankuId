@@ -16,7 +16,11 @@ const backend = spawn('python', ['app.py'], {
 const frontend = spawn('npm', ['run', 'dev'], {
     cwd: path.join(__dirname, '..'),
     stdio: 'inherit',
-    shell: true
+    shell: true,
+    env: {
+        ...process.env,
+        PORT: process.env.PORT || '1000'
+    }
 });
 
 // Handle process termination
