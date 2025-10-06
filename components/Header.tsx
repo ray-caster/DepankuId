@@ -32,7 +32,7 @@ export default function Header() {
             }}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 sm:py-4">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-3 sm:gap-4">
                     {/* Logo */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
@@ -41,14 +41,14 @@ export default function Header() {
                     >
                         <Link
                             href="/"
-                            className="text-xl sm:text-2xl font-bold text-primary-800 hover:text-primary-950 transition-all"
+                            className="text-lg sm:text-xl md:text-2xl font-bold text-primary-800 hover:text-primary-950 transition-all"
                         >
                             Depanku.id
                         </Link>
                     </motion.div>
 
                     {/* Navigation - Desktop */}
-                    <nav className="hidden md:flex items-center gap-2">
+                    <nav className="hidden lg:flex items-center gap-2">
                         {navItems.map((item, index) => {
                             const Icon = item.icon;
                             const active = isActive(item.href);
@@ -85,17 +85,17 @@ export default function Header() {
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2 sm:gap-4"
+                        className="flex items-center gap-2 sm:gap-3"
                     >
                         {user ? (
                             <>
-                                <div className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 rounded-soft bg-background-light border-2 border-neutral-400"
+                                <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-soft bg-background-light border-2 border-neutral-400"
                                     style={{
                                         boxShadow: '0 2px 4px -1px oklch(0% 0 0 / 0.08)'
                                     }}
                                 >
                                     {user.photoURL ? (
-                                        <div className="relative w-7 h-7 sm:w-8 sm:h-8">
+                                        <div className="relative w-6 h-6 sm:w-8 sm:h-8">
                                             <Image
                                                 src={user.photoURL}
                                                 alt={user.displayName || 'User'}
@@ -105,15 +105,15 @@ export default function Header() {
                                             />
                                         </div>
                                     ) : (
-                                        <UserCircleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400" />
+                                        <UserCircleIcon className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
                                     )}
-                                    <span className="text-xs sm:text-sm font-semibold text-foreground hidden sm:block max-w-[120px] truncate">
+                                    <span className="text-xs sm:text-sm font-semibold text-foreground hidden sm:block max-w-[100px] truncate">
                                         {user.displayName}
                                     </span>
                                 </div>
                                 <button
                                     onClick={signOut}
-                                    className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-soft
+                                    className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-soft
                                              bg-white text-foreground border-2 border-neutral-400
                                              hover:bg-neutral-50 hover:border-neutral-500
                                              transition-all duration-300"
@@ -121,13 +121,14 @@ export default function Header() {
                                         boxShadow: '0 2px 4px -1px oklch(0% 0 0 / 0.08), inset 0 1px 0 0 oklch(100% 0 0 / 0.05)'
                                     }}
                                 >
-                                    Sign Out
+                                    <span className="hidden sm:inline">Sign Out</span>
+                                    <span className="sm:hidden">Out</span>
                                 </button>
                             </>
                         ) : (
                             <button
                                 onClick={() => setShowAuthModal(true)}
-                                className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold rounded-soft
+                                className="px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold rounded-soft
                                          bg-primary-600 text-white border-2 border-neutral-500
                                          hover:bg-primary-700 hover:border-neutral-600
                                          transition-all duration-300"
@@ -135,14 +136,15 @@ export default function Header() {
                                     boxShadow: '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
                                 }}
                             >
-                                Sign In
+                                <span className="hidden sm:inline">Sign In</span>
+                                <span className="sm:hidden">Sign In</span>
                             </button>
                         )}
                     </motion.div>
                 </div>
 
                 {/* Mobile Navigation */}
-                <nav className="md:hidden flex items-center gap-1 mt-3 pb-1 overflow-x-auto">
+                <nav className="lg:hidden flex items-center gap-2 mt-4 pb-2 overflow-x-auto px-2 -mx-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.href);
@@ -151,24 +153,24 @@ export default function Header() {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-soft font-medium transition-all duration-300
+                                className={`flex-shrink-0 flex flex-col items-center gap-1.5 px-4 py-3 rounded-soft font-medium transition-all duration-300 min-w-[70px]
                                     ${active
-                                        ? 'bg-primary-600 text-white border-2 border-neutral-500'
-                                        : 'bg-background-light text-foreground-light border-2 border-neutral-400 hover:border-neutral-500'
+                                        ? 'bg-primary-600 text-white border-2 border-primary-500 shadow-lg'
+                                        : 'bg-background-light text-foreground-light border-2 border-neutral-300 hover:border-neutral-400 hover:bg-background-lighter'
                                     }`}
                                 style={{
                                     boxShadow: active
-                                        ? '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
-                                        : '0 2px 4px -1px oklch(0% 0 0 / 0.08)'
+                                        ? '0 4px 12px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
+                                        : '0 2px 6px -1px oklch(0% 0 0 / 0.08)'
                                 }}
                             >
                                 {Icon ? (
                                     <>
                                         <Icon className="w-5 h-5" />
-                                        <span className="text-xs whitespace-nowrap">{item.label}</span>
+                                        <span className="text-xs whitespace-nowrap font-medium">{item.label}</span>
                                     </>
                                 ) : (
-                                    <span className="text-xs whitespace-nowrap py-2">{item.label}</span>
+                                    <span className="text-xs whitespace-nowrap font-medium py-1">{item.label}</span>
                                 )}
                             </Link>
                         );
