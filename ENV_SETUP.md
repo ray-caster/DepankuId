@@ -13,10 +13,10 @@ NEXT_PUBLIC_FRONTEND_URL=http://localhost:1000
 
 ## How it Works
 
-The application now uses environment variables for port configuration:
+The application now uses `cross-env` for cross-platform environment variable support:
 
-- **Default Port:** 1000 (if no PORT environment variable is set)
-- **Custom Port:** Set the `PORT` environment variable to any port you prefer
+- **Default Port:** 1000 (set in package.json scripts)
+- **Custom Port:** Override by setting the `PORT` environment variable
 
 ## Usage Examples
 
@@ -40,14 +40,9 @@ PORT=3000 npm run dev
 npm run dev
 ```
 
-### Method 3: Cross-platform with cross-env
-If you want to ensure cross-platform compatibility, you can install `cross-env`:
+### Method 3: Cross-platform with cross-env (Already Configured)
+The project is already configured with `cross-env` for cross-platform compatibility:
 
-```bash
-npm install --save-dev cross-env
-```
-
-Then update package.json scripts:
 ```json
 {
   "scripts": {
