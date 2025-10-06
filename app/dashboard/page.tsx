@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity } from '@/lib/api';
@@ -39,9 +39,9 @@ function DashboardContent() {
         if (user) {
             loadBookmarks();
         }
-    }, [user]);
+    }, [user, loadBookmarks]);
 
-    const loadBookmarks = async () => {
+    const loadBookmarks = useCallback(async () => {
         try {
             const idToken = await getIdToken();
             if (idToken) {
@@ -54,7 +54,7 @@ function DashboardContent() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [getIdToken]);
 
     const processDeadlines = (opportunities: Opportunity[]) => {
         const events: DeadlineEvent[] = opportunities
@@ -313,7 +313,7 @@ function DashboardContent() {
                                 <div className="card text-center py-12">
                                     <BookmarkIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
                                     <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
-                                    <p className="text-neutral-600 mb-6">Start bookmarking opportunities you're interested in!</p>
+                                    <p className="text-neutral-600 mb-6">Start bookmarking opportunities you&apos;re interested in!</p>
                                     <Link href="/search" className="btn-primary inline-block">
                                         Browse Opportunities
                                     </Link>

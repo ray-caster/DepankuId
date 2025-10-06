@@ -15,11 +15,11 @@ export default function AIAnalysisPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
 
-    const scrollToBottom = () => {
+    const scrollToBottom = useCallback(() => {
         if (shouldScrollToBottom) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
-    };
+    }, [shouldScrollToBottom]);
 
     useEffect(() => {
         scrollToBottom();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
@@ -9,7 +9,7 @@ import {
     SparklesIcon, 
     DocumentDuplicateIcon, 
     CalendarIcon, 
-    InfinityIcon,
+    ArrowPathIcon,
     LinkIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -384,7 +384,7 @@ function OpportunitiesContent() {
                                                 })}
                                                 className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
                                             />
-                                            <InfinityIcon className="w-4 h-4" />
+                                            <ArrowPathIcon className="w-4 h-4" />
                                             No deadline / Indefinite
                                         </label>
                                     </div>
