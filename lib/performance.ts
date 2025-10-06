@@ -2,7 +2,6 @@
  * Performance utilities and optimizations
  */
 
-// Import React for lazy loading
 import React from 'react';
 
 // Lazy load components
@@ -122,6 +121,3 @@ export const reportWebVitals = (metric: any) => {
     // Example: gtag('event', metric.name, { value: metric.value });
   }
 };
-
-// Import React for lazy loading
-import React from 'react';

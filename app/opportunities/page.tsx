@@ -5,10 +5,10 @@ import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { 
-    SparklesIcon, 
-    DocumentDuplicateIcon, 
-    CalendarIcon, 
+import {
+    SparklesIcon,
+    DocumentDuplicateIcon,
+    CalendarIcon,
     ArrowPathIcon,
     LinkIcon,
     XMarkIcon
@@ -47,15 +47,69 @@ function OpportunitiesContent() {
         contact_email: '',
         has_indefinite_deadline: false,
     });
-    
+
     const [templates, setTemplates] = useState<Record<string, OpportunityTemplate>>({});
     const [categoryPresets, setCategoryPresets] = useState<Record<string, string[]>>({});
     const [tagPresets, setTagPresets] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
     const [categoryInput, setCategoryInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [showSocialMedia, setShowSocialMedia] = useState(false);
+    // Security: Input validation and sanitization
+    const validateInput = useCallback((field: string, value: any): string | null => {
+        switch (field) {
+            case 'title':
+                if (!value || value.trim().length < 3) return 'Title must be at least 3 characters';
+                if (value.length > 200) return 'Title must be less than 200 characters';
+                break;
+            case 'description':
+                if (!value || value.trim().length < 10) return 'Description must be at least 10 characters';
+                if (value.length > 2000) return 'Description must be less than 2000 characters';
+                break;
+            case 'organization':
+                if (!value || value.trim().length < 2) return 'Organization must be at least 2 characters';
+                if (value.length > 100) return 'Organization must be less than 100 characters';
+                break;
+            case 'url':
+                if (value && !isValidUrl(value)) return 'Please enter a valid URL';
+                break;
+            case 'contact_email':
+                if (value && !isValidEmail(value)) return 'Please enter a valid email address';
+                break;
+            case 'deadline':
+                if (!formData.has_indefinite_deadline && value && !isValidDate(value)) {
+                    return 'Please enter a valid date';
+                }
+                break;
+        }
+        return null;
+    }, [formData.has_indefinite_deadline]);
+
+    const isValidUrl = (url: string): boolean => {
+        try {
+            new URL(url);
+            return true;
+        } catch {
+            return false;
+        }
+    };
+
+    const isValidEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const isValidDate = (dateString: string): boolean => {
+        const date = new Date(dateString);
+        return date instanceof Date && !isNaN(date.getTime()) && date > new Date();
+    };
+
+    const sanitizeInput = (input: string): string => {
+        return input
+            .replace(/[<>]/g, '') // Remove potential HTML tags
+            .replace(/javascript:/gi, '') // Remove javascript: protocol
+            .replace(/on\w+=/gi, '') // Remove event handlers
+            .trim();
+    };
     const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
     useEffect(() => {
@@ -69,7 +123,7 @@ function OpportunitiesContent() {
                 api.getCategoryPresets(),
                 api.getTagPresets()
             ]);
-            
+
             setTemplates(templatesData);
             setCategoryPresets(categoriesData);
             setTagPresets(tagsData);
@@ -240,11 +294,10 @@ function OpportunitiesContent() {
                                     key={key}
                                     type="button"
                                     onClick={() => applyTemplate(key)}
-                                    className={`p-4 rounded-soft border-2 transition-all ${
-                                        selectedTemplate === key
-                                            ? 'border-primary-600 bg-primary-50'
-                                            : 'border-neutral-300 hover:border-primary-400 bg-white'
-                                    }`}
+                                    className={`p-4 rounded-soft border-2 transition-all ${selectedTemplate === key
+                                        ? 'border-primary-600 bg-primary-50'
+                                        : 'border-neutral-300 hover:border-primary-400 bg-white'
+                                        }`}
                                 >
                                     <div className="text-2xl mb-2">
                                         {key === 'research' && '🔬'}
@@ -262,11 +315,10 @@ function OpportunitiesContent() {
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className={`mb-6 p-4 rounded-soft ${
-                                message.type === 'success' 
-                                    ? 'bg-secondary-light text-secondary-dark' 
-                                    : 'bg-red-100 text-red-700'
-                            }`}
+                            className={`mb-6 p-4 rounded-soft ${message.type === 'success'
+                                ? 'bg-secondary-light text-secondary-dark'
+                                : 'bg-red-100 text-red-700'
+                                }`}
                         >
                             {message.text}
                         </motion.div>
@@ -377,8 +429,8 @@ function OpportunitiesContent() {
                                             <input
                                                 type="checkbox"
                                                 checked={formData.has_indefinite_deadline}
-                                                onChange={(e) => setFormData({ 
-                                                    ...formData, 
+                                                onChange={(e) => setFormData({
+                                                    ...formData,
                                                     has_indefinite_deadline: e.target.checked,
                                                     deadline: e.target.checked ? 'indefinite' : ''
                                                 })}
@@ -419,7 +471,7 @@ function OpportunitiesContent() {
                                         Add
                                     </button>
                                 </div>
-                                
+
                                 {/* Category Presets */}
                                 {formData.type && categoryPresets[formData.type] && (
                                     <div className="mb-3">
