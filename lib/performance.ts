@@ -5,13 +5,13 @@
 import React from 'react';
 
 // Lazy load components
-export const lazyLoad = <T extends React.ComponentType<any>>(
-  importFunc: () => Promise<{ default: T }>,
+export const lazyLoad = (
+  importFunc: () => Promise<{ default: React.ComponentType<any> }>,
   fallback?: React.ReactNode
 ) => {
   const LazyComponent = React.lazy(importFunc);
 
-  return (props: React.ComponentProps<T>) => (
+  return (props: any) => (
     <React.Suspense fallback= { fallback || <LoadingSpinner />
 }>
   <LazyComponent { ...props } />
@@ -27,24 +27,24 @@ const LoadingSpinner = () => (
 );
 
 // Debounce function for search inputs
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+export function debounce(
+  func: (...args: any[]) => any,
   wait: number
-): (...args: Parameters<T>) => void {
+): (...args: any[]) => void {
   let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
+  return (...args: any[]) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
 }
 
 // Throttle function for scroll events
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
+export function throttle(
+  func: (...args: any[]) => any,
   limit: number
-): (...args: Parameters<T>) => void {
+): (...args: any[]) => void {
   let inThrottle: boolean;
-  return (...args: Parameters<T>) => {
+  return (...args: any[]) => {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
