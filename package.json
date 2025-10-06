@@ -3,9 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "cross-env PORT=1550 next dev",
+        "dev": "cross-env PORT=6550 next dev",
         "build": "next build",
-        "start": "cross-env PORT=1550 next start",
+        "start": "cross-env PORT=6550 next start",
         "lint": "next lint",
         "backend": "cd backend && python app.py",
         "seed": "cd backend && python seed_data.py"
