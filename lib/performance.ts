@@ -1,143 +1,123 @@
 /**
- * Performance Optimization Utilities
- * Memoization, debouncing, throttling, and lazy loading helpers
+ * Performance utilities and optimizations
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+// Lazy load components
+export const lazyLoad = <T extends React.ComponentType<any>>(
+  importFunc: () => Promise<{ default: T }>,
+  fallback?: React.ReactNode
+) => {
+  const LazyComponent = React.lazy(importFunc);
+  
+  return (props: React.ComponentProps<T>) => (
+    <React.Suspense fallback={fallback || <LoadingSpinner />}>
+      <LazyComponent {...props} />
+    </React.Suspense>
+  );
+};
 
-/**
- * Debounce hook - delays execution until after user stops typing/acting
- * Perfect for search inputs and expensive operations
- */
-export function useDebounce<T>(value: T, delay: number = 300): T {
-    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value);
-        }, delay);
-
-        return () => clearTimeout(handler);
-    }, [value, delay]);
-
-    return debouncedValue;
+// Debounce function for search inputs
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
 }
 
-/**
- * Throttle hook - limits execution rate
- * Perfect for scroll events and resize handlers
- */
-export function useThrottle<T>(value: T, limit: number = 200): T {
-    const [throttledValue, setThrottledValue] = useState<T>(value);
-    const lastRan = useRef(Date.now());
-
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            if (Date.now() - lastRan.current >= limit) {
-                setThrottledValue(value);
-                lastRan.current = Date.now();
-            }
-        }, limit - (Date.now() - lastRan.current));
-
-        return () => clearTimeout(handler);
-    }, [value, limit]);
-
-    return throttledValue;
+// Throttle function for scroll events
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  return (...args: Parameters<T>) => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
 }
 
-/**
- * Intersection Observer hook for lazy loading
- * Perfect for images, components, and infinite scroll
- */
-export function useIntersectionObserver(
-    ref: React.RefObject<Element>,
-    options: IntersectionObserverInit = {}
-): boolean {
-    const [isIntersecting, setIsIntersecting] = useState(false);
+// Intersection Observer for lazy loading
+export const useIntersectionObserver = (
+  callback: IntersectionObserverCallback,
+  options?: IntersectionObserverInit
+) => {
+  const observerRef = React.useRef<IntersectionObserver | null>(null);
 
-    useEffect(() => {
-        const element = ref.current;
-        if (!element) return;
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+      observerRef.current = new IntersectionObserver(callback, {
+        rootMargin: '50px',
+        threshold: 0.01,
+        ...options,
+      });
+    }
 
-        const observer = new IntersectionObserver(([entry]) => {
-            setIsIntersecting(entry.isIntersecting);
-        }, options);
-
-        observer.observe(element);
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [ref, options]);
-
-    return isIntersecting;
-}
-
-/**
- * Memoized callback that won't change on re-renders
- */
-export function useMemoizedCallback<T extends (...args: any[]) => any>(
-    callback: T,
-    dependencies: React.DependencyList
-): T {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    return useCallback(callback, dependencies) as T;
-}
-
-/**
- * Local storage hook with SSR safety
- */
-export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
-    const [storedValue, setStoredValue] = useState<T>(() => {
-        if (typeof window === 'undefined') return initialValue;
-
-        try {
-            const item = window.localStorage.getItem(key);
-            return item ? JSON.parse(item) : initialValue;
-        } catch (error) {
-            console.error(`Error reading localStorage key "${key}":`, error);
-            return initialValue;
-        }
-    });
-
-    const setValue = (value: T) => {
-        try {
-            setStoredValue(value);
-            if (typeof window !== 'undefined') {
-                window.localStorage.setItem(key, JSON.stringify(value));
-            }
-        } catch (error) {
-            console.error(`Error setting localStorage key "${key}":`, error);
-        }
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
+  }, [callback, options]);
 
-    return [storedValue, setValue];
-}
+  return observerRef.current;
+};
 
-/**
- * Prefetch utility for optimistic loading
- */
-export const prefetch = async (url: string): Promise<void> => {
-    if (typeof window === 'undefined') return;
-
+// Prefetch link on hover
+export const prefetchOnHover = (href: string) => {
+  if (typeof window !== 'undefined') {
     const link = document.createElement('link');
     link.rel = 'prefetch';
-    link.href = url;
+    link.href = href;
     document.head.appendChild(link);
+  }
 };
 
-/**
- * Image optimization utility
- */
-export const getOptimizedImageUrl = (
-    src: string,
-    width: number = 800,
-    quality: number = 75
-): string => {
-    // For Next.js Image Optimization API
-    if (src.startsWith('/')) {
-        return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
+// Measure performance
+export const measurePerformance = (metricName: string, callback: () => void) => {
+  if (typeof window !== 'undefined' && 'performance' in window) {
+    const startMark = `${metricName}-start`;
+    const endMark = `${metricName}-end`;
+    
+    performance.mark(startMark);
+    callback();
+    performance.mark(endMark);
+    
+    try {
+      performance.measure(metricName, startMark, endMark);
+      const measure = performance.getEntriesByName(metricName)[0];
+      console.log(`${metricName}: ${measure.duration.toFixed(2)}ms`);
+    } catch (e) {
+      // Ignore errors in production
     }
-    return src;
+  } else {
+    callback();
+  }
 };
 
+// Web Vitals reporting
+export const reportWebVitals = (metric: any) => {
+  if (process.env.NODE_ENV === 'production') {
+    // Send to analytics
+    console.log(metric);
+    
+    // You can send to Google Analytics, Vercel Analytics, etc.
+    // Example: gtag('event', metric.name, { value: metric.value });
+  }
+};
+
+// Import React for lazy loading
+import React from 'react';

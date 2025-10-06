@@ -18,6 +18,17 @@ export interface AIChatResponse {
     error?: string;
 }
 
+export interface SocialMediaLinks {
+    website?: string;
+    twitter?: string;
+    instagram?: string;
+    facebook?: string;
+    linkedin?: string;
+    youtube?: string;
+    discord?: string;
+    telegram?: string;
+}
+
 export interface Opportunity {
     id?: string;
     objectID?: string;
@@ -31,6 +42,24 @@ export interface Opportunity {
     url?: string;
     tags: string[];
     createdAt?: any;
+    social_media?: SocialMediaLinks;
+    requirements?: string;
+    benefits?: string;
+    eligibility?: string;
+    cost?: string;
+    duration?: string;
+    application_process?: string;
+    contact_email?: string;
+    has_indefinite_deadline?: boolean;
+}
+
+export interface OpportunityTemplate {
+    type: string;
+    category: string[];
+    tags: string[];
+    description: string;
+    requirements?: string;
+    benefits?: string;
 }
 
 export interface UserPreferences {
@@ -132,13 +161,46 @@ class API {
     }
 
     async syncAlgolia(): Promise<void> {
-        const response = await fetch(`${this.baseURL}/api/sync-algolia`, {
+        const response = await fetch(`${this.baseURL}/api/sync/algolia`, {
             method: 'POST',
         });
 
         if (!response.ok) {
             throw new Error('Failed to sync Algolia');
         }
+    }
+
+    async getOpportunityTemplates(): Promise<Record<string, OpportunityTemplate>> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/templates`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch templates');
+        }
+
+        const data = await response.json();
+        return data.data || {};
+    }
+
+    async getCategoryPresets(): Promise<Record<string, string[]>> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/presets/categories`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch category presets');
+        }
+
+        const data = await response.json();
+        return data.data || {};
+    }
+
+    async getTagPresets(): Promise<string[]> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/presets/tags`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch tag presets');
+        }
+
+        const data = await response.json();
+        return data.data || [];
     }
 
     async signup(data: { email: string; password: string; name: string }): Promise<{ success: boolean; message: string }> {

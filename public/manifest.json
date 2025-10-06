@@ -1,0 +1,22 @@
+{
+  "name": "Depanku.id - Discover Opportunities",
+  "short_name": "Depanku",
+  "description": "Find research programs, competitions, and youth opportunities across Indonesia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "opportunities", "career"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
+

@@ -21,6 +21,7 @@ interface AuthContextType {
     signUpWithEmail: (email: string, password: string, name: string) => Promise<{ success: boolean; message: string }>;
     signOut: () => Promise<void>;
     refreshIdToken: () => Promise<string | null>;
+    getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType>({
     signUpWithEmail: async () => ({ success: false, message: '' }),
     signOut: async () => { },
     refreshIdToken: async () => null,
+    getIdToken: async () => null,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -59,6 +61,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const token = await user.getIdToken(true);
             setIdToken(token);
             return token;
+        }
+        return null;
+    };
+
+    const getIdToken = async () => {
+        if (user) {
+            return await user.getIdToken();
         }
         return null;
     };
@@ -122,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, idToken, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut, refreshIdToken }}>
+        <AuthContext.Provider value={{ user, loading, idToken, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut, refreshIdToken, getIdToken }}>
             {children}
         </AuthContext.Provider>
     );

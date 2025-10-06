@@ -4,7 +4,7 @@ import { useState, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { motion } from 'framer-motion';
 import { XMarkIcon, EnvelopeIcon, LockClosedIcon, UserIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { api } from '@/lib/api';
+import { useAuth } from './AuthProvider';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -13,6 +13,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
+    const { signUpWithEmail, signInWithEmail } = useAuth();
     const [isSignUp, setIsSignUp] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -28,23 +29,32 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         try {
             if (isSignUp) {
-                const response = await api.signup({ email, password, name });
+                console.log('Attempting signup...', { email, name });
+                const response = await signUpWithEmail(email, password, name);
+                console.log('Signup response:', response);
+
                 if (response.success) {
                     setVerificationSent(true);
                 } else {
                     setError(response.message || 'Signup failed');
+                    console.error('Signup failed:', response.message);
                 }
             } else {
-                const response = await api.signin({ email, password });
+                console.log('Attempting signin...', { email });
+                const response = await signInWithEmail(email, password);
+                console.log('Signin response:', response);
+
                 if (response.success) {
                     onSuccess();
                     onClose();
                 } else {
                     setError(response.message || 'Invalid credentials');
+                    console.error('Signin failed:', response.message);
                 }
             }
-        } catch (err) {
-            setError('Something went wrong. Please try again.');
+        } catch (err: any) {
+            console.error('Auth error:', err);
+            setError(err?.message || 'Something went wrong. Please try again.');
         } finally {
             setLoading(false);
         }
