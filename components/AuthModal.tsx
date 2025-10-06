@@ -91,10 +91,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                             leaveTo="opacity-0 scale-95"
                         >
                             <Dialog.Panel
-                                className="w-full max-w-4xl transform overflow-hidden rounded-comfort bg-white/80 backdrop-blur-sm border border-neutral-200/50 shadow-2xl transition-all"
+                                className="w-full max-w-4xl transform overflow-hidden rounded-comfort bg-white/60 backdrop-blur-xl border-2 border-neutral-400/60 shadow-2xl transition-all"
                                 style={{
-                                    backdropFilter: 'blur(8px) saturate(120%)',
-                                    WebkitBackdropFilter: 'blur(8px) saturate(120%)',
+                                    backdropFilter: 'blur(16px) saturate(180%)',
+                                    WebkitBackdropFilter: 'blur(16px) saturate(180%)',
                                 }}
                             >
                                 <div className="grid md:grid-cols-2">
@@ -134,7 +134,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                                     <div className="p-8 sm:p-12 relative">
                                         <button
                                             onClick={onClose}
-                                            className="absolute top-4 right-4 p-2 rounded-soft hover:bg-neutral-100 transition-colors"
+                                            className="absolute top-4 right-4 p-2 rounded-soft hover:bg-neutral-100 transition-colors border-2 border-transparent hover:border-neutral-300"
                                         >
                                             <XMarkIcon className="w-6 h-6 text-neutral-600" />
                                         </button>
@@ -165,7 +165,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                                                 </p>
 
                                                 {error && (
-                                                    <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-soft">
+                                                    <div className="mb-6 p-4 bg-red-50 border-2 border-red-400 rounded-soft">
                                                         <p className="text-red-700 text-sm">{error}</p>
                                                     </div>
                                                 )}
@@ -233,7 +233,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                                                     <button
                                                         type="submit"
                                                         disabled={loading}
-                                                        className="w-full py-4 bg-primary-600 text-white font-bold rounded-soft border-2 border-neutral-500 hover:bg-primary-700 disabled:opacity-50 transition-all"
+                                                        className="w-full py-4 bg-primary-600 text-white font-bold rounded-soft border-2 border-neutral-400 hover:bg-primary-700 hover:border-neutral-500 disabled:opacity-50 transition-all"
                                                         style={{
                                                             boxShadow: '0 8px 16px -4px oklch(0% 0 0 / 0.2), 0 4px 8px -2px oklch(0% 0 0 / 0.1)'
                                                         }}
