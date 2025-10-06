@@ -129,13 +129,11 @@ export default function Header() {
                             <button
                                 onClick={() => setShowAuthModal(true)}
                                 className="px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold rounded-soft
-                                         bg-primary-600/80 backdrop-blur-sm text-white border-2 border-neutral-400
-                                         hover:bg-primary-700/90 hover:border-neutral-500
+                                         bg-primary-600 text-white border-2 border-neutral-400
+                                         hover:bg-primary-700 hover:border-neutral-500
                                          transition-all duration-300"
                                 style={{
-                                    boxShadow: '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)',
-                                    backdropFilter: 'blur(8px) saturate(120%)',
-                                    WebkitBackdropFilter: 'blur(8px) saturate(120%)',
+                                    boxShadow: '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
                                 }}
                             >
                                 <span className="hidden sm:inline">Sign In</span>
