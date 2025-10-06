@@ -1,6 +1,6 @@
 'use client';
 
-import { useHits } from 'react-instantsearch-nextjs';
+import { useHits } from 'react-instantsearch';
 import OpportunityCard from './OpportunityCard';
 import { Opportunity } from '@/lib/api';
 import { motion } from 'framer-motion';

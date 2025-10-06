@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useSearchBox } from 'react-instantsearch-nextjs';
+import { useSearchBox } from 'react-instantsearch';
 
 const tags = [
     { label: '#research', query: 'research academic study' },

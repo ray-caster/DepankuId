@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { InstantSearchNext } from 'react-instantsearch-nextjs';
-import { Configure, useSearchBox } from 'react-instantsearch-nextjs';
+import { Configure, useSearchBox } from 'react-instantsearch';
 import { searchClient, ALGOLIA_INDEX_NAME } from '@/lib/algolia';
 import SearchResults from '@/components/SearchResults';
 import { AuthProvider } from '@/components/AuthProvider';

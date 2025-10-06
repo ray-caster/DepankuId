@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchBox } from 'react-instantsearch-nextjs';
+import { useSearchBox } from 'react-instantsearch';
 import { motion } from 'framer-motion';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
