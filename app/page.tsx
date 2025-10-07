@@ -224,13 +224,13 @@ function HomeContent() {
                     </section>
 
                     {/* Social Proof Section */}
-                    <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+                    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-background-lighter border-y-2 border-neutral-400">
                         <div className="max-w-7xl mx-auto">
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                className="text-[clamp(1.75rem,5vw,3rem)] font-bold text-center text-foreground mb-4 sm:mb-6"
+                                className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-center text-foreground mb-3 sm:mb-4"
                             >
                                 Trusted by Students Worldwide
                             </motion.h2>
@@ -239,7 +239,7 @@ function HomeContent() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.1 }}
-                                className="text-base sm:text-lg lg:text-xl text-foreground-light text-center max-w-3xl mx-auto mb-12 sm:mb-16"
+                                className="text-sm sm:text-base lg:text-lg text-foreground-light text-center max-w-3xl mx-auto mb-8 sm:mb-12"
                             >
                                 Join thousands of students who found their perfect opportunity
                             </motion.p>
@@ -272,13 +272,13 @@ function HomeContent() {
                     </section>
 
                     {/* FAQ Section */}
-                    <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-background-light border-y border-neutral-200">
+                    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-background-light border-y-2 border-neutral-400">
                         <div className="max-w-3xl mx-auto">
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                className="text-[clamp(1.75rem,5vw,3rem)] font-bold text-center text-foreground mb-4 sm:mb-6"
+                                className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-center text-foreground mb-3 sm:mb-4"
                             >
                                 Frequently Asked Questions
                             </motion.h2>
@@ -287,7 +287,7 @@ function HomeContent() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.1 }}
-                                className="text-base sm:text-lg lg:text-xl text-foreground-light text-center mb-10 sm:mb-12"
+                                className="text-sm sm:text-base lg:text-lg text-foreground-light text-center mb-8 sm:mb-10"
                             >
                                 Everything you need to know about Depanku.id
                             </motion.p>
@@ -334,20 +334,20 @@ function HomeContent() {
                     </section>
 
                     {/* Final CTA Section */}
-                    <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+                    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-background">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="max-w-5xl mx-auto text-center bg-gradient-to-br from-primary-600 to-accent-600 rounded-comfort p-8 sm:p-12 lg:p-16 border-2 border-neutral-500"
+                            className="max-w-5xl mx-auto text-center bg-gradient-to-br from-primary-600 to-accent-600 rounded-comfort p-6 sm:p-10 lg:p-12 border-2 border-neutral-400"
                             style={{
                                 boxShadow: '0 20px 40px -8px oklch(0% 0 0 / 0.2), 0 8px 16px -4px oklch(0% 0 0 / 0.1), inset 0 2px 0 0 oklch(100% 0 0 / 0.1)'
                             }}
                         >
-                            <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-bold text-white mb-4 sm:mb-6 leading-tight">
+                            <h2 className="text-[clamp(1.5rem,5vw,2.75rem)] font-bold text-white mb-3 sm:mb-4 leading-tight">
                                 Ready to Find Your Path?
                             </h2>
-                            <p className="text-base sm:text-xl lg:text-2xl text-white/90 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed">
+                            <p className="text-sm sm:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
                                 Join thousands of students discovering life-changing opportunities. It&apos;s free, fast, and tailored to you.
                             </p>
                             <motion.button
@@ -369,7 +369,7 @@ function HomeContent() {
 
             {/* Enhanced Footer */}
             <footer
-                className="border-t-2 border-neutral-200 py-10 sm:py-12 lg:py-16 bg-background-light"
+                className="border-t-2 border-neutral-400 py-10 sm:py-12 lg:py-16 bg-background-light"
                 style={{
                     boxShadow: 'inset 0 2px 0 0 oklch(100% 0 0 / 0.1)'
                 }}
