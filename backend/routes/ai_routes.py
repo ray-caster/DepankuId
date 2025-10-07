@@ -4,9 +4,13 @@ from services.ai_service import AIService
 
 ai_bp = Blueprint('ai', __name__, url_prefix='/api/ai')
 
-@ai_bp.route('/chat', methods=['POST'])
+@ai_bp.route('/chat', methods=['POST', 'OPTIONS'])
 def ai_chat():
     """AI Socratic discovery endpoint"""
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        return '', 200
+    
     try:
         data = request.json
         user_message = data.get('message', '')

@@ -33,13 +33,29 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # Configure CORS with security settings
-ALLOWED_ORIGINS = os.getenv('FRONTEND_URL', 'http://localhost:3000').split(',')
+ALLOWED_ORIGINS = [
+    'http://localhost:7550',
+    'http://localhost:6550', 
+    'https://www.depanku.id',
+    'https://depanku.id'
+]
+
+# Add any additional origins from environment variable
+env_origins = os.getenv('FRONTEND_URL', '').split(',')
+for origin in env_origins:
+    if origin.strip() and origin.strip() not in ALLOWED_ORIGINS:
+        ALLOWED_ORIGINS.append(origin.strip())
+
 CORS(app, 
      resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
      supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     expose_headers=["Content-Length", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"]
 )
+
+# Log CORS configuration
+logger.info(f"CORS configured for origins: {ALLOWED_ORIGINS}")
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")
