@@ -12,18 +12,17 @@ export const lazyLoad = (
   const LazyComponent = React.lazy(importFunc);
 
   return (props: any) => (
-    <React.Suspense fallback= { fallback || <LoadingSpinner />
-}>
-  <LazyComponent { ...props } />
-  </React.Suspense>
+    <React.Suspense fallback={fallback || <LoadingSpinner />}>
+      <LazyComponent {...props} />
+    </React.Suspense>
   );
 };
 
 // Loading spinner component
 const LoadingSpinner = () => (
-  <div className= "flex items-center justify-center p-8" >
-  <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" > </div>
-    </div>
+  <div className="flex items-center justify-center p-8">
+    <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
 );
 
 // Debounce function for search inputs
