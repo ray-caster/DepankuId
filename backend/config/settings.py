@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
-from algoliasearch.search.client import SearchClientSync
+from algoliasearch.search.client import SearchClient
 import brevo_python
 from brevo_python import TransactionalEmailsApi
 
@@ -26,7 +26,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 # Algolia Configuration
-algolia_client = SearchClientSync(
+algolia_client = SearchClient(
     os.getenv("ALGOLIA_APP_ID"),
     os.getenv("ALGOLIA_ADMIN_API_KEY")
 )
