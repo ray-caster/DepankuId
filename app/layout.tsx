@@ -52,8 +52,26 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className={inter.variable}>
+        <html lang="en" className={inter.variable} suppressHydrationWarning>
             <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            // Suppress hydration warnings for browser extension attributes
+                            if (typeof window !== 'undefined') {
+                                const originalConsoleWarn = console.warn;
+                                console.warn = function(...args) {
+                                    const message = args.join(' ');
+                                    if (message.includes('Extra attributes from the server') && 
+                                        message.includes('webcrx')) {
+                                        return; // Suppress webcrx warnings
+                                    }
+                                    originalConsoleWarn.apply(console, args);
+                                };
+                            }
+                        `
+                    }}
+                />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{

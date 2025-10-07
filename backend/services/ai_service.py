@@ -54,17 +54,36 @@ Based on their answers, help narrow down whether they'd be interested in researc
         }
 
         payload = {
-            "model": "deepseek-chat-v3.1:free",
+            "model": "deepseek/deepseek-chat-v3.1:free",
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 300
         }
 
-        response = requests.post(OPENROUTER_URL, json=payload, headers=headers)
-        response.raise_for_status()
-        
-        ai_response = response.json()
-        assistant_message = ai_response['choices'][0]['message']['content']
+        try:
+            # Debug logging
+            print(f"Making request to OpenRouter with model: {payload['model']}")
+            print(f"API Key present: {bool(OPENROUTER_API_KEY)}")
+            
+            response = requests.post(OPENROUTER_URL, json=payload, headers=headers)
+            
+            # Better error handling with detailed response
+            if response.status_code != 200:
+                error_detail = f"Status: {response.status_code}, Response: {response.text}"
+                print(f"OpenRouter API Error Details: {error_detail}")
+                raise Exception(f"OpenRouter API error: {error_detail}")
+            
+            ai_response = response.json()
+            assistant_message = ai_response['choices'][0]['message']['content']
 
-        return assistant_message
+            return assistant_message
+        except requests.exceptions.HTTPError as e:
+            # Log detailed error information
+            print(f"OpenRouter API Error: {e}")
+            print(f"Response status: {response.status_code}")
+            print(f"Response text: {response.text}")
+            raise
+        except Exception as e:
+            print(f"Unexpected error in AI service: {e}")
+            return "I apologize, but I'm having trouble connecting right now. Please try again in a moment."
 
