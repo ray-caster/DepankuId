@@ -180,7 +180,7 @@ function AIDiscoveryContent() {
             // Extract keywords and update interests
             if (typeof answer === 'string') {
                 const keywords = extractKeywords(answer);
-                updated.interests = [...new Set([...updated.interests, ...keywords])];
+                updated.interests = Array.from(new Set([...updated.interests, ...keywords]));
             }
 
             // Update based on opportunity reaction
