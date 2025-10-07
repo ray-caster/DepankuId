@@ -93,6 +93,89 @@ class API {
         return response.json();
     }
 
+    async startDiscovery(userProfile?: UserPreferences): Promise<AIChatResponse> {
+        const response = await fetch(`${this.baseURL}/api/ai/discovery/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_profile: userProfile }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to start discovery');
+        }
+
+        return response.json();
+    }
+
+    async continueDiscovery(data: {
+        message: string;
+        history: AIMessage[];
+        user_profile: UserPreferences;
+        user_answers: Record<string, any>;
+    }): Promise<AIChatResponse & { 
+        user_profile: UserPreferences; 
+        should_show_opportunities: boolean;
+        opportunities?: Opportunity[];
+    }> {
+        const response = await fetch(`${this.baseURL}/api/ai/discovery/continue`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to continue discovery');
+        }
+
+        return response.json();
+    }
+
+    async getDiscoveryOpportunities(userProfile: UserPreferences, limit: number = 5): Promise<{
+        success: boolean;
+        opportunities: Opportunity[];
+        count: number;
+    }> {
+        const response = await fetch(`${this.baseURL}/api/ai/discovery/opportunities`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_profile: userProfile, limit }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get discovery opportunities');
+        }
+
+        return response.json();
+    }
+
+    async analyzeProfile(data: {
+        history: AIMessage[];
+        user_answers: Record<string, any>;
+    }): Promise<{
+        success: boolean;
+        user_profile: UserPreferences;
+    }> {
+        const response = await fetch(`${this.baseURL}/api/ai/discovery/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to analyze profile');
+        }
+
+        return response.json();
+    }
+
     async getOpportunities(): Promise<Opportunity[]> {
         const response = await fetch(`${this.baseURL}/api/opportunities`);
 

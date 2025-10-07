@@ -86,16 +86,13 @@ function AIDiscoveryContent() {
 
     useEffect(() => {
         saveState();
-    }, [saveState, userAnswers, userProfile, conversationHistory]);
+    }, [saveState]);
 
     // Start the discovery process
     const startDiscovery = async () => {
         setIsLoading(true);
         try {
-            const response = await api.aiChat({
-                message: "Start the discovery process. Ask me a question to understand my interests and goals.",
-                history: conversationHistory,
-            });
+            const response = await api.startDiscovery(userProfile);
 
             if (response.success && response.message) {
                 const newMessage: AIMessage = {
@@ -103,6 +100,11 @@ function AIDiscoveryContent() {
                     content: response.message
                 };
                 setConversationHistory(prev => [...prev, newMessage]);
+                
+                // Update user profile if provided
+                if (response.user_profile) {
+                    setUserProfile(response.user_profile);
+                }
                 
                 // Generate first question card
                 generateQuestionCard(newMessage.content);
@@ -225,9 +227,11 @@ function AIDiscoveryContent() {
     const askNextQuestion = async () => {
         setIsLoading(true);
         try {
-            const response = await api.aiChat({
+            const response = await api.continueDiscovery({
                 message: "Ask me another question to better understand my preferences and goals.",
                 history: conversationHistory,
+                user_profile: userProfile,
+                user_answers: userAnswers
             });
 
             if (response.success && response.message) {
@@ -236,7 +240,27 @@ function AIDiscoveryContent() {
                     content: response.message
                 };
                 setConversationHistory(prev => [...prev, newMessage]);
-                generateQuestionCard(newMessage.content);
+                
+                // Update user profile
+                if (response.user_profile) {
+                    setUserProfile(response.user_profile);
+                }
+                
+                // Check if we should show opportunities
+                if (response.should_show_opportunities && response.opportunities) {
+                    // Show opportunity reaction card
+                    const opportunity = response.opportunities[0];
+                    const questionCard: QuestionCard = {
+                        id: Date.now().toString(),
+                        type: 'opportunity_reaction',
+                        question: `What do you think about this opportunity?`,
+                        opportunity: opportunity,
+                        required: true
+                    };
+                    setCurrentQuestion(questionCard);
+                } else {
+                    generateQuestionCard(newMessage.content);
+                }
             }
         } catch (error) {
             console.error('Error asking next question:', error);
@@ -249,34 +273,27 @@ function AIDiscoveryContent() {
     const generateRecommendations = async () => {
         setIsAnalyzing(true);
         try {
-            const opportunities = await api.getOpportunities();
+            const response = await api.getDiscoveryOpportunities(userProfile, 5);
             
-            // Filter opportunities based on user profile
-            const filtered = opportunities.filter(opp => {
-                const hasMatchingInterest = opp.tags.some(tag => 
-                    userProfile.interests.some(interest => 
-                        interest.toLowerCase().includes(tag.toLowerCase()) ||
-                        tag.toLowerCase().includes(interest.toLowerCase())
-                    )
-                );
-                const hasMatchingType = userProfile.preferredTypes.includes(opp.type);
-                
-                return hasMatchingInterest || hasMatchingType;
-            });
-
-            // Sort by relevance and take top 5
-            const sorted = filtered
-                .sort((a, b) => {
-                    const aScore = calculateRelevanceScore(a);
-                    const bScore = calculateRelevanceScore(b);
-                    return bScore - aScore;
-                })
-                .slice(0, 5);
-
-            setRecommendations(sorted);
-            setShowResults(true);
+            if (response.success && response.opportunities) {
+                setRecommendations(response.opportunities);
+                setShowResults(true);
+            } else {
+                // Fallback to regular opportunities if discovery fails
+                const opportunities = await api.getOpportunities();
+                setRecommendations(opportunities.slice(0, 5));
+                setShowResults(true);
+            }
         } catch (error) {
             console.error('Error generating recommendations:', error);
+            // Fallback to regular opportunities
+            try {
+                const opportunities = await api.getOpportunities();
+                setRecommendations(opportunities.slice(0, 5));
+                setShowResults(true);
+            } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError);
+            }
         } finally {
             setIsAnalyzing(false);
         }
@@ -568,7 +585,7 @@ function AIDiscoveryContent() {
                                 </div>
                                 
                                 <h1 className="text-3xl font-bold text-foreground mb-4">
-                                    Can't Decide? Let us pick!
+                                    Can&apos;t Decide? Let us pick!
                                 </h1>
                                 
                                 <p className="text-neutral-600 text-lg mb-8 leading-relaxed">
