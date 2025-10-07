@@ -74,7 +74,7 @@ class EnvValidator:
                 prod_checks.append('FLASK_DEBUG should be False in production')
             
             if prod_checks:
-                print("⚠️  Production environment warnings:")
+                print("[WARNING] Production environment warnings:")
                 for check in prod_checks:
                     print(f"  - {check}")
                 return False
@@ -86,21 +86,21 @@ def validate_environment():
     try:
         result = EnvValidator.validate()
         
-        print("✅ Environment validation passed")
+        print("[OK] Environment validation passed")
         
         if result['warnings']:
-            print("\n⚠️  Warnings:")
+            print("\n[WARNING] Environment warnings:")
             for warning in result['warnings']:
                 print(f"  - {warning}")
         
         # Production-specific checks
         if not EnvValidator.validate_production():
-            print("\n⚠️  Consider fixing production warnings before deployment")
+            print("\n[WARNING] Consider fixing production warnings before deployment")
         
         return True
         
     except EnvironmentError as e:
-        print(f"\n❌ Environment validation failed: {str(e)}")
+        print(f"\n[ERROR] Environment validation failed: {str(e)}")
         print("\nPlease check your .env file and ensure all required variables are set.")
         print("See backend/ENV_TEMPLATE.md for reference.")
         sys.exit(1)
