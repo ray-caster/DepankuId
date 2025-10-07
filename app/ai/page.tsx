@@ -86,7 +86,7 @@ function AIDiscoveryContent() {
 
     useEffect(() => {
         saveState();
-    }, [saveState]);
+    }, [userAnswers, userProfile, conversationHistory]);
 
     // Start the discovery process
     const startDiscovery = async () => {
@@ -96,7 +96,7 @@ function AIDiscoveryContent() {
 
             if (response.success && response.message) {
                 const newMessage: AIMessage = {
-                    role: 'assistant',
+                role: 'assistant',
                     content: response.message
                 };
                 setConversationHistory(prev => [...prev, newMessage]);
@@ -236,7 +236,7 @@ function AIDiscoveryContent() {
 
             if (response.success && response.message) {
                 const newMessage: AIMessage = {
-                    role: 'assistant',
+                        role: 'assistant',
                     content: response.message
                 };
                 setConversationHistory(prev => [...prev, newMessage]);
@@ -431,7 +431,7 @@ function AIDiscoveryContent() {
 
     // Render results
     const renderResults = () => {
-        return (
+    return (
             <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -499,9 +499,9 @@ function AIDiscoveryContent() {
                                     <div className="flex items-center gap-2 text-sm text-neutral-600">
                                         <MapPinIcon className="w-4 h-4" />
                                         {opportunity.location}
-                                    </div>
+                                            </div>
                                 )}
-                            </div>
+                                        </div>
 
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {opportunity.tags.slice(0, 5).map(tag => (
@@ -547,12 +547,12 @@ function AIDiscoveryContent() {
             <div className="bg-white/80 backdrop-blur-sm border-b-2 border-neutral-300 sticky top-0 z-10">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button
+                                    <button
                             onClick={() => router.back()}
                             className="p-2 hover:bg-neutral-100 rounded-soft transition-colors"
                         >
                             <ArrowLeftIcon className="w-6 h-6 text-neutral-600" />
-                        </button>
+                                    </button>
                         <div>
                             <h1 className="text-2xl font-bold text-foreground">AI Discovery</h1>
                             <p className="text-sm text-neutral-600">Find your perfect opportunity</p>
@@ -647,15 +647,15 @@ function AIDiscoveryContent() {
                                 <div className="w-16 h-16 border-4 border-accent-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
                                 <h2 className="text-xl font-semibold text-foreground mb-2">Finding your perfect matches...</h2>
                                 <p className="text-neutral-600">Searching through our database</p>
-                            </div>
+                    </div>
                         </motion.div>
                     )}
 
                     {currentQuestion && !showResults && renderQuestionCard()}
                     {showResults && renderResults()}
                 </AnimatePresence>
-            </main>
-        </div>
+                </main>
+            </div>
     );
 }
 

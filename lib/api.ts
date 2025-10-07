@@ -16,6 +16,9 @@ export interface AIChatResponse {
     message?: string;
     conversation_id?: string;
     error?: string;
+    user_profile?: UserPreferences;
+    should_show_opportunities?: boolean;
+    opportunities?: Opportunity[];
 }
 
 export interface SocialMediaLinks {
