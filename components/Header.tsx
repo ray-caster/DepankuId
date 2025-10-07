@@ -58,7 +58,6 @@ export default function Header() {
     const navItems = [
         { href: '/', label: 'Home', icon: HomeIcon },
         { href: '/search', label: 'Browse', icon: MagnifyingGlassIcon },
-        { href: '/ai', label: 'AI Discovery', icon: SparklesIcon },
         { href: '/features', label: 'Features', icon: CogIcon },
         { href: '/about', label: 'About Us', icon: InformationCircleIcon },
     ];

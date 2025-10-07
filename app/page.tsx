@@ -373,7 +373,7 @@ function HomeContent() {
                             <h4 className="font-bold text-sm sm:text-base text-foreground mb-3 sm:mb-4">Quick Links</h4>
                             <ul className="space-y-2">
                                 <li><a href="/search" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">Browse Opportunities</a></li>
-                                <li><a href="/ai" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">AI Discovery</a></li>
+                                <li><a href="/ai" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">Can't Decide?</a></li>
                                 <li><a href="/about" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">About Us</a></li>
                             </ul>
                         </div>

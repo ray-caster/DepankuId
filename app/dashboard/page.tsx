@@ -14,10 +14,12 @@ import {
     MapPinIcon,
     BuildingOfficeIcon,
     TagIcon,
-    ClockIcon
+    ClockIcon,
+    SparklesIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface DeadlineEvent {
     id: string;
@@ -30,6 +32,7 @@ interface DeadlineEvent {
 
 function DashboardContent() {
     const { user, getIdToken } = useAuth();
+    const router = useRouter();
     const [bookmarks, setBookmarks] = useState<Opportunity[]>([]);
     const [loading, setLoading] = useState(true);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
@@ -217,7 +220,7 @@ function DashboardContent() {
                     </motion.div>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -267,6 +270,24 @@ function DashboardContent() {
                                         {deadlineEvents.filter(e => getDaysUntil(e.deadline) <= 7 && getDaysUntil(e.deadline) >= 0).length}
                                     </div>
                                     <div className="text-sm text-neutral-600">Due This Week</div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="card cursor-pointer hover:shadow-card-hover transition-shadow"
+                            onClick={() => router.push('/ai')}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-r from-primary-100 to-accent-100 rounded-soft">
+                                    <SparklesIcon className="w-6 h-6 text-primary-600" />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="text-sm font-semibold text-foreground">AI Discovery</div>
+                                    <div className="text-xs text-neutral-600">Find your perfect match</div>
                                 </div>
                             </div>
                         </motion.div>
