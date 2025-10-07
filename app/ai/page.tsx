@@ -244,7 +244,7 @@ function AIDiscoveryContent() {
                         goals: response.user_profile?.goals || prev.goals,
                         preferredTypes: response.user_profile?.preferredTypes || prev.preferredTypes,
                         conversationSummary: response.user_profile?.conversationSummary || prev.conversationSummary,
-                        confidence: response.user_profile?.confidence || prev.confidence
+                        confidence: prev.confidence // Keep existing confidence
                     }));
                 }
                 
