@@ -120,3 +120,4 @@ export const reportWebVitals = (metric: any) => {
     // Example: gtag('event', metric.name, { value: metric.value });
   }
 };
+
