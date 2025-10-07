@@ -54,7 +54,7 @@ Based on their answers, help narrow down whether they'd be interested in researc
         }
 
         payload = {
-            "model": "anthropic/claude-3.5-sonnet",
+            "model": "deepseek-chat-v3.1:free",
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 300
