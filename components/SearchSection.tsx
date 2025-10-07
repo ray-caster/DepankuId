@@ -38,7 +38,7 @@ export default function SearchSection() {
                     }}
                 >
                     <SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Can't Decide? Let us pick!</span>
+                    <span>Can&apos;t Decide? Let us pick!</span>
                 </motion.button>
             </motion.div>
         </div>

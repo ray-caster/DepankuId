@@ -86,7 +86,7 @@ function AIDiscoveryContent() {
 
     useEffect(() => {
         saveState();
-    }, [saveState]);
+    }, [saveState, userAnswers, userProfile, conversationHistory]);
 
     // Start the discovery process
     const startDiscovery = async () => {
@@ -425,7 +425,7 @@ function AIDiscoveryContent() {
                         Your Personalized Recommendations
                     </h1>
                     <p className="text-neutral-600 text-lg">
-                        Based on your interests and preferences, here are opportunities we think you'll love:
+                        Based on your interests and preferences, here are opportunities we think you&apos;ll love:
                     </p>
                 </div>
 
@@ -573,7 +573,7 @@ function AIDiscoveryContent() {
                                 
                                 <p className="text-neutral-600 text-lg mb-8 leading-relaxed">
                                     Our AI will ask you thoughtful questions to understand your interests, 
-                                    goals, and preferences. Then we'll recommend opportunities that are 
+                                    goals, and preferences. Then we&apos;ll recommend opportunities that are 
                                     perfect for you.
                                 </p>
 
