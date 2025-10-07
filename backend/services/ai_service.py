@@ -20,9 +20,9 @@ class AIService:
         # Remove common garbled patterns
         garbled_patterns = [
             r'[^\w\s\?\!\.\,\-\'\"]+',  # Remove special characters except basic punctuation
-            r'\b\w{1,2}\b',  # Remove very short words that might be garbled
             r'\d+\.\d+\.\d+',  # Remove version numbers
             r'[^\x00-\x7F]+',  # Remove non-ASCII characters
+            r'\b\w{1,2}\b',  # Remove very short words that might be garbled
         ]
         
         for pattern in garbled_patterns:
@@ -30,6 +30,11 @@ class AIService:
         
         # Clean up multiple spaces
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # Fix common grammar issues
+        cleaned = re.sub(r'\bThat\'?\s*', 'That\'s ', cleaned)  # Fix "That'" -> "That's"
+        cleaned = re.sub(r'\bWhat\s*you\b', 'What do you', cleaned)  # Fix "What you" -> "What do you"
+        cleaned = re.sub(r'\bbegin\s+sentence\?\s*', '', cleaned)  # Remove "begin sentence?"
         
         # If response is too short or seems garbled, provide a fallback
         if len(cleaned) < 10 or len(cleaned.split()) < 3:
