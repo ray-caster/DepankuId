@@ -151,3 +151,39 @@ def signin():
             "message": "An unexpected error occurred"
         }), 500
 
+@auth_bp.route('/resend-verification', methods=['POST'])
+@rate_limit(limit=3, window=3600)  # 3 resends per hour per IP
+def resend_verification():
+    """Resend verification email for pending users"""
+    try:
+        data = request.json
+        
+        if not data or not data.get('email'):
+            return jsonify({
+                "success": False,
+                "message": "Email is required"
+            }), 400
+        
+        email = data['email'].strip().lower()
+        
+        try:
+            AuthService.resend_verification_email(email)
+            logger.info(f"Verification email resent to {email}")
+            return jsonify({
+                "success": True,
+                "message": "Verification email sent successfully"
+            }), 200
+        except ValueError as e:
+            logger.warning(f"Resend verification failed: {str(e)}")
+            return jsonify({
+                "success": False,
+                "message": str(e)
+            }), 400
+    
+    except Exception as e:
+        logger.error(f"Unexpected error in resend_verification: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "An unexpected error occurred"
+        }), 500
+
