@@ -205,8 +205,8 @@ function DashboardContent() {
         <div className="min-h-screen bg-background">
             <Header />
 
-            <main className="pt-24 pb-16 px-4 sm:px-6">
-                <div className="max-w-7xl mx-auto">
+            <main className="pt-20 sm:pt-24 laptop:pt-28 pb-12 sm:pb-16 laptop:pb-20 px-4 sm:px-6 laptop:px-8">
+                <div className="max-w-6xl laptop:max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -313,7 +313,7 @@ function DashboardContent() {
                                 <div className="card text-center py-12">
                                     <BookmarkIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
                                     <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
-                                    <p className="text-neutral-600 mb-6">Start bookmarking opportunities you&apos;re interested in!</p>
+                                    <p className="text-neutral-600 mb-6">Start bookmarking opportunities you're interested in!</p>
                                     <Link href="/search" className="btn-primary inline-block">
                                         Browse Opportunities
                                     </Link>

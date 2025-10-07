@@ -75,7 +75,7 @@ export default function SearchWithButtons() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
-                            className="absolute w-full mt-2 bg-white/50 backdrop-blur-xl rounded-soft sm:rounded-gentle md:rounded-comfort border border-neutral-200/60 overflow-hidden z-50 max-h-[60vh] overflow-y-auto"
+                            className="absolute w-full mt-2 bg-white/50 backdrop-blur-xl rounded-soft sm:rounded-gentle md:rounded-comfort border border-neutral-200/60 overflow-hidden z-50 max-h-[40vh] laptop:max-h-[50vh] overflow-y-auto"
                             style={{
                                 boxShadow: `0 12px 32px -4px oklch(0% 0 0 / 0.12),
                            0 16px 48px -6px oklch(0% 0 0 / 0.08)`,

@@ -268,8 +268,8 @@ function OpportunitiesContent() {
         <div className="min-h-screen bg-background">
             <Header />
 
-            <main className="pt-24 pb-16 px-4 sm:px-6">
-                <div className="max-w-6xl mx-auto">
+            <main className="pt-20 sm:pt-24 laptop:pt-28 pb-12 sm:pb-16 laptop:pb-20 px-4 sm:px-6 laptop:px-8">
+                <div className="max-w-5xl laptop:max-w-6xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

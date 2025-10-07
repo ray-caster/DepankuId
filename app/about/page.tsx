@@ -11,22 +11,22 @@ export default function AboutPage() {
         {
             icon: HeartIcon,
             title: 'Accessibility for All',
-            description: 'We believe every student deserves access to life-changing opportunities, regardless of their background or resources.'
+            description: 'Every student deserves access to opportunities, regardless of background or resources.'
         },
         {
             icon: LightBulbIcon,
             title: 'Discovery Through Curiosity',
-            description: 'We guide students to explore their passions through thoughtful questions, not just keyword matching.'
+            description: 'We guide students to explore passions through questions, not keyword matching.'
         },
         {
             icon: RocketLaunchIcon,
             title: 'Empowerment Through Technology',
-            description: 'We leverage cutting-edge AI and search technology to make opportunity discovery simple and personalized.'
+            description: 'We use AI and search technology to make opportunity discovery simple and personalized.'
         },
         {
             icon: GlobeAltIcon,
             title: 'Global Community',
-            description: 'We connect Indonesian students with opportunities worldwide, breaking down geographical barriers.'
+            description: 'We connect Indonesian students with opportunities worldwide.'
         }
     ];
 
@@ -50,7 +50,7 @@ export default function AboutPage() {
                                 </span>
                             </h1>
                             <p className="text-lg sm:text-xl text-foreground-light max-w-3xl mx-auto">
-                                Making meaningful opportunities accessible to every Indonesian student
+                                Making opportunities accessible to every Indonesian student
                             </p>
                         </motion.div>
 
@@ -66,10 +66,10 @@ export default function AboutPage() {
                         >
                             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Our Mission</h2>
                             <p className="text-base sm:text-lg text-foreground-light leading-relaxed">
-                                Depanku.id was born from a simple observation: talented Indonesian students often miss out on incredible opportunities—not because they lack ability, but because they don&apos;t know these opportunities exist. We&apos;re here to change that.
+                                Depanku.id was born from a simple observation: talented Indonesian students miss opportunities because they don't know these opportunities exist. We're here to change that.
                             </p>
                             <p className="text-base sm:text-lg text-foreground-light leading-relaxed mt-4">
-                                Our platform combines intelligent search technology with AI-powered guidance to help students discover research programs, competitions, and youth initiatives that align with their unique interests and goals. We believe that the right opportunity, discovered at the right time, can change everything.
+                                Our platform combines intelligent search technology with AI-powered guidance to help students discover research programs, competitions, and youth initiatives that align with their interests and goals. The right opportunity, discovered at the right time, changes everything.
                             </p>
                         </motion.div>
 
@@ -114,19 +114,19 @@ export default function AboutPage() {
                             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">Why We Built This</h2>
                             <div className="space-y-4 text-base sm:text-lg text-foreground-light leading-relaxed">
                                 <p>
-                                    Too many brilliant students in Indonesia are limited by information asymmetry. While opportunities exist, they&apos;re scattered across countless websites, hidden in obscure announcements, or locked behind language barriers.
+                                    Too many brilliant students in Indonesia are limited by information asymmetry. Opportunities exist, but they're scattered across websites, hidden in announcements, or locked behind language barriers.
                                 </p>
                                 <p>
-                                    We built Depanku.id to be the bridge—a single platform where students can:
+                                    We built Depanku.id to be the bridge. A single platform where students:
                                 </p>
                                 <ul className="list-disc list-inside space-y-2 ml-4">
-                                    <li>Search through curated, verified opportunities instantly</li>
-                                    <li>Get personalized recommendations through AI-powered conversations</li>
-                                    <li>Access opportunities they never knew existed</li>
-                                    <li>Find programs that match their unique interests and goals</li>
+                                    <li>Search curated, verified opportunities instantly</li>
+                                    <li>Get personalized recommendations through AI conversations</li>
+                                    <li>Access opportunities they missed</li>
+                                    <li>Find programs that match their interests and goals</li>
                                 </ul>
                                 <p className="pt-4">
-                                    Best of all? It&apos;s completely free. Because opportunity should never have a paywall.
+                                    Best of all? It's free. Opportunity should never have a paywall.
                                 </p>
                             </div>
                         </motion.div>
@@ -145,7 +145,7 @@ export default function AboutPage() {
                                 Join Our Community
                             </h2>
                             <p className="text-lg sm:text-xl text-white/90 mb-8">
-                                Start discovering opportunities that can change your life
+                                Start discovering opportunities that change your life
                             </p>
                             <motion.a
                                 href="/"

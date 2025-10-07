@@ -30,7 +30,7 @@ export default function AIAnalysisPage() {
         setMessages([
             {
                 role: 'assistant',
-                content: "Hi! I'm here to help you discover opportunities that truly resonate with you. What kind of problems or topics make you curious?"
+                content: "Hi! I'm here to help you discover opportunities that match your interests. What problems or topics make you curious?"
             }
         ]);
         // Don't auto-scroll on initial load
@@ -92,37 +92,14 @@ export default function AIAnalysisPage() {
             <div className="min-h-screen bg-background">
                 <Header />
 
-                <main className="pt-32 sm:pt-40 pb-16 sm:pb-24 px-4 sm:px-8">
-                    <div className="max-w-5xl mx-auto">
-                        {/* Header */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-center mb-8 sm:mb-12"
-                        >
-                            <div className="inline-flex items-center gap-3 mb-4">
-                                <div className="p-3 bg-primary-100 rounded-soft border-2 border-neutral-400"
-                                    style={{
-                                        boxShadow: '0 2px 4px -1px oklch(0% 0 0 / 0.08)'
-                                    }}
-                                >
-                                    <SparklesIcon className="h-7 w-7 sm:h-8 sm:w-8 text-primary-700" />
-                                </div>
-                            </div>
-                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4">
-                                AI Guided Discovery
-                            </h1>
-                            <p className="text-lg sm:text-xl text-foreground-light max-w-2xl mx-auto px-4">
-                                Let&apos;s have a conversation to find opportunities that match your interests and goals
-                            </p>
-                        </motion.div>
-
+                <main className="pt-20 sm:pt-24 laptop:pt-28 pb-1 sm:pb-1.5 laptop:pb-2 px-4 sm:px-6 laptop:px-8 h-[calc(100vh-4.5rem)] laptop:h-[calc(100vh-5.5rem)]">
+                    <div className="max-w-4xl laptop:max-w-5xl mx-auto h-full flex flex-col">
                         {/* Chat Container */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="bg-background-light rounded-comfort overflow-hidden border-2 border-neutral-400"
+                            className="bg-background-light rounded-comfort overflow-hidden border-2 border-neutral-400 flex-1 flex flex-col"
                             style={{
                                 boxShadow: `inset 0 1px 0 0 oklch(100% 0 0 / 0.1),
                            0 8px 16px -4px oklch(0% 0 0 / 0.10),
@@ -130,7 +107,7 @@ export default function AIAnalysisPage() {
                             }}
                         >
                             {/* Messages */}
-                            <div className="h-[500px] sm:h-[600px] overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6">
+                            <div className="flex-1 overflow-y-auto p-3 sm:p-4 laptop:p-6 space-y-3 sm:space-y-4 laptop:space-y-6">
                                 <AnimatePresence>
                                     {messages.map((message, index) => (
                                         <motion.div
@@ -141,7 +118,7 @@ export default function AIAnalysisPage() {
                                             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                         >
                                             <div
-                                                className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border-2 ${message.role === 'user'
+                                                className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 laptop:px-6 py-2 sm:py-3 laptop:py-4 border-2 ${message.role === 'user'
                                                     ? 'bg-primary-600 text-white border-neutral-500'
                                                     : 'bg-background-lighter text-foreground border-neutral-400'
                                                     }`}
@@ -153,7 +130,7 @@ export default function AIAnalysisPage() {
                                      0 1px 3px 0 oklch(0% 0 0 / 0.04)`
                                                 }}
                                             >
-                                                <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap font-medium">
+                                                <p className="text-xs sm:text-sm laptop:text-base leading-relaxed whitespace-pre-wrap font-medium">
                                                     {message.content}
                                                 </p>
                                             </div>
@@ -167,11 +144,11 @@ export default function AIAnalysisPage() {
                                         animate={{ opacity: 1 }}
                                         className="flex justify-start"
                                     >
-                                        <div className="bg-background-lighter rounded-2xl px-6 py-4 border-2 border-neutral-400">
-                                            <div className="flex gap-2">
-                                                <div className="w-2.5 h-2.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                                <div className="w-2.5 h-2.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                                <div className="w-2.5 h-2.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        <div className="bg-background-lighter rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border-2 border-neutral-400">
+                                            <div className="flex gap-1.5 sm:gap-2">
+                                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                             </div>
                                         </div>
                                     </motion.div>
@@ -181,12 +158,12 @@ export default function AIAnalysisPage() {
 
                             {/* Input */}
                             <div
-                                className="border-t-2 border-neutral-400 p-4 sm:p-6 bg-background-lighter"
+                                className="border-t-2 border-neutral-400 p-3 sm:p-4 laptop:p-6 bg-background-lighter flex-shrink-0"
                                 style={{
                                     boxShadow: 'inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
                                 }}
                             >
-                                <div className="flex gap-3 sm:gap-4">
+                                <div className="flex gap-2 sm:gap-3 laptop:gap-4">
                                     <input
                                         type="text"
                                         value={input}
@@ -194,10 +171,10 @@ export default function AIAnalysisPage() {
                                         onKeyPress={handleKeyPress}
                                         placeholder="Share your thoughts and interests..."
                                         disabled={isLoading}
-                                        className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-white border-2 border-neutral-400 rounded-soft 
+                                        className="flex-1 px-3 sm:px-4 laptop:px-6 py-2 sm:py-3 laptop:py-4 bg-white border-2 border-neutral-400 rounded-soft 
                               focus:outline-none focus:border-primary-500 focus:bg-background-lighter
                               hover:border-neutral-500
-                              transition-all disabled:opacity-50 font-medium text-sm sm:text-base"
+                              transition-all disabled:opacity-50 font-medium text-xs sm:text-sm laptop:text-base"
                                         style={{
                                             boxShadow: 'inset 0 1px 3px 0 oklch(0% 0 0 / 0.05)'
                                         }}
@@ -205,17 +182,17 @@ export default function AIAnalysisPage() {
                                     <button
                                         onClick={handleSend}
                                         disabled={!input.trim() || isLoading}
-                                        className="px-6 sm:px-8 py-3 sm:py-4 bg-primary-600 text-white rounded-soft font-bold text-sm sm:text-base border-2 border-neutral-500
+                                        className="px-4 sm:px-6 laptop:px-8 py-2 sm:py-3 laptop:py-4 bg-primary-600 text-white rounded-soft font-bold text-xs sm:text-sm laptop:text-base border-2 border-neutral-500
                               hover:bg-primary-700 hover:border-neutral-600 active:scale-95 
                               transition-all disabled:opacity-50 disabled:cursor-not-allowed
-                              flex items-center gap-2"
+                              flex items-center gap-1 sm:gap-2"
                                         style={{
                                             boxShadow: `inset 0 1px 0 0 oklch(100% 0 0 / 0.2),
                                  0 2px 4px 0 oklch(0% 0 0 / 0.15)`
                                         }}
                                     >
                                         <span className="hidden sm:inline">Send</span>
-                                        <PaperAirplaneIcon className="h-5 w-5" />
+                                        <PaperAirplaneIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                                     </button>
                                 </div>
                             </div>

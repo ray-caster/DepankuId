@@ -13,26 +13,13 @@ import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import { useState, memo } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '@/lib/api';
+import { getCategoryBadgeClasses, getCategoryLabel, OpportunityType } from '@/lib/categoryColors';
 
 interface OpportunityCardProps {
     opportunity: Opportunity;
     isBookmarked?: boolean;
     onBookmarkChange?: (bookmarked: boolean) => void;
 }
-
-const typeColors = {
-    'research': 'bg-primary-light text-primary-dark',
-    'youth-program': 'bg-secondary-light text-secondary-dark',
-    'community': 'bg-accent-light text-accent-dark',
-    'competition': 'bg-neutral-200 text-neutral-700',
-};
-
-const typeLabels = {
-    'research': 'Research',
-    'youth-program': 'Youth Program',
-    'community': 'Community',
-    'competition': 'Competition',
-};
 
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
     const { user, idToken } = useAuth();
@@ -88,12 +75,12 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     </h3>
                     <div className="flex items-center gap-2">
                         <span
-                            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${typeColors[opportunity.type]}`}
+                            className={getCategoryBadgeClasses(opportunity.type as OpportunityType)}
                             style={{
                                 boxShadow: 'inset 0 1px 0 0 oklch(100% 0 0 / 0.2), 0 1px 2px 0 oklch(0% 0 0 / 0.08)'
                             }}
                         >
-                            {typeLabels[opportunity.type]}
+                            {getCategoryLabel(opportunity.type as OpportunityType)}
                         </span>
                         {user && (
                             <button

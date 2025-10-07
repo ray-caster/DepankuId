@@ -35,7 +35,7 @@ export default function SearchResults() {
                         No results found
                     </h3>
                     <p className="text-neutral-600">
-                        Try adjusting your search or explore our curiosity tags below
+                        Try adjusting your search or explore our tags below
                     </p>
                 </div>
             </motion.div>

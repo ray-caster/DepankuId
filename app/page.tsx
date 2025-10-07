@@ -28,17 +28,17 @@ function HomeContent() {
         {
             icon: MagnifyingGlassIcon,
             title: 'Find Opportunities Instantly',
-            description: 'Search through curated research programs, competitions, and communities in seconds.'
+            description: 'Search curated research programs, competitions, and communities in seconds.'
         },
         {
             icon: SparklesIcon,
             title: 'AI-Powered Discovery',
-            description: 'Let our intelligent guide ask the right questions to uncover opportunities you never knew existed.'
+            description: 'Our guide asks questions to find opportunities you missed.'
         },
         {
             icon: AcademicCapIcon,
             title: 'Verified & Curated',
-            description: 'Every opportunity is hand-picked and verified to ensure quality and relevance.'
+            description: 'Every opportunity is hand-picked and verified for quality.'
         }
     ];
 
@@ -53,19 +53,19 @@ function HomeContent() {
         {
             name: 'Sarah Chen',
             role: 'MIT Research Science Institute Participant',
-            content: 'Depanku helped me find the perfect research opportunity that matched my interests in bioengineering.',
+            content: 'Depanku found the perfect research opportunity for my bioengineering interests.',
             avatar: '👩‍🔬'
         },
         {
             name: 'Ahmad Rizki',
             role: 'Google Code Jam Finalist',
-            content: 'The AI discovery feature guided me to competitions I would have never found on my own.',
+            content: 'The AI discovery feature guided me to competitions I missed.',
             avatar: '👨‍💻'
         },
         {
             name: 'Maya Putri',
             role: 'Youth Leadership Program Alumni',
-            content: 'This platform made it so easy to discover leadership programs tailored to my goals.',
+            content: 'This platform made discovering leadership programs easy.',
             avatar: '👩‍🎓'
         }
     ];
@@ -73,15 +73,15 @@ function HomeContent() {
     const faqs = [
         {
             question: 'Is Depanku.id free to use?',
-            answer: 'Yes. Depanku.id is free for all students. We make opportunities accessible to everyone.'
+            answer: 'Yes. Depanku.id is free for all students.'
         },
         {
             question: 'How do you verify opportunities?',
-            answer: 'We manually review each opportunity. We check the organizer, verify deadlines, and ensure information is accurate.'
+            answer: 'We review each opportunity. We check the organizer, verify deadlines, and ensure information is accurate.'
         },
         {
             question: 'How does AI discovery work?',
-            answer: 'Our AI asks questions to understand your interests and goals. It finds opportunities that match your profile through conversation.'
+            answer: 'Our AI asks questions to understand your interests and goals. It finds opportunities that match your profile.'
         },
         {
             question: 'How often do you add new opportunities?',
@@ -184,7 +184,7 @@ function HomeContent() {
                                 transition={{ delay: 0.1 }}
                                 className="text-sm sm:text-base lg:text-lg text-foreground-light text-center max-w-3xl mx-auto mb-8 sm:mb-12 px-4"
                             >
-                                We make finding life-changing opportunities simple, personalized, and completely free.
+                                We make finding opportunities simple, personalized, and free.
                             </motion.p>
 
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
