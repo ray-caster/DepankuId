@@ -35,11 +35,21 @@ function DashboardContent() {
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt'>('bookmarks');
 
-    useEffect(() => {
-        if (user) {
-            loadBookmarks();
-        }
-    }, [user, loadBookmarks]);
+    const processDeadlines = useCallback((opportunities: Opportunity[]) => {
+        const events: DeadlineEvent[] = opportunities
+            .filter(opp => opp.deadline && opp.deadline !== 'indefinite' && !opp.has_indefinite_deadline)
+            .map(opp => ({
+                id: opp.id || '',
+                title: opp.title,
+                deadline: new Date(opp.deadline!),
+                type: opp.type,
+                organization: opp.organization,
+                url: opp.url
+            }))
+            .sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
+        
+        setDeadlineEvents(events);
+    }, []);
 
     const loadBookmarks = useCallback(async () => {
         try {
@@ -54,23 +64,13 @@ function DashboardContent() {
         } finally {
             setLoading(false);
         }
-    }, [getIdToken]);
+    }, [getIdToken, processDeadlines]);
 
-    const processDeadlines = (opportunities: Opportunity[]) => {
-        const events: DeadlineEvent[] = opportunities
-            .filter(opp => opp.deadline && opp.deadline !== 'indefinite' && !opp.has_indefinite_deadline)
-            .map(opp => ({
-                id: opp.id || '',
-                title: opp.title,
-                deadline: new Date(opp.deadline!),
-                type: opp.type,
-                organization: opp.organization,
-                url: opp.url
-            }))
-            .sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
-        
-        setDeadlineEvents(events);
-    };
+    useEffect(() => {
+        if (user) {
+            loadBookmarks();
+        }
+    }, [user, loadBookmarks]);
 
     const handleRemoveBookmark = async (opportunityId: string) => {
         try {
