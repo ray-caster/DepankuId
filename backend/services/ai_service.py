@@ -9,28 +9,69 @@ class AIService:
     """Service for AI interactions"""
     
     @staticmethod
+    def _clean_response(response_text):
+        """Clean and validate AI response to prevent garbled output"""
+        if not response_text or not isinstance(response_text, str):
+            return "I'd love to learn more about your interests! What subjects do you enjoy most?"
+        
+        # Remove any garbled text patterns
+        cleaned = response_text.strip()
+        
+        # Remove common garbled patterns
+        garbled_patterns = [
+            r'[^\w\s\?\!\.\,\-\'\"]+',  # Remove special characters except basic punctuation
+            r'\b\w{1,2}\b',  # Remove very short words that might be garbled
+            r'\d+\.\d+\.\d+',  # Remove version numbers
+            r'[^\x00-\x7F]+',  # Remove non-ASCII characters
+        ]
+        
+        for pattern in garbled_patterns:
+            cleaned = re.sub(pattern, ' ', cleaned)
+        
+        # Clean up multiple spaces
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # If response is too short or seems garbled, provide a fallback
+        if len(cleaned) < 10 or len(cleaned.split()) < 3:
+            return "That's interesting! What kind of activities do you enjoy doing?"
+        
+        # Ensure it ends with a question mark or period
+        if not cleaned.endswith(('?', '.', '!')):
+            cleaned += '?'
+        
+        return cleaned
+    
+    @staticmethod
     def chat(user_message, conversation_history=None):
         """Process AI chat request"""
         if conversation_history is None:
             conversation_history = []
         
         # System prompt for Socratic questioning
-        system_prompt = """You are a thoughtful guide for Depanku.id, helping users discover opportunities that match their interests and goals. 
+        system_prompt = """You are a helpful AI assistant for Depanku.id, a platform that helps students find opportunities like research programs, competitions, and youth programs.
 
-Your role is to:
-1. Ask reflective, open-ended questions to understand the user's interests, skills, and aspirations
-2. Be warm, encouraging, and conversational
-3. Guide users toward clarity about what they're looking for
-4. Ask one question at a time
-5. Keep responses concise (2-3 sentences max)
+CRITICAL INSTRUCTIONS:
+- Always respond with clear, coherent sentences
+- Ask ONE question at a time
+- Keep responses under 50 words
+- Be encouraging and friendly
+- Focus on understanding the user's interests and goals
 
-Example questions:
-- "What kind of problems do you love solving?"
-- "Do you enjoy working with people or ideas?"
-- "What topics make you lose track of time when you're learning about them?"
-- "Are you looking to build skills, meet like-minded people, or explore new fields?"
+RESPONSE FORMAT:
+- Start with a brief acknowledgment of their answer
+- Ask ONE specific follow-up question
+- End with encouragement
 
-Based on their answers, help narrow down whether they'd be interested in research programs, competitions, communities, or youth programs."""
+EXAMPLE RESPONSES:
+- "That's interesting! What subjects do you enjoy most in school?"
+- "Great! Are you more interested in individual projects or team activities?"
+- "I see! What kind of problems do you like solving?"
+
+NEVER:
+- Ask multiple questions at once
+- Give long explanations
+- Use confusing language
+- Repeat the same question"""
 
         # Prepare messages for OpenRouter
         messages = [{"role": "system", "content": system_prompt}]
@@ -59,8 +100,11 @@ Based on their answers, help narrow down whether they'd be interested in researc
         payload = {
             "model": "deepseek/deepseek-chat-v3.1:free",
             "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 300
+            "temperature": 0.3,
+            "max_tokens": 100,
+            "top_p": 0.9,
+            "frequency_penalty": 0.1,
+            "presence_penalty": 0.1
         }
 
         try:
@@ -78,8 +122,11 @@ Based on their answers, help narrow down whether they'd be interested in researc
             
             ai_response = response.json()
             assistant_message = ai_response['choices'][0]['message']['content']
+            
+            # Clean the response to prevent garbled output
+            cleaned_message = AIService._clean_response(assistant_message)
 
-            return assistant_message
+            return cleaned_message
         except requests.exceptions.HTTPError as e:
             # Log detailed error information
             print(f"OpenRouter API Error: {e}")
@@ -102,25 +149,30 @@ Based on their answers, help narrow down whether they'd be interested in researc
                 'confidence': 0
             }
         
-        system_prompt = """You are an AI discovery assistant for Depanku.id, helping users find opportunities that match their interests and goals.
+        system_prompt = """You are an AI discovery assistant for Depanku.id. Your job is to help students find opportunities like research programs, competitions, and youth programs.
 
-Your role is to:
-1. Ask thoughtful, open-ended questions to understand the user's interests, skills, and aspirations
-2. Be warm, encouraging, and conversational
-3. Guide users toward clarity about what they're looking for
-4. Ask ONE question at a time
-5. Keep responses concise (1-2 sentences max)
-6. Based on responses, determine if you should show them specific opportunities
+CRITICAL RULES:
+- Ask exactly ONE question per response
+- Keep responses under 40 words
+- Use simple, clear language
+- Be encouraging and friendly
+- Focus on learning about their interests
 
-Question types you can ask:
-- Interest exploration: "What topics make you lose track of time when learning?"
-- Goal clarification: "Are you looking to build skills, meet people, or explore new fields?"
-- Experience level: "What's your experience with [topic]?"
-- Opportunity type preference: "Do you prefer research, competitions, or community programs?"
+GOOD FIRST QUESTIONS:
+- "What subjects do you enjoy most in school?"
+- "What kind of activities do you like doing outside of class?"
+- "Are you interested in science, technology, or creative projects?"
 
-When you have enough information about their interests, you can mention specific opportunities by saying "Let me show you an opportunity that might interest you" and I'll provide relevant opportunities.
+RESPONSE FORMAT:
+- Ask ONE specific question
+- Be encouraging
+- Keep it short and simple
 
-Current user profile: {user_profile}
+NEVER:
+- Ask multiple questions
+- Give long explanations
+- Use complex language
+- Ask about personal details
 
 Ask your first question to start the discovery process."""
 
@@ -133,16 +185,30 @@ Ask your first question to start the discovery process."""
         """Continue the discovery conversation"""
         system_prompt = """You are an AI discovery assistant for Depanku.id. Continue the conversation based on the user's response.
 
-Your role:
-1. Analyze the user's response and update your understanding
-2. Ask ONE follow-up question to learn more
-3. Be conversational and encouraging
-4. If you have enough information about their interests, suggest showing them opportunities
+CRITICAL RULES:
+- Ask exactly ONE follow-up question
+- Keep responses under 40 words
+- Use simple, clear language
+- Be encouraging and friendly
+- Build on their previous answers
 
-Current user profile: {user_profile}
-Conversation history: {history}
+RESPONSE FORMAT:
+- Acknowledge their answer briefly
+- Ask ONE specific follow-up question
+- Be encouraging
 
-Based on their latest response, ask one thoughtful follow-up question or suggest showing opportunities if you have enough information."""
+GOOD FOLLOW-UP QUESTIONS:
+- "That's great! What do you like most about [their interest]?"
+- "Interesting! Are you more interested in individual work or team projects?"
+- "Cool! What kind of problems do you enjoy solving?"
+
+NEVER:
+- Ask multiple questions
+- Give long explanations
+- Use complex language
+- Repeat previous questions
+
+Based on their response, ask one thoughtful follow-up question."""
 
         # Prepare conversation context
         history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in conversation_history[-5:]])
@@ -280,8 +346,11 @@ Based on their latest response, ask one thoughtful follow-up question or suggest
         payload = {
             "model": "deepseek/deepseek-chat-v3.1:free",
             "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 200
+            "temperature": 0.3,
+            "max_tokens": 100,
+            "top_p": 0.9,
+            "frequency_penalty": 0.1,
+            "presence_penalty": 0.1
         }
 
         try:
@@ -293,7 +362,12 @@ Based on their latest response, ask one thoughtful follow-up question or suggest
                 raise Exception(f"OpenRouter API error: {error_detail}")
             
             ai_response = response.json()
-            return ai_response['choices'][0]['message']['content']
+            assistant_message = ai_response['choices'][0]['message']['content']
+            
+            # Clean the response to prevent garbled output
+            cleaned_message = AIService._clean_response(assistant_message)
+            
+            return cleaned_message
             
         except Exception as e:
             print(f"Error calling OpenRouter: {e}")
