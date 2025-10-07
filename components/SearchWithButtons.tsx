@@ -40,8 +40,8 @@ export default function SearchWithButtons() {
             <div className="relative">
                 {/* Search Input */}
                 <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-5 md:pl-7 flex items-center pointer-events-none z-10">
-                        <MagnifyingGlassIcon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-neutral-400 group-focus-within:text-primary-500 transition-colors" />
+                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-3.5 md:pl-4 flex items-center pointer-events-none z-10">
+                        <MagnifyingGlassIcon className="h-4 w-4 sm:h-4 sm:w-4 md:h-5 md:w-5 text-neutral-400 group-focus-within:text-primary-500 transition-colors" />
                     </div>
 
                     <input
@@ -52,13 +52,13 @@ export default function SearchWithButtons() {
                         onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                         onKeyPress={handleKeyPress}
                         placeholder="What are you curious about?"
-                        className="w-full pl-12 sm:pl-16 md:pl-20 pr-4 sm:pr-6 md:pr-10 py-4 sm:py-6 md:py-8 lg:py-10 text-base sm:text-lg md:text-xl lg:text-2xl font-medium
+                        className="w-full pl-9 sm:pl-12 md:pl-14 pr-3 sm:pr-4 md:pr-6 py-2.5 sm:py-3 md:py-4 lg:py-5 text-sm sm:text-base md:text-lg lg:text-xl font-medium
                        bg-background-light rounded-soft sm:rounded-gentle md:rounded-comfort
                        border-2 border-neutral-400
                        focus:outline-none focus:border-primary-500 focus:bg-background-lighter
                        hover:border-neutral-500
                        transition-all duration-300 ease-out
-                       placeholder:text-neutral-400 placeholder:font-normal min-h-[56px] sm:min-h-[64px]"
+                       placeholder:text-neutral-400 placeholder:font-normal min-h-[44px] sm:min-h-[48px]"
                         style={{
                             boxShadow: `inset 0 2px 4px 0 oklch(0% 0 0 / 0.05),
                           0 6px 12px -2px oklch(0% 0 0 / 0.08),
@@ -112,10 +112,6 @@ export default function SearchWithButtons() {
                     )}
                 </AnimatePresence>
 
-                {/* Helper Text */}
-                <p className="text-center text-xs sm:text-sm text-foreground-lighter mt-2 sm:mt-3 px-2">
-                    Type to search or use AI for personalized recommendations
-                </p>
             </div>
         </div>
     );

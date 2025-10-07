@@ -125,15 +125,15 @@ function HomeContent() {
                     <Configure hitsPerPage={5} />
 
                     {/* Hero Section */}
-                    <section className="min-h-fit laptop:min-h-[75vh] desktop:min-h-[85vh] 2xl:min-h-[calc(100dvh-5rem)] max-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-[clamp(2rem,6vh,4rem)]">
+                    <section className="min-h-fit laptop:min-h-[70vh] desktop:min-h-[80vh] 2xl:min-h-[calc(100dvh-5rem)] max-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-[clamp(1.5rem,5vh,3rem)]">
                         <div className="w-full max-w-7xl mx-auto text-center">
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6 }}
-                                className="text-[clamp(1.75rem,min(6vw,5vh),3.5rem)] font-bold text-foreground tracking-tight leading-[1.1] mb-3 sm:mb-4"
+                                className="text-[clamp(2.5rem,min(9vw,8vh),5rem)] font-bold text-foreground tracking-tight leading-[1.1] mb-4 sm:mb-5 mt-[clamp(2rem,6vh,4rem)]"
                             >
-                                <div className="mb-1.5">Find your next{' '}
+                                <div className="mb-2">Find your next{' '}
                                     <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
                                         Life changing
                                     </span>
@@ -150,28 +150,14 @@ function HomeContent() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.1 }}
-                                className="text-[clamp(0.9rem,min(2.5vw,2vh),1.25rem)] text-foreground-light max-w-3xl mx-auto leading-relaxed mb-[clamp(1.25rem,3vh,2rem)] px-4"
+                                className="text-[clamp(1rem,min(3vw,2.5vh),1.4rem)] text-foreground-light max-w-3xl mx-auto leading-relaxed mb-[clamp(1.5rem,3.5vh,2.25rem)] px-4"
                             >
                                 Free platform for Indonesian students. Search 500+ verified research programs, competitions, and youth opportunities.
                             </motion.p>
 
-                            {/* Trust Indicators */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: 0.2 }}
-                                className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-[clamp(1.5rem,4vh,2.5rem)] max-w-4xl mx-auto"
-                            >
-                                {stats.map((stat, index) => (
-                                    <div key={index} className="text-center">
-                                        <div className="text-[clamp(1.75rem,min(4vw,3.5vh),2.5rem)] font-bold text-primary-600 leading-none">{stat.number}</div>
-                                        <div className="text-[clamp(0.75rem,1.25vw,1rem)] text-foreground-lighter mt-1">{stat.label}</div>
-                                    </div>
-                                ))}
-                            </motion.div>
 
                             {/* Search Bar */}
-                            <div className="mb-[clamp(1rem,2.5vh,1.5rem)]">
+                            <div className="mb-[clamp(0.75rem,2vh,1.25rem)]">
                                 <SearchWithButtons />
                             </div>
 
@@ -181,7 +167,7 @@ function HomeContent() {
                     </section>
 
                     {/* Benefits Section */}
-                    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background to-background-light border-y-2 border-neutral-400">
+                    <section className="py-10 sm:py-14 lg:py-16 bg-gradient-to-b from-background to-background-light border-y-2 border-neutral-400">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
@@ -224,7 +210,7 @@ function HomeContent() {
                     </section>
 
                     {/* Social Proof Section */}
-                    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-background-lighter border-y-2 border-neutral-400">
+                    <section className="py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 bg-background-lighter border-y-2 border-neutral-400">
                         <div className="max-w-7xl mx-auto">
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
@@ -272,7 +258,7 @@ function HomeContent() {
                     </section>
 
                     {/* FAQ Section */}
-                    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-background-light border-y-2 border-neutral-400">
+                    <section className="py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 bg-background-light border-y-2 border-neutral-400">
                         <div className="max-w-3xl mx-auto">
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
@@ -334,7 +320,7 @@ function HomeContent() {
                     </section>
 
                     {/* Final CTA Section */}
-                    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-background">
+                    <section className="py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 bg-background">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}

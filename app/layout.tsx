@@ -14,13 +14,6 @@ export const metadata: Metadata = {
     title: "Depanku.id - Find Research Programs and Youth Opportunities in Indonesia",
     description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities. Search 500+ verified opportunities.",
     keywords: ["research programs Indonesia", "youth opportunities", "student competitions", "academic programs", "scholarships Indonesia", "student research", "youth development"],
-    // Industry standard: Proper viewport configuration
-    viewport: {
-        width: 'device-width',
-        initialScale: 1,
-        maximumScale: 5,
-        viewportFit: 'cover', // For devices with notches
-    },
     openGraph: {
         title: "Depanku.id - Find Research Programs and Youth Opportunities",
         description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities.",
@@ -43,6 +36,14 @@ export const metadata: Metadata = {
             "max-snippet": -1,
         },
     },
+};
+
+// Industry standard: Proper viewport configuration (Next.js 14+)
+export const viewport = {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    viewportFit: 'cover', // For devices with notches
 };
 
 export default function RootLayout({

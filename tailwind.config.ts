@@ -11,9 +11,9 @@ const config: Config = {
       // OKLCH Color System - Your original sage green design
       colors: {
         background: {
-          DEFAULT: 'oklch(96% 0.015 160)', // Sage green background
-          light: 'oklch(98% 0.01 160)', // Lighter sage
-          lighter: 'oklch(99% 0.005 160)', // Very light sage
+          DEFAULT: 'oklch(94% 0.02 160)', // Sage green background - darker
+          light: 'oklch(96% 0.015 160)', // Lighter sage - darker
+          lighter: 'oklch(98% 0.01 160)', // Very light sage - darker
         },
         foreground: {
           DEFAULT: 'oklch(24% 0.02 160)', // Dark sage-tinted text

@@ -2,20 +2,24 @@
 
 import { motion } from 'framer-motion';
 import { useSearchBox } from 'react-instantsearch';
+import { useRouter } from 'next/navigation';
 
 const tags = [
-    { label: '#research', query: 'research academic study' },
-    { label: '#stem', query: 'STEM science technology' },
-    { label: '#coding', query: 'programming coding software' },
-    { label: '#design', query: 'design creative arts' },
-    { label: '#leadership', query: 'leadership management' },
+    { label: '#research', query: 'research' },
+    { label: '#stem', query: 'STEM' },
+    { label: '#coding', query: 'programming' },
+    { label: '#design', query: 'design' },
+    { label: '#leadership', query: 'leadership' },
 ];
 
 export default function CuriosityTags() {
     const { refine } = useSearchBox();
+    const router = useRouter();
 
     const handleTagClick = (query: string) => {
         refine(query);
+        // Navigate to search page immediately with the query
+        router.push(`/search?q=${encodeURIComponent(query)}`);
     };
 
     const container = {
