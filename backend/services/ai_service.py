@@ -35,10 +35,30 @@ class AIService:
         cleaned = re.sub(r'\bThat\'?\s*', 'That\'s ', cleaned)  # Fix "That'" -> "That's"
         cleaned = re.sub(r'\bWhat\s*you\b', 'What do you', cleaned)  # Fix "What you" -> "What do you"
         cleaned = re.sub(r'\bbegin\s+sentence\?\s*', '', cleaned)  # Remove "begin sentence?"
+        cleaned = re.sub(r'\bgreat\s+hear\b', 'great to hear', cleaned)  # Fix "great hear" -> "great to hear"
+        cleaned = re.sub(r'\bscience\s+experiments\?\s*begin\s+sentence\?\s*', 'science experiments?', cleaned)  # Remove trailing garbage
+        cleaned = re.sub(r'\bmath\s+problems\s+science\s+experiments\?\s*begin\s+sentence\?\s*', 'math problems or science experiments?', cleaned)  # Fix combined question
         
-        # If response is too short or seems garbled, provide a fallback
-        if len(cleaned) < 10 or len(cleaned.split()) < 3:
-            return "That's interesting! What kind of activities do you enjoy doing?"
+        # Check if response seems garbled or incoherent
+        if (len(cleaned) < 10 or 
+            len(cleaned.split()) < 3 or 
+            'begin sentence' in cleaned.lower() or
+            cleaned.count('?') > 2 or
+            any(word in cleaned.lower() for word in ['garbled', 'error', 'undefined'])):
+            
+            # Provide predefined good responses as fallbacks
+            fallback_responses = [
+                "That's interesting! What subjects do you enjoy most in school?",
+                "Great! What kind of activities do you like doing outside of class?",
+                "I see! Are you more interested in individual projects or team activities?",
+                "That's cool! What problems do you enjoy solving?",
+                "Nice! Do you prefer hands-on activities or theoretical learning?"
+            ]
+            
+            # Use a simple hash to pick a consistent fallback
+            import hashlib
+            hash_val = int(hashlib.md5(response_text.encode()).hexdigest()[:8], 16)
+            return fallback_responses[hash_val % len(fallback_responses)]
         
         # Ensure it ends with a question mark or period
         if not cleaned.endswith(('?', '.', '!')):
