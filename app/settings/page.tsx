@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { motion } from 'framer-motion';
@@ -13,7 +13,7 @@ import {
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
-function SettingsContentInner() {
+function SettingsContent() {
     const { user } = useAuth();
     const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
@@ -439,21 +439,6 @@ function SettingsContentInner() {
                 </div>
             </main>
         </div>
-    );
-}
-
-function SettingsContent() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <div className="inline-block w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p className="text-neutral-600">Loading settings...</p>
-                </div>
-            </div>
-        }>
-            <SettingsContentInner />
-        </Suspense>
     );
 }
 

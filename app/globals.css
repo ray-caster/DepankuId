@@ -15,10 +15,26 @@
         background: oklch(96% 0.015 160);
         color: oklch(24% 0.02 160);
         font-feature-settings: 'rlig' 1, 'calt' 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
     }
 
     html {
         scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Better mobile scrolling */
+    @media (max-width: 1024px) {
+        * {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+
+    /* Prevent horizontal scroll on mobile */
+    body {
+        overflow-x: hidden;
     }
 }
 

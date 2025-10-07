@@ -73,9 +73,16 @@ const config: Config = {
         'card': '0 2px 8px -2px oklch(0% 0 0 / 0.1), 0 4px 16px -4px oklch(0% 0 0 / 0.05)',
         'card-hover': '0 4px 16px -2px oklch(0% 0 0 / 0.15), 0 8px 24px -4px oklch(0% 0 0 / 0.08)',
       },
-      // Responsive breakpoints
+      // Responsive breakpoints - Industry standard includes laptop-specific sizes
       screens: {
         'xs': '475px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'laptop': '1024px',      // Explicit laptop breakpoint (13"-15" laptops)
+        'desktop': '1280px',     // Desktop monitors
+        'xl': '1280px',
+        '2xl': '1536px',
         '3xl': '1920px',
       },
     },
