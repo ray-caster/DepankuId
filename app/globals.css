@@ -23,6 +23,8 @@
     html {
         scroll-behavior: smooth;
         -webkit-tap-highlight-color: transparent;
+        /* Industry standard: Account for fixed header when scrolling to anchors */
+        scroll-padding-top: 5rem; /* 80px = height of header + buffer */
     }
 
     /* Better mobile scrolling */
@@ -30,11 +32,23 @@
         * {
             -webkit-overflow-scrolling: touch;
         }
+        
+        html {
+            /* Adjust scroll padding for mobile header height */
+            scroll-padding-top: 4rem; /* 64px for mobile header */
+        }
     }
 
     /* Prevent horizontal scroll on mobile */
     body {
         overflow-x: hidden;
+    }
+    
+    /* Industry standard: Support for dynamic viewport units */
+    @supports (height: 100dvh) {
+        .min-h-screen {
+            min-height: 100dvh;
+        }
     }
 }
 

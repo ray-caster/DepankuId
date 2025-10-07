@@ -125,15 +125,15 @@ function HomeContent() {
                     <Configure hitsPerPage={5} />
 
                     {/* Hero Section */}
-                    <section className="min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+                    <section className="min-h-fit laptop:min-h-[75vh] desktop:min-h-[85vh] 2xl:min-h-[calc(100dvh-5rem)] max-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-[clamp(2rem,6vh,4rem)]">
                         <div className="w-full max-w-7xl mx-auto text-center">
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6 }}
-                                className="text-[clamp(2rem,8vw,4.5rem)] font-bold text-foreground tracking-tight leading-[1.1] mb-4 sm:mb-6"
+                                className="text-[clamp(1.75rem,min(6vw,5vh),3.5rem)] font-bold text-foreground tracking-tight leading-[1.1] mb-3 sm:mb-4"
                             >
-                                <div className="mb-2">Find your next{' '}
+                                <div className="mb-1.5">Find your next{' '}
                                     <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
                                         Life changing
                                     </span>
@@ -150,7 +150,7 @@ function HomeContent() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.1 }}
-                                className="text-[clamp(1rem,3vw,1.5rem)] text-foreground-light max-w-3xl mx-auto leading-relaxed mb-6 sm:mb-8 px-4"
+                                className="text-[clamp(0.9rem,min(2.5vw,2vh),1.25rem)] text-foreground-light max-w-3xl mx-auto leading-relaxed mb-[clamp(1.25rem,3vh,2rem)] px-4"
                             >
                                 Free platform for Indonesian students. Search 500+ verified research programs, competitions, and youth opportunities.
                             </motion.p>
@@ -160,18 +160,18 @@ function HomeContent() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.2 }}
-                                className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-10 max-w-2xl mx-auto"
+                                className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-[clamp(1.5rem,4vh,2.5rem)] max-w-4xl mx-auto"
                             >
                                 {stats.map((stat, index) => (
                                     <div key={index} className="text-center">
-                                        <div className="text-[clamp(2rem,5vw,3rem)] font-bold text-primary-600 leading-none">{stat.number}</div>
-                                        <div className="text-sm sm:text-base lg:text-lg text-foreground-lighter mt-1 sm:mt-2">{stat.label}</div>
+                                        <div className="text-[clamp(1.75rem,min(4vw,3.5vh),2.5rem)] font-bold text-primary-600 leading-none">{stat.number}</div>
+                                        <div className="text-[clamp(0.75rem,1.25vw,1rem)] text-foreground-lighter mt-1">{stat.label}</div>
                                     </div>
                                 ))}
                             </motion.div>
 
                             {/* Search Bar */}
-                            <div className="mb-6 sm:mb-8">
+                            <div className="mb-[clamp(1rem,2.5vh,1.5rem)]">
                                 <SearchWithButtons />
                             </div>
 
@@ -181,13 +181,13 @@ function HomeContent() {
                     </section>
 
                     {/* Benefits Section */}
-                    <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-background to-background-light border-y border-neutral-200">
+                    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background to-background-light border-y-2 border-neutral-400">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                className="text-[clamp(1.75rem,5vw,3rem)] font-bold text-center text-foreground mb-4 sm:mb-6"
+                                className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-center text-foreground mb-3 sm:mb-4"
                             >
                                 Why Choose Depanku.id?
                             </motion.h2>
@@ -196,7 +196,7 @@ function HomeContent() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.1 }}
-                                className="text-base sm:text-lg lg:text-xl text-foreground-light text-center max-w-3xl mx-auto mb-12 sm:mb-16 px-4"
+                                className="text-sm sm:text-base lg:text-lg text-foreground-light text-center max-w-3xl mx-auto mb-8 sm:mb-12 px-4"
                             >
                                 We make finding life-changing opportunities simple, personalized, and completely free.
                             </motion.p>
