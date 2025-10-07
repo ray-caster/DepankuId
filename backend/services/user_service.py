@@ -1,5 +1,6 @@
 """User service - Business logic for user operations"""
 from firebase_admin import auth, firestore
+from firebase_admin.firestore import SERVER_TIMESTAMP
 from config.settings import db
 
 class UserService:
@@ -11,7 +12,7 @@ class UserService:
         user_ref = db.collection('users').document(user_id)
         user_ref.set({
             'preferences': preferences,
-            'updated_at': firestore.SERVER_TIMESTAMP
+            'updated_at': SERVER_TIMESTAMP
         }, merge=True)
         
         return True
@@ -42,7 +43,7 @@ class UserService:
         user_ref = db.collection('users').document(user_id)
         user_ref.set({
             'profile': profile_data,
-            'updated_at': firestore.SERVER_TIMESTAMP
+            'updated_at': SERVER_TIMESTAMP
         }, merge=True)
         
         return True
@@ -74,7 +75,7 @@ class UserService:
         user_ref = db.collection('users').document(user_id)
         user_ref.set({
             'notification_settings': settings,
-            'updated_at': firestore.SERVER_TIMESTAMP
+            'updated_at': SERVER_TIMESTAMP
         }, merge=True)
         
         return True
@@ -104,7 +105,7 @@ class UserService:
         user_ref = db.collection('users').document(user_id)
         user_ref.set({
             'privacy_settings': settings,
-            'updated_at': firestore.SERVER_TIMESTAMP
+            'updated_at': SERVER_TIMESTAMP
         }, merge=True)
         
         return True
