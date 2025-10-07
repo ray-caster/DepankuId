@@ -4,6 +4,13 @@
 
 import React from 'react';
 
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
+
 // Lazy load components
 export const lazyLoad = (
   importFunc: () => Promise<{ default: React.ComponentType<any> }>,
@@ -17,13 +24,6 @@ export const lazyLoad = (
     </React.Suspense>
   );
 };
-
-// Loading spinner component
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center p-8">
-    <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-  </div>
-);
 
 // Debounce function for search inputs
 export function debounce(
