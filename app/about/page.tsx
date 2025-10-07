@@ -66,7 +66,7 @@ export default function AboutPage() {
                         >
                             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Our Mission</h2>
                             <p className="text-base sm:text-lg text-foreground-light leading-relaxed">
-                                Depanku.id was born from a simple observation: talented Indonesian students miss opportunities because they don't know these opportunities exist. We're here to change that.
+                                Depanku.id was born from a simple observation: talented Indonesian students miss opportunities because they don&apos;t know these opportunities exist. We&apos;re here to change that.
                             </p>
                             <p className="text-base sm:text-lg text-foreground-light leading-relaxed mt-4">
                                 Our platform combines intelligent search technology with AI-powered guidance to help students discover research programs, competitions, and youth initiatives that align with their interests and goals. The right opportunity, discovered at the right time, changes everything.
@@ -114,7 +114,7 @@ export default function AboutPage() {
                             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">Why We Built This</h2>
                             <div className="space-y-4 text-base sm:text-lg text-foreground-light leading-relaxed">
                                 <p>
-                                    Too many brilliant students in Indonesia are limited by information asymmetry. Opportunities exist, but they're scattered across websites, hidden in announcements, or locked behind language barriers.
+                                    Too many brilliant students in Indonesia are limited by information asymmetry. Opportunities exist, but they&apos;re scattered across websites, hidden in announcements, or locked behind language barriers.
                                 </p>
                                 <p>
                                     We built Depanku.id to be the bridge. A single platform where students:
@@ -126,7 +126,7 @@ export default function AboutPage() {
                                     <li>Find programs that match their interests and goals</li>
                                 </ul>
                                 <p className="pt-4">
-                                    Best of all? It's free. Opportunity should never have a paywall.
+                                    Best of all? It&apos;s free. Opportunity should never have a paywall.
                                 </p>
                             </div>
                         </motion.div>

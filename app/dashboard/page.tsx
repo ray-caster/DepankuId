@@ -313,7 +313,7 @@ function DashboardContent() {
                                 <div className="card text-center py-12">
                                     <BookmarkIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
                                     <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
-                                    <p className="text-neutral-600 mb-6">Start bookmarking opportunities you're interested in!</p>
+                                    <p className="text-neutral-600 mb-6">Start bookmarking opportunities you&apos;re interested in!</p>
                                     <Link href="/search" className="btn-primary inline-block">
                                         Browse Opportunities
                                     </Link>
