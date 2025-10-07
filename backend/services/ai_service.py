@@ -123,10 +123,10 @@ NEVER:
         }
 
         payload = {
-            "model": "deepseek/deepseek-chat-v3.1:free",
+            "model": "google/gemini-2.5-flash",
             "messages": messages,
             "temperature": 0.3,
-            "max_tokens": 100,
+            "max_tokens": 200,
             "top_p": 0.9,
             "frequency_penalty": 0.1,
             "presence_penalty": 0.1
