@@ -69,24 +69,10 @@ function AIDiscoveryContent() {
         if (savedState) {
             const parsed = JSON.parse(savedState);
             setUserAnswers(parsed.answers || {});
-            setUserProfile(parsed.profile || userProfile);
+            setUserProfile(prev => parsed.profile || prev);
             setConversationHistory(parsed.history || []);
         }
     }, []);
-
-    // Save conversation state to localStorage
-    const saveState = useCallback(() => {
-        const state = {
-            answers: userAnswers,
-            profile: userProfile,
-            history: conversationHistory
-        };
-        localStorage.setItem('ai-discovery-state', JSON.stringify(state));
-    }, [userAnswers, userProfile, conversationHistory]);
-
-    useEffect(() => {
-        saveState();
-    }, [userAnswers, userProfile, conversationHistory]);
 
     // Start the discovery process
     const startDiscovery = async () => {
@@ -103,7 +89,15 @@ function AIDiscoveryContent() {
                 
                 // Update user profile if provided
                 if (response.user_profile) {
-                    setUserProfile(response.user_profile);
+                    setUserProfile(prev => ({
+                        ...prev,
+                        interests: response.user_profile?.interests || prev.interests,
+                        skills: response.user_profile?.skills || prev.skills,
+                        goals: response.user_profile?.goals || prev.goals,
+                        preferredTypes: response.user_profile?.preferredTypes || prev.preferredTypes,
+                        conversationSummary: response.user_profile?.conversationSummary || prev.conversationSummary,
+                        confidence: prev.confidence // Keep existing confidence
+                    }));
                 }
                 
                 // Generate first question card
@@ -243,7 +237,15 @@ function AIDiscoveryContent() {
                 
                 // Update user profile
                 if (response.user_profile) {
-                    setUserProfile(response.user_profile);
+                    setUserProfile(prev => ({
+                        ...prev,
+                        interests: response.user_profile?.interests || prev.interests,
+                        skills: response.user_profile?.skills || prev.skills,
+                        goals: response.user_profile?.goals || prev.goals,
+                        preferredTypes: response.user_profile?.preferredTypes || prev.preferredTypes,
+                        conversationSummary: response.user_profile?.conversationSummary || prev.conversationSummary,
+                        confidence: response.user_profile?.confidence || prev.confidence
+                    }));
                 }
                 
                 // Check if we should show opportunities
