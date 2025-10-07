@@ -7,6 +7,6 @@ python-dotenv==1.0.1
 algoliasearch>=4.0,<5.0
 gunicorn==22.0.0
 brevo-python>=1.2.0
-a2wsgi==1.10.4
+asgiref>=3.7.0
 uvicorn[standard]==0.30.6
 
