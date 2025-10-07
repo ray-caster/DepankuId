@@ -54,6 +54,8 @@ function OpportunitiesContent() {
     const [tagInput, setTagInput] = useState('');
     const [categoryInput, setCategoryInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [showSocialMedia, setShowSocialMedia] = useState(false);
     // Security: Input validation and sanitization
     const validateInput = useCallback((field: string, value: any): string | null => {
         switch (field) {
