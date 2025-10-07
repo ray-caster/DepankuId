@@ -8,6 +8,10 @@ import dotenv
 
 dotenv.load_dotenv()
 
+# Validate environment variables
+from utils.env_validator import validate_environment
+validate_environment()
+
 # Import utilities
 from utils.logging_config import logger
 from utils.error_handlers import register_error_handlers
@@ -24,7 +28,18 @@ from routes.profile_routes import profile_bp
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+
+# Set maximum request size (16 MB)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+# Configure CORS with security settings
+ALLOWED_ORIGINS = os.getenv('FRONTEND_URL', 'http://localhost:3000').split(',')
+CORS(app, 
+     resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")

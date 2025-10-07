@@ -229,13 +229,13 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                                                                 onChange={(e) => setPassword(e.target.value)}
                                                                 placeholder="Enter your password"
                                                                 required
-                                                                minLength={6}
+                                                                minLength={8}
                                                                 className="w-full pl-12 pr-4 py-3 border-2 border-neutral-400 rounded-soft focus:border-primary-500 focus:outline-none transition-colors"
                                                             />
                                                         </div>
                                                         {isSignUp && (
                                                             <p className="text-xs text-foreground-lighter mt-2">
-                                                                Minimum 6 characters
+                                                                Minimum 8 characters with uppercase, lowercase, and number
                                                             </p>
                                                         )}
                                                     </div>

@@ -10,7 +10,7 @@ import {
     BookmarkIcon as BookmarkOutlineIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '@/lib/api';
 
@@ -34,7 +34,7 @@ const typeLabels = {
     'competition': 'Competition',
 };
 
-export default function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
+function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
     const { user, idToken } = useAuth();
     const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
     const [bookmarkLoading, setBookmarkLoading] = useState(false);
@@ -180,3 +180,13 @@ export default function OpportunityCard({ opportunity, isBookmarked: initialBook
     );
 }
 
+// Export memoized version for performance
+export default memo(OpportunityCard, (prevProps, nextProps) => {
+    // Custom comparison function - only re-render if these change
+    return (
+        prevProps.opportunity.id === nextProps.opportunity.id &&
+        prevProps.isBookmarked === nextProps.isBookmarked &&
+        prevProps.opportunity.title === nextProps.opportunity.title &&
+        prevProps.opportunity.deadline === nextProps.opportunity.deadline
+    );
+});

@@ -18,11 +18,15 @@ export const lazyLoad = (
 ) => {
   const LazyComponent = React.lazy(importFunc);
 
-  return (props: any) => (
+  const LazyLoadWrapper = (props: any) => (
     <React.Suspense fallback={fallback || <LoadingSpinner />}>
       <LazyComponent {...props} />
     </React.Suspense>
   );
+
+  LazyLoadWrapper.displayName = 'LazyLoadWrapper';
+
+  return LazyLoadWrapper;
 };
 
 // Debounce function for search inputs
