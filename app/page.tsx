@@ -32,8 +32,8 @@ function HomeContent() {
         },
         {
             icon: SparklesIcon,
-            title: 'AI-Powered Discovery',
-            description: 'Our guide asks questions to find opportunities you missed.'
+            title: 'Personalized for You',
+            description: 'Browse opportunities tailored to your interests and goals.'
         },
         {
             icon: AcademicCapIcon,
@@ -59,7 +59,7 @@ function HomeContent() {
         {
             name: 'Ahmad Rizki',
             role: 'Google Code Jam Finalist',
-            content: 'The AI discovery feature guided me to competitions I missed.',
+            content: 'The search feature helped me discover competitions I would have missed.',
             avatar: '👨‍💻'
         },
         {
@@ -80,8 +80,8 @@ function HomeContent() {
             answer: 'We review each opportunity. We check the organizer, verify deadlines, and ensure information is accurate.'
         },
         {
-            question: 'How does AI discovery work?',
-            answer: 'Our AI asks questions to understand your interests and goals. It finds opportunities that match your profile.'
+            question: 'How can I find opportunities that match my interests?',
+            answer: 'Use our search and filter features to browse opportunities by category, type, location, and tags. You can also explore curated collections based on popular interests.'
         },
         {
             question: 'How often do you add new opportunities?',
@@ -125,13 +125,13 @@ function HomeContent() {
                     <Configure hitsPerPage={5} />
 
                     {/* Hero Section */}
-                    <section className="min-h-fit laptop:min-h-[70vh] desktop:min-h-[80vh] 2xl:min-h-[calc(100dvh-5rem)] max-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-[clamp(1.5rem,5vh,3rem)]">
-                        <div className="w-full max-w-7xl mx-auto text-center">
+                    <section className="h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+                        <div className="w-full max-w-7xl mx-auto text-center flex flex-col justify-center h-full py-8">
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6 }}
-                                className="text-[clamp(2.5rem,min(9vw,8vh),5rem)] font-bold text-foreground tracking-tight leading-[1.1] mb-4 sm:mb-5 mt-[clamp(2rem,6vh,4rem)]"
+                                className="text-[clamp(2rem,7vw,4rem)] sm:text-[clamp(2.5rem,6vw,4.5rem)] lg:text-[clamp(3rem,5.5vw,5rem)] font-bold text-foreground tracking-tight leading-[1.15] mb-4 sm:mb-5"
                             >
                                 <div className="mb-2">Find your next{' '}
                                     <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
@@ -150,18 +150,18 @@ function HomeContent() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.1 }}
-                                className="text-[clamp(1rem,min(3vw,2.5vh),1.4rem)] text-foreground-light max-w-3xl mx-auto leading-relaxed mb-[clamp(1.5rem,3.5vh,2.25rem)] px-4"
+                                className="text-base sm:text-lg lg:text-xl text-foreground-light max-w-3xl mx-auto leading-relaxed mb-6 sm:mb-8 px-4"
                             >
                                 Free platform for Indonesian students. Search 500+ verified research programs, competitions, and youth opportunities.
                             </motion.p>
 
 
                             {/* Search Bar */}
-                            <div className="mb-[clamp(0.75rem,2vh,1.25rem)]">
+                            <div className="mb-4 sm:mb-6">
                                 <SearchWithButtons />
                             </div>
 
-                            {/* Popular Tags & AI Discovery */}
+                            {/* Popular Tags & Browse Button */}
                             <SearchSection />
                         </div>
                     </section>
@@ -373,7 +373,7 @@ function HomeContent() {
                             <h4 className="font-bold text-sm sm:text-base text-foreground mb-3 sm:mb-4">Quick Links</h4>
                             <ul className="space-y-2">
                                 <li><a href="/search" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">Browse Opportunities</a></li>
-                                <li><a href="/ai" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">Can&apos;t Decide?</a></li>
+                                <li><a href="/features" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">Features</a></li>
                                 <li><a href="/about" className="text-sm sm:text-base text-foreground-light hover:text-primary-600 transition-colors inline-block py-1">About Us</a></li>
                             </ul>
                         </div>

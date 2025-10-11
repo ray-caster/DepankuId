@@ -84,7 +84,7 @@ export default function Header() {
     return (
         <>
             <header
-                className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b-2 border-neutral-400"
+                className="fixed top-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-xl border-b-2 border-neutral-400 safe-top"
                 style={{
                     boxShadow: '0 4px 12px -2px oklch(0% 0 0 / 0.08), 0 2px 6px -1px oklch(0% 0 0 / 0.05)'
                 }}
@@ -253,21 +253,42 @@ export default function Header() {
                             )}
 
                             {/* Hamburger Menu Button - Mobile Only */}
-                            <button
+                            <motion.button
                                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                                className="lg:hidden flex items-center justify-center w-11 h-11 rounded-soft bg-background-light border-2 border-neutral-400
-                                         hover:bg-background-lighter hover:border-neutral-500 transition-all duration-300"
+                                whileTap={{ scale: 0.95 }}
+                                className="lg:hidden flex items-center justify-center w-12 h-12 rounded-soft bg-background-light border-2 border-neutral-400
+                                         hover:bg-background-lighter hover:border-neutral-500 transition-all duration-300 active:bg-neutral-100"
                                 style={{
                                     boxShadow: '0 2px 4px -1px oklch(0% 0 0 / 0.08)'
                                 }}
                                 aria-label="Toggle menu"
+                                aria-expanded={showMobileMenu}
                             >
-                                {showMobileMenu ? (
-                                    <XMarkIcon className="w-6 h-6 text-foreground" />
-                                ) : (
-                                    <Bars3Icon className="w-6 h-6 text-foreground" />
-                                )}
-                            </button>
+                                <motion.div
+                                    animate={showMobileMenu ? "open" : "closed"}
+                                    className="w-6 h-6 flex items-center justify-center"
+                                >
+                                    {showMobileMenu ? (
+                                        <motion.div
+                                            initial={{ rotate: 0, scale: 0 }}
+                                            animate={{ rotate: 90, scale: 1 }}
+                                            exit={{ rotate: 0, scale: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            <XMarkIcon className="w-6 h-6 text-foreground" />
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div
+                                            initial={{ rotate: -90, scale: 0 }}
+                                            animate={{ rotate: 0, scale: 1 }}
+                                            exit={{ rotate: -90, scale: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            <Bars3Icon className="w-6 h-6 text-foreground" />
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            </motion.button>
                         </motion.div>
                     </div>
                 </div>
@@ -291,119 +312,160 @@ export default function Header() {
                                 initial={{ x: '100%' }}
                                 animate={{ x: 0 }}
                                 exit={{ x: '100%' }}
-                                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                                className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-background border-l-2 border-neutral-400 z-50 lg:hidden overflow-y-auto"
+                                transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                                className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md bg-background border-l-2 border-neutral-400 z-50 lg:hidden overflow-y-auto safe-top safe-bottom"
                                 style={{
-                                    boxShadow: '-4px 0 24px -4px oklch(0% 0 0 / 0.2)'
+                                    boxShadow: '-8px 0 32px -4px oklch(0% 0 0 / 0.25)'
                                 }}
                             >
                                 <div className="flex flex-col h-full">
                                     {/* Mobile Menu Header */}
-                                    <div className="flex items-center justify-between p-4 border-b-2 border-neutral-400">
-                                        <span className="text-xl font-bold text-primary-800">Menu</span>
-                                        <button
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.1 }}
+                                        className="flex items-center justify-between p-5 border-b-2 border-neutral-400 bg-background-light"
+                                    >
+                                        <span className="text-2xl font-bold text-primary-800">Menu</span>
+                                        <motion.button
                                             onClick={closeMobileMenu}
-                                            className="flex items-center justify-center w-10 h-10 rounded-soft bg-background-light border-2 border-neutral-400 hover:bg-background-lighter transition-all"
+                                            whileTap={{ scale: 0.9 }}
+                                            className="flex items-center justify-center w-11 h-11 rounded-soft bg-background border-2 border-neutral-400 hover:bg-neutral-100 active:bg-neutral-200 transition-all"
                                             aria-label="Close menu"
                                         >
                                             <XMarkIcon className="w-6 h-6 text-foreground" />
-                                        </button>
-                                    </div>
+                                        </motion.button>
+                                    </motion.div>
 
                                     {/* User Info - If Logged In */}
                                     {user && (
-                                        <div className="p-4 border-b-2 border-neutral-400 bg-background-light">
-                                            <div className="flex items-center gap-3">
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.15 }}
+                                            className="p-5 border-b-2 border-neutral-400 bg-gradient-to-br from-primary-50 to-accent-50"
+                                        >
+                                            <div className="flex items-center gap-4">
                                                 {user.photoURL ? (
-                                                    <div className="relative w-12 h-12">
+                                                    <div className="relative w-14 h-14">
                                                         <Image
                                                             src={user.photoURL}
                                                             alt={user.displayName || 'User'}
-                                                            width={48}
-                                                            height={48}
-                                                            className="rounded-full ring-2 ring-primary-300"
+                                                            width={56}
+                                                            height={56}
+                                                            className="rounded-full ring-2 ring-primary-400 shadow-md"
                                                         />
                                                     </div>
                                                 ) : (
-                                                    <UserCircleIcon className="w-12 h-12 text-neutral-400" />
+                                                    <div className="w-14 h-14 rounded-full bg-primary-200 flex items-center justify-center">
+                                                        <UserCircleIcon className="w-10 h-10 text-primary-600" />
+                                                    </div>
                                                 )}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-foreground truncate">{user.displayName}</p>
-                                                    <p className="text-xs text-neutral-600 truncate">{user.email}</p>
+                                                    <p className="text-base font-bold text-foreground truncate">{user.displayName}</p>
+                                                    <p className="text-sm text-neutral-700 truncate">{user.email}</p>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     )}
 
                                     {/* Navigation Links */}
-                                    <nav className="flex-1 p-4 space-y-2">
-                                        {navItems.map((item) => {
+                                    <nav className="flex-1 p-5 space-y-2 overflow-y-auto">
+                                        {navItems.map((item, index) => {
                                             const Icon = item.icon;
                                             const active = isActive(item.href);
 
                                             return (
-                                                <Link
+                                                <motion.div
                                                     key={item.href}
-                                                    href={item.href}
-                                                    onClick={closeMobileMenu}
-                                                    className={`flex items-center gap-3 px-4 py-3.5 rounded-soft font-medium transition-all duration-300 min-h-[52px]
-                                                        ${active
-                                                            ? 'bg-primary-600 text-white border-2 border-neutral-500'
-                                                            : 'bg-background-light text-foreground border-2 border-neutral-400 hover:border-neutral-500 hover:bg-background-lighter'
-                                                        }`}
-                                                    style={{
-                                                        boxShadow: active
-                                                            ? '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
-                                                            : '0 2px 4px -1px oklch(0% 0 0 / 0.08)'
-                                                    }}
+                                                    initial={{ opacity: 0, x: 20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: 0.2 + index * 0.05 }}
                                                 >
-                                                    <Icon className="w-6 h-6" />
-                                                    <span className="text-base">{item.label}</span>
-                                                </Link>
+                                                    <Link
+                                                        href={item.href}
+                                                        onClick={closeMobileMenu}
+                                                        className={`flex items-center gap-4 px-5 py-4 rounded-soft font-semibold transition-all duration-300 min-h-[56px] active:scale-98
+                                                            ${active
+                                                                ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white border-2 border-neutral-500 shadow-lg'
+                                                                : 'bg-background-light text-foreground border-2 border-neutral-400 hover:border-primary-400 hover:bg-background-lighter active:bg-neutral-100'
+                                                            }`}
+                                                        style={{
+                                                            boxShadow: active
+                                                                ? '0 6px 12px -2px oklch(0% 0 0 / 0.2), inset 0 2px 0 0 oklch(100% 0 0 / 0.15)'
+                                                                : '0 2px 6px -1px oklch(0% 0 0 / 0.08)'
+                                                        }}
+                                                    >
+                                                        <Icon className="w-6 h-6 flex-shrink-0" />
+                                                        <span className="text-base">{item.label}</span>
+                                                    </Link>
+                                                </motion.div>
                                             );
                                         })}
 
                                         {/* Divider */}
-                                        <div className="py-2">
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.4 }}
+                                            className="py-3"
+                                        >
                                             <div className="border-t-2 border-neutral-300" />
-                                        </div>
+                                        </motion.div>
 
                                         {/* Create Opportunity CTA */}
-                                        <Link
-                                            href="/opportunities"
-                                            onClick={closeMobileMenu}
-                                            className="flex items-center gap-3 px-4 py-3.5 rounded-soft font-bold transition-all duration-300 min-h-[52px]
-                                                     bg-accent-600 text-white border-2 border-neutral-400 hover:bg-accent-700"
-                                            style={{
-                                                boxShadow: '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
-                                            }}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.45 }}
                                         >
-                                            <SparklesIcon className="w-6 h-6" />
-                                            <span className="text-base">Create Opportunity</span>
-                                        </Link>
+                                            <Link
+                                                href="/opportunities"
+                                                onClick={closeMobileMenu}
+                                                className="flex items-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-300 min-h-[56px] active:scale-98
+                                                         bg-gradient-to-r from-accent-600 to-accent-700 text-white border-2 border-neutral-500 hover:from-accent-700 hover:to-accent-800 shadow-lg"
+                                                style={{
+                                                    boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
+                                                }}
+                                            >
+                                                <SparklesIcon className="w-6 h-6 flex-shrink-0" />
+                                                <span className="text-base">Create Opportunity</span>
+                                            </Link>
+                                        </motion.div>
 
                                         {/* User Menu Items - If Logged In */}
                                         {user && (
                                             <>
-                                                <div className="py-2">
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ delay: 0.5 }}
+                                                    className="py-3"
+                                                >
                                                     <div className="border-t-2 border-neutral-300" />
-                                                </div>
-                                                {profileMenuItems.map((item) => {
+                                                </motion.div>
+                                                {profileMenuItems.map((item, index) => {
                                                     const Icon = item.icon;
                                                     return (
-                                                        <Link
+                                                        <motion.div
                                                             key={item.href}
-                                                            href={item.href}
-                                                            onClick={closeMobileMenu}
-                                                            className="flex items-center gap-3 px-4 py-3.5 rounded-soft font-medium transition-all duration-300 min-h-[52px]
-                                                                     bg-background-light text-foreground border-2 border-neutral-400 hover:border-neutral-500 hover:bg-background-lighter"
-                                                            style={{
-                                                                boxShadow: '0 2px 4px -1px oklch(0% 0 0 / 0.08)'
-                                                            }}
+                                                            initial={{ opacity: 0, x: 20 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            transition={{ delay: 0.55 + index * 0.05 }}
                                                         >
-                                                            <Icon className="w-6 h-6 text-neutral-600" />
-                                                            <span className="text-base">{item.label}</span>
-                                                        </Link>
+                                                            <Link
+                                                                href={item.href}
+                                                                onClick={closeMobileMenu}
+                                                                className="flex items-center gap-4 px-5 py-4 rounded-soft font-medium transition-all duration-300 min-h-[56px] active:scale-98
+                                                                         bg-background-light text-foreground border-2 border-neutral-400 hover:border-primary-400 hover:bg-background-lighter active:bg-neutral-100"
+                                                                style={{
+                                                                    boxShadow: '0 2px 6px -1px oklch(0% 0 0 / 0.08)'
+                                                                }}
+                                                            >
+                                                                <Icon className="w-6 h-6 text-neutral-600 flex-shrink-0" />
+                                                                <span className="text-base">{item.label}</span>
+                                                            </Link>
+                                                        </motion.div>
                                                     );
                                                 })}
                                             </>
@@ -411,36 +473,43 @@ export default function Header() {
                                     </nav>
 
                                     {/* Bottom Actions */}
-                                    <div className="p-4 border-t-2 border-neutral-400 bg-background-light space-y-2">
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.7 }}
+                                        className="p-5 border-t-2 border-neutral-400 bg-background-light space-y-3"
+                                    >
                                         {user ? (
-                                            <button
+                                            <motion.button
                                                 onClick={handleSignOut}
-                                                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-soft font-bold transition-all duration-300 min-h-[52px]
-                                                         bg-red-600 text-white border-2 border-neutral-400 hover:bg-red-700"
+                                                whileTap={{ scale: 0.98 }}
+                                                className="w-full flex items-center justify-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-300 min-h-[56px]
+                                                         bg-gradient-to-r from-red-600 to-red-700 text-white border-2 border-neutral-500 hover:from-red-700 hover:to-red-800 active:scale-95 shadow-lg"
                                                 style={{
-                                                    boxShadow: '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
+                                                    boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
                                                 }}
                                             >
                                                 <ArrowRightOnRectangleIcon className="w-6 h-6" />
                                                 <span className="text-base">Sign Out</span>
-                                            </button>
+                                            </motion.button>
                                         ) : (
-                                            <button
+                                            <motion.button
                                                 onClick={() => {
                                                     setShowAuthModal(true);
                                                     closeMobileMenu();
                                                 }}
-                                                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-soft font-bold transition-all duration-300 min-h-[52px]
-                                                         bg-primary-600 text-white border-2 border-neutral-400 hover:bg-primary-700"
+                                                whileTap={{ scale: 0.98 }}
+                                                className="w-full flex items-center justify-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-300 min-h-[56px]
+                                                         bg-gradient-to-r from-primary-600 to-primary-700 text-white border-2 border-neutral-500 hover:from-primary-700 hover:to-primary-800 active:scale-95 shadow-lg"
                                                 style={{
-                                                    boxShadow: '0 4px 8px -2px oklch(0% 0 0 / 0.15), inset 0 1px 0 0 oklch(100% 0 0 / 0.1)'
+                                                    boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
                                                 }}
                                             >
                                                 <UserCircleIcon className="w-6 h-6" />
                                                 <span className="text-base">Sign In</span>
-                                            </button>
+                                            </motion.button>
                                         )}
-                                    </div>
+                                    </motion.div>
                                 </div>
                             </motion.div>
                         </>

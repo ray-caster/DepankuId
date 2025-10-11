@@ -18,7 +18,6 @@ from utils.error_handlers import register_error_handlers
 from utils.middleware import log_request_middleware
 
 # Import route blueprints
-from routes.ai_routes import ai_bp
 from routes.opportunity_routes import opportunity_bp
 from routes.auth_routes import auth_bp
 from routes.user_routes import user_bp
@@ -65,7 +64,6 @@ logger.info("Logging and error handling configured")
 
 # Register blueprints
 logger.info("Registering blueprints...")
-app.register_blueprint(ai_bp)
 app.register_blueprint(opportunity_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
@@ -90,7 +88,6 @@ def root():
         "status": "operational",
         "endpoints": {
             "health": "/health",
-            "ai": "/api/ai/*",
             "opportunities": "/api/opportunities/*",
             "auth": "/api/auth/*",
             "user": "/api/user/*",

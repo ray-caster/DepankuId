@@ -8,8 +8,8 @@ import CuriosityTags from './CuriosityTags';
 export default function SearchSection() {
     const router = useRouter();
 
-    const handleAIAnalysis = () => {
-        router.push('/ai');
+    const handleBrowse = () => {
+        router.push('/search');
     };
 
     return (
@@ -17,7 +17,7 @@ export default function SearchSection() {
             {/* Curiosity Tags */}
             <CuriosityTags />
 
-            {/* AI Discovery Button */}
+            {/* Browse Button */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -27,7 +27,7 @@ export default function SearchSection() {
                 <motion.button
                     whileHover={{ y: -2, scale: 1.03 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={handleAIAnalysis}
+                    onClick={handleBrowse}
                     className="flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 text-sm sm:text-base md:text-lg font-bold
                          bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-soft
                          border-2 border-neutral-500
@@ -38,7 +38,7 @@ export default function SearchSection() {
                     }}
                 >
                     <SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Can&apos;t Decide? Let us pick!</span>
+                    <span>Make your own path! We&apos;ll help you</span>
                 </motion.button>
             </motion.div>
         </div>
