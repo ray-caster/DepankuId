@@ -25,8 +25,8 @@ export default function FeaturesPage() {
         },
         {
             icon: SparklesIcon,
-            title: 'AI Helps You Discover',
-            description: 'Our AI asks questions to understand your interests, then finds opportunities you missed.',
+            title: 'Smart Search & Discovery',
+            description: 'Our intelligent search helps you discover opportunities that match your interests and goals.',
             color: 'from-purple-500 to-pink-500'
         },
         {

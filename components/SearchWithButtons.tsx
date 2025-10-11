@@ -16,12 +16,6 @@ export default function SearchWithButtons() {
     const topSuggestions = hits.slice(0, 8);
     const showSuggestions = isFocused && query.length > 0 && topSuggestions.length > 0;
 
-    // Removed auto-navigation - user must press Enter or click suggestions
-
-    const handleAIAnalysis = () => {
-        router.push('/ai');
-    };
-
     const handleSuggestionClick = (suggestionQuery: string) => {
         refine(suggestionQuery);
         router.push(`/search?q=${encodeURIComponent(suggestionQuery)}`);

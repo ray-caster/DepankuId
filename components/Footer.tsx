@@ -19,8 +19,8 @@ export default function Footer({ variant = 'full' }: FooterProps) {
                             <Link href="/search" className="text-foreground-light hover:text-primary-600 transition-colors">
                                 Browse
                             </Link>
-                            <Link href="/ai" className="text-foreground-light hover:text-primary-600 transition-colors">
-                                AI Discovery
+                            <Link href="/opportunities" className="text-foreground-light hover:text-primary-600 transition-colors">
+                                Share Opportunity
                             </Link>
                             <Link href="/about" className="text-foreground-light hover:text-primary-600 transition-colors">
                                 About
@@ -52,7 +52,7 @@ export default function Footer({ variant = 'full' }: FooterProps) {
                         <h4 className="font-bold text-foreground mb-4">Explore</h4>
                         <ul className="space-y-2">
                             <li><Link href="/search" className="text-foreground-light hover:text-primary-600 transition-colors">Browse Opportunities</Link></li>
-                            <li><Link href="/ai" className="text-foreground-light hover:text-primary-600 transition-colors">AI Discovery</Link></li>
+                            <li><Link href="/opportunities" className="text-foreground-light hover:text-primary-600 transition-colors">Share Opportunity</Link></li>
                             <li><Link href="/features" className="text-foreground-light hover:text-primary-600 transition-colors">Features</Link></li>
                         </ul>
                     </div>

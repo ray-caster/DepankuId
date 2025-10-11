@@ -522,8 +522,9 @@ export default function Header() {
                 isOpen={showAuthModal}
                 onClose={() => setShowAuthModal(false)}
                 onSuccess={() => {
-                    // Refresh user state
-                    window.location.reload();
+                    // Close modal and refresh auth state
+                    setShowAuthModal(false);
+                    router.refresh();
                 }}
             />
         </>

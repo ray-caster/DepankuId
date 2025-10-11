@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { QueryProvider } from "@/components/QueryProvider";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -96,10 +97,12 @@ export default function RootLayout({
                 />
             </head>
             <body className={inter.className} suppressHydrationWarning>
-                <ErrorBoundary>
-                    <ScrollToTop />
-                    {children}
-                </ErrorBoundary>
+                <QueryProvider>
+                    <ErrorBoundary>
+                        <ScrollToTop />
+                        {children}
+                    </ErrorBoundary>
+                </QueryProvider>
             </body>
         </html>
     );

@@ -279,15 +279,15 @@ function DashboardContent() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                             className="card cursor-pointer hover:shadow-card-hover transition-shadow"
-                            onClick={() => router.push('/ai')}
+                            onClick={() => router.push('/opportunities')}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="p-3 bg-gradient-to-r from-primary-100 to-accent-100 rounded-soft">
                                     <SparklesIcon className="w-6 h-6 text-primary-600" />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-sm font-semibold text-foreground">AI Discovery</div>
-                                    <div className="text-xs text-neutral-600">Find your perfect match</div>
+                                    <div className="text-sm font-semibold text-foreground">Share Opportunity</div>
+                                    <div className="text-xs text-neutral-600">Help others discover more</div>
                                 </div>
                             </div>
                         </motion.div>

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
+import AuthModal from '@/components/AuthModal';
 import Header from '@/components/Header';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
 import { motion } from 'framer-motion';
@@ -27,6 +29,9 @@ const SOCIAL_PLATFORMS = [
 
 function OpportunitiesContent() {
     const { user } = useAuth();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [showAuthModal, setShowAuthModal] = useState(false);
     const [formData, setFormData] = useState<Partial<Opportunity>>({
         title: '',
         description: '',
@@ -116,7 +121,14 @@ function OpportunitiesContent() {
 
     useEffect(() => {
         loadPresetsAndTemplates();
-    }, []);
+        // Show auth modal if user is not signed in or if auth_redirect param exists
+        const authRedirect = searchParams.get('auth_redirect');
+        if (!user && (authRedirect === 'signup' || authRedirect === 'create')) {
+            setShowAuthModal(true);
+        } else if (!user) {
+            setShowAuthModal(true);
+        }
+    }, [user, searchParams]);
 
     const loadPresetsAndTemplates = async () => {
         try {
@@ -250,14 +262,46 @@ function OpportunitiesContent() {
         return (
             <div className="min-h-screen bg-background">
                 <Header />
+                <AuthModal 
+                    isOpen={showAuthModal}
+                    onClose={() => {
+                        setShowAuthModal(false);
+                        // Redirect to home if they close without signing in
+                        router.push('/');
+                    }}
+                    onSuccess={() => {
+                        setShowAuthModal(false);
+                        // Remove auth_redirect param from URL
+                        router.replace('/opportunities');
+                    }}
+                />
                 <div className="pt-32 text-center px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <h1 className="text-3xl font-bold mb-4">Create Opportunities</h1>
-                        <p className="text-neutral-600 mb-6">Please sign in to create and share opportunities with the community</p>
-                        <div className="text-4xl mb-4">🔒</div>
+                        <div className="text-6xl mb-6">✨</div>
+                        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
+                            Share Your Opportunity
+                        </h1>
+                        <p className="text-lg text-neutral-600 mb-6 max-w-2xl mx-auto">
+                            Help other students discover amazing opportunities by sharing what you know. 
+                            Sign in to get started!
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <div className="flex items-center gap-2 text-neutral-600">
+                                <span className="text-2xl">🚀</span>
+                                <span>Quick & Easy</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-neutral-600">
+                                <span className="text-2xl">🌟</span>
+                                <span>Help Others Succeed</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-neutral-600">
+                                <span className="text-2xl">💯</span>
+                                <span>100% Free</span>
+                            </div>
+                        </div>
                     </motion.div>
                 </div>
             </div>

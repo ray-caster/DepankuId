@@ -16,12 +16,12 @@ export default function AboutPage() {
         {
             icon: LightBulbIcon,
             title: 'Discovery Through Curiosity',
-            description: 'We guide students to explore passions through questions, not keyword matching.'
+            description: 'We guide students to explore their passions and find opportunities that match their interests.'
         },
         {
             icon: RocketLaunchIcon,
             title: 'Empowerment Through Technology',
-            description: 'We use AI and search technology to make opportunity discovery simple and personalized.'
+            description: 'We use smart search technology to make opportunity discovery simple and personalized.'
         },
         {
             icon: GlobeAltIcon,
@@ -69,7 +69,7 @@ export default function AboutPage() {
                                 Depanku.id was born from a simple observation: talented Indonesian students miss opportunities because they don&apos;t know these opportunities exist. We&apos;re here to change that.
                             </p>
                             <p className="text-base sm:text-lg text-foreground-light leading-relaxed mt-4">
-                                Our platform combines intelligent search technology with AI-powered guidance to help students discover research programs, competitions, and youth initiatives that align with their interests and goals. The right opportunity, discovered at the right time, changes everything.
+                                Our platform uses intelligent search technology to help students discover research programs, competitions, and youth initiatives that align with their interests and goals. The right opportunity, discovered at the right time, changes everything.
                             </p>
                         </motion.div>
 
@@ -121,9 +121,9 @@ export default function AboutPage() {
                                 </p>
                                 <ul className="list-disc list-inside space-y-2 ml-4">
                                     <li>Search curated, verified opportunities instantly</li>
-                                    <li>Get personalized recommendations through AI conversations</li>
-                                    <li>Access opportunities they missed</li>
-                                    <li>Find programs that match their interests and goals</li>
+                                    <li>Get personalized recommendations based on their interests</li>
+                                    <li>Discover opportunities they would have missed</li>
+                                    <li>Find programs that match their passions and goals</li>
                                 </ul>
                                 <p className="pt-4">
                                     Best of all? It&apos;s free. Opportunity should never have a paywall.

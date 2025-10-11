@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, Fragment } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
 import { motion } from 'framer-motion';
 import { XMarkIcon, EnvelopeIcon, LockClosedIcon, UserIcon, SparklesIcon } from '@heroicons/react/24/outline';
@@ -13,6 +14,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
+    const router = useRouter();
     const { signUpWithEmail, signInWithEmail } = useAuth();
     const [isSignUp, setIsSignUp] = useState(true);
     const [email, setEmail] = useState('');
@@ -64,7 +66,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         '🔖 Bookmark your favorite opportunities',
         '🎯 Get personalized recommendations',
         '📧 Receive deadline reminders',
-        '✨ Access AI-powered discovery',
+        '✨ Share opportunities with others',
         '📊 Track your application progress'
     ];
 

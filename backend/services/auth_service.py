@@ -1,6 +1,8 @@
 """Authentication service - Business logic for auth"""
 import secrets
-from firebase_admin import auth, firestore
+from datetime import datetime, timedelta
+from firebase_admin import auth
+from google.cloud.firestore import SERVER_TIMESTAMP
 from config.settings import db, brevo_api_instance, FRONTEND_URL, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME
 from brevo_python import SendSmtpEmail, SendSmtpEmailTo, SendSmtpEmailSender
 from utils.logging_config import logger
@@ -35,15 +37,14 @@ class AuthService:
         
         # Store pending user data in Firestore ONLY (NO Firebase Auth user created yet)
         pending_user_ref = db.collection('pending_users').document()
+        expires_at = datetime.utcnow() + timedelta(hours=1)
         pending_user_ref.set({
             'email': email,
             'password_hash': password,  # Store temporarily for verification
             'name': name,
             'verification_token': verification_token,
-            'created_at': firestore.SERVER_TIMESTAMP,
-            'expires_at': firestore.Timestamp.from_datetime(
-                firestore.datetime.datetime.utcnow() + firestore.datetime.timedelta(hours=1)
-            )  # 1 hour expiry
+            'created_at': SERVER_TIMESTAMP,
+            'expires_at': expires_at
         })
         
         pending_user_id = pending_user_ref.id
@@ -199,11 +200,10 @@ class AuthService:
         new_verification_token = secrets.token_urlsafe(32)
         
         # Update the pending user with new token
+        new_expires_at = datetime.utcnow() + timedelta(hours=1)
         pending_user_doc.reference.update({
             'verification_token': new_verification_token,
-            'expires_at': firestore.Timestamp.from_datetime(
-                firestore.datetime.datetime.utcnow() + firestore.datetime.timedelta(hours=1)
-            )
+            'expires_at': new_expires_at
         })
         
         # Send new verification email
