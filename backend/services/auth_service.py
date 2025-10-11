@@ -1,7 +1,7 @@
 """Authentication service - Business logic for auth"""
 import secrets
 from datetime import datetime, timedelta
-from firebase_admin import auth
+from firebase_admin import auth, firestore
 from google.cloud.firestore import SERVER_TIMESTAMP
 from config.settings import db, brevo_api_instance, FRONTEND_URL, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME
 from brevo_python import SendSmtpEmail, SendSmtpEmailTo, SendSmtpEmailSender
@@ -131,7 +131,7 @@ class AuthService:
         
         # Check if verification has expired
         expires_at = pending_user_data.get('expires_at')
-        if expires_at and expires_at < firestore.SERVER_TIMESTAMP:
+        if expires_at and expires_at < datetime.utcnow():
             # Clean up expired verification
             pending_user_ref.delete()
             raise ValueError("Verification link has expired. Please request a new one.")
