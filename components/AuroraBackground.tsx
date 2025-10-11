@@ -32,7 +32,7 @@ export function AuroraBackground({
         <motion.div
           className={`absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full ${config.blur}`}
           style={{
-            background: 'radial-gradient(circle, oklch(65% 0.15 230 / 0.6) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, transparent 70%)',
             opacity: config.opacity,
           }}
           animate={{
@@ -71,7 +71,7 @@ export function AuroraBackground({
         <motion.div
           className={`absolute bottom-1/4 left-1/2 w-[500px] h-[500px] rounded-full ${config.blur}`}
           style={{
-            background: 'radial-gradient(circle, oklch(72% 0.14 50 / 0.4) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(251, 146, 60, 0.4) 0%, transparent 70%)',
             opacity: config.opacity,
           }}
           animate={{
@@ -91,7 +91,7 @@ export function AuroraBackground({
         <motion.div
           className={`absolute bottom-0 right-1/3 w-[550px] h-[550px] rounded-full ${config.blur}`}
           style={{
-            background: 'radial-gradient(circle, oklch(80% 0.11 230 / 0.4) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(103, 232, 249, 0.4) 0%, transparent 70%)',
             opacity: config.opacity,
           }}
           animate={{
@@ -113,7 +113,7 @@ export function AuroraBackground({
             className="absolute inset-0"
             style={{
               background:
-                'radial-gradient(ellipse 80% 80% at 50% 0%, transparent 0%, oklch(96% 0.015 160) 100%)',
+                'radial-gradient(ellipse 80% 80% at 50% 0%, transparent 0%, rgba(240, 249, 245, 0.8) 100%)',
             }}
           />
         )}
@@ -140,7 +140,7 @@ export function AuroraCard({
           className="absolute top-0 -left-1/4 w-full h-full"
           style={{
             background:
-              'linear-gradient(120deg, oklch(65% 0.15 230 / 0.3) 0%, oklch(70% 0.12 160 / 0.2) 50%, oklch(72% 0.14 50 / 0.25) 100%)',
+              'linear-gradient(120deg, rgba(59, 130, 246, 0.3) 0%, rgba(34, 197, 94, 0.2) 50%, rgba(251, 146, 60, 0.25) 100%)',
             filter: 'blur(60px)',
           }}
           animate={{
@@ -174,7 +174,7 @@ export function AuroraBorder({
         className="absolute -inset-0.5 rounded-comfort opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
           background:
-            'linear-gradient(90deg, oklch(65% 0.15 230), oklch(70% 0.12 160), oklch(72% 0.14 50), oklch(65% 0.15 230))',
+            'linear-gradient(90deg, rgba(59, 130, 246, 1), rgba(34, 197, 94, 1), rgba(251, 146, 60, 1), rgba(59, 130, 246, 1))',
           backgroundSize: '200% 100%',
           filter: 'blur(4px)',
         }}

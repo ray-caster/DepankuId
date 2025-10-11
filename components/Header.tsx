@@ -64,6 +64,7 @@ export default function Header() {
 
     const profileMenuItems = [
         { href: '/dashboard', label: 'Dashboard', icon: ChartBarIcon },
+        { href: '/admin', label: 'Admin Panel', icon: Cog6ToothIcon },
         { href: '/profile', label: 'My Profile', icon: UserCircleIcon },
         { href: '/settings', label: 'Settings', icon: Cog6ToothIcon },
     ];
