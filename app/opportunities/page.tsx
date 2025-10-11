@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import AuthModal from '@/components/AuthModal';
@@ -788,7 +788,16 @@ function OpportunitiesContent() {
 export default function OpportunitiesPage() {
     return (
         <AuthProvider>
-            <OpportunitiesContent />
+            <Suspense fallback={
+                <div className="min-h-screen bg-background flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="inline-block w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-neutral-600">Loading...</p>
+                    </div>
+                </div>
+            }>
+                <OpportunitiesContent />
+            </Suspense>
         </AuthProvider>
     );
 }
