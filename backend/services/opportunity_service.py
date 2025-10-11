@@ -1,6 +1,5 @@
 """Opportunity service - Business logic for opportunities"""
 from firebase_admin import firestore
-from firebase_admin.firestore import SERVER_TIMESTAMP
 from config.settings import db, algolia_client, ALGOLIA_INDEX_NAME
 from datetime import datetime
 
@@ -39,7 +38,7 @@ class OpportunityService:
         # Add to Firestore
         doc_ref = db.collection('opportunities').document()
         firestore_data = data.copy()
-        firestore_data['createdAt'] = SERVER_TIMESTAMP
+        firestore_data['createdAt'] = firestore.SERVER_TIMESTAMP
         doc_ref.set(firestore_data)
         
         # Add to Algolia

@@ -1,7 +1,6 @@
 """Authentication service - Business logic for auth"""
 import secrets
 from firebase_admin import auth, firestore
-from firebase_admin.firestore import SERVER_TIMESTAMP
 from config.settings import db, brevo_api_instance, FRONTEND_URL, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME
 from brevo_python import SendSmtpEmail, SendSmtpEmailTo, SendSmtpEmailSender
 from utils.logging_config import logger
@@ -41,7 +40,7 @@ class AuthService:
             'password_hash': password,  # Store temporarily for verification
             'name': name,
             'verification_token': verification_token,
-            'created_at': SERVER_TIMESTAMP,
+            'created_at': firestore.SERVER_TIMESTAMP,
             'expires_at': firestore.Timestamp.from_datetime(
                 firestore.datetime.datetime.utcnow() + firestore.datetime.timedelta(hours=1)
             )  # 1 hour expiry
@@ -131,7 +130,7 @@ class AuthService:
         
         # Check if verification has expired
         expires_at = pending_user_data.get('expires_at')
-        if expires_at and expires_at < SERVER_TIMESTAMP:
+        if expires_at and expires_at < firestore.SERVER_TIMESTAMP:
             # Clean up expired verification
             pending_user_ref.delete()
             raise ValueError("Verification link has expired. Please request a new one.")
@@ -151,9 +150,9 @@ class AuthService:
                 'email': pending_user_data['email'],
                 'name': pending_user_data['name'],
                 'email_verified': True,
-                'verified_at': SERVER_TIMESTAMP,
-                'created_at': SERVER_TIMESTAMP,
-                'last_login': SERVER_TIMESTAMP,
+                'verified_at': firestore.SERVER_TIMESTAMP,
+                'created_at': firestore.SERVER_TIMESTAMP,
+                'last_login': firestore.SERVER_TIMESTAMP,
                 'profile_complete': False,
                 'preferences': {
                     'notifications': True,
@@ -191,7 +190,7 @@ class AuthService:
         
         # Check if verification has expired
         expires_at = pending_user_data.get('expires_at')
-        if expires_at and expires_at < SERVER_TIMESTAMP:
+        if expires_at and expires_at < firestore.SERVER_TIMESTAMP:
             # Delete expired verification
             pending_user_doc.reference.delete()
             raise ValueError("Verification link has expired. Please sign up again.")

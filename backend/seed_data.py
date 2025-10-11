@@ -8,7 +8,6 @@ import json
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
-from firebase_admin.firestore import SERVER_TIMESTAMP
 from algoliasearch.search.client import SearchClient
 from datetime import datetime, timedelta
 
@@ -189,7 +188,7 @@ def seed_database():
         # Add to Firestore
         doc_ref = db.collection('opportunities').document()
         firestore_opp = opp.copy()
-        firestore_opp['createdAt'] = SERVER_TIMESTAMP
+        firestore_opp['createdAt'] = firestore.SERVER_TIMESTAMP
         doc_ref.set(firestore_opp)
         
         # Prepare for Algolia (without SERVER_TIMESTAMP sentinel)

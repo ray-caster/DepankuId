@@ -39,12 +39,6 @@ class AIService:
         cleaned = re.sub(r'\bscience\s+experiments\?\s*begin\s+sentence\?\s*', 'science experiments?', cleaned)  # Remove trailing garbage
         cleaned = re.sub(r'\bmath\s+problems\s+science\s+experiments\?\s*begin\s+sentence\?\s*', 'math problems or science experiments?', cleaned)  # Fix combined question
         
-        # Socratic question improvements
-        cleaned = re.sub(r'\bWhat\s+exactly\s+do\s+you\s+mean\b', 'What exactly do you mean', cleaned)
-        cleaned = re.sub(r'\bWhat\s+assumptions\s+are\s+you\s+making\b', 'What assumptions are you making', cleaned)
-        cleaned = re.sub(r'\bHow\s+would\s+others\s+see\s+this\b', 'How would others see this', cleaned)
-        cleaned = re.sub(r'\bWhat\s+are\s+the\s+implications\b', 'What are the implications', cleaned)
-        
         # Check if response seems garbled or incoherent
         if (len(cleaned) < 10 or 
             len(cleaned.split()) < 3 or 
@@ -52,13 +46,13 @@ class AIService:
             cleaned.count('?') > 2 or
             any(word in cleaned.lower() for word in ['garbled', 'error', 'undefined'])):
             
-            # Provide predefined Socratic responses as fallbacks
+            # Provide predefined good responses as fallbacks
             fallback_responses = [
-                "What exactly do you mean by that goal?",
-                "What assumptions are you making about achieving it?",
-                "What evidence supports your current approach?",
-                "How would others see this situation?",
-                "What are the implications of pursuing this path?"
+                "That's interesting! What subjects do you enjoy most in school?",
+                "Great! What kind of activities do you like doing outside of class?",
+                "I see! Are you more interested in individual projects or team activities?",
+                "That's cool! What problems do you enjoy solving?",
+                "Nice! Do you prefer hands-on activities or theoretical learning?"
             ]
             
             # Use a simple hash to pick a consistent fallback
@@ -129,13 +123,13 @@ NEVER:
         }
 
         payload = {
-            "model": "deepseek/deepseek-chat-v3.1:free",
+            "model": "google/gemini-2.5-flash",
             "messages": messages,
-            "temperature": 0.4,
-            "max_tokens": 150,
-            "top_p": 0.8,
-            "frequency_penalty": 0.2,
-            "presence_penalty": 0.2
+            "temperature": 0.3,
+            "max_tokens": 200,
+            "top_p": 0.9,
+            "frequency_penalty": 0.1,
+            "presence_penalty": 0.1
         }
 
         try:
@@ -170,7 +164,7 @@ NEVER:
 
     @staticmethod
     def start_discovery_session(user_profile=None):
-        """Start a new AI discovery session with Socratic questioning"""
+        """Start a new AI discovery session"""
         if user_profile is None:
             user_profile = {
                 'interests': [],
@@ -180,54 +174,66 @@ NEVER:
                 'confidence': 0
             }
         
-        # Always start with the same question
-        return "What are you currently pursuing?"
+        system_prompt = """You are an AI discovery assistant for Depanku.id. Your job is to help students find opportunities like research programs, competitions, and youth programs.
 
-    @staticmethod
-    def continue_discovery(user_message, conversation_history, user_profile):
-        """Continue the discovery conversation with Socratic questioning"""
-        system_prompt = """You are Socrates, the ancient Greek philosopher, helping students discover opportunities through insightful questioning.
+CRITICAL RULES:
+- Ask exactly ONE question per response
+- Keep responses under 40 words
+- Use simple, clear language
+- Be encouraging and friendly
+- Focus on learning about their interests
 
-YOUR ROLE:
-- Embody Socratic questioning methodology
-- Ask ONE penetrating question that makes the student think deeper
-- Help them clarify their goals and identify gaps
-- Guide them toward specific opportunities that fulfill their aspirations
+GOOD FIRST QUESTIONS:
+- "What subjects do you enjoy most in school?"
+- "What kind of activities do you like doing outside of class?"
+- "Are you interested in science, technology, or creative projects?"
 
-SOCRATIC QUESTIONING FRAMEWORK:
-1. CLARIFICATION: "What exactly do you mean by...?"
-2. ASSUMPTION PROBING: "What assumptions are you making?"
-3. EVIDENCE REASONING: "What evidence supports this?"
-4. PERSPECTIVE VIEWPOINTS: "How would others see this?"
-5. IMPLICATIONS CONSEQUENCES: "What are the implications?"
-6. META-COGNITION: "Why is this question important?"
-
-GOAL-FOCUSED EXAMPLES:
-- If they say "I want to get into Stanford" → "What extracurriculars do you currently have that align with Stanford's values?"
-- If they say "I want to be a doctor" → "What specific medical experiences have you had so far?"
-- If they say "I want to start a business" → "What problem have you identified that you're passionate about solving?"
-- If they say "I want to do research" → "What research questions keep you up at night?"
-
-CHAIN OF THOUGHT PROCESSING:
-1. Analyze their response for goals, current status, and gaps
-2. Identify the most important question to ask next
-3. Frame it as a Socratic question that promotes deeper thinking
-4. Focus on actionable next steps toward their goal
-
-RESPONSE REQUIREMENTS:
-- Ask exactly ONE question
-- Keep it under 30 words
-- Make it thought-provoking and specific
-- Connect to their stated goal
-- Encourage self-reflection
+RESPONSE FORMAT:
+- Ask ONE specific question
+- Be encouraging
+- Keep it short and simple
 
 NEVER:
 - Ask multiple questions
-- Give advice or answers
+- Give long explanations
 - Use complex language
-- Ask about personal details unrelated to goals
+- Ask about personal details
 
-Based on their response, ask one Socratic question that helps them think deeper about achieving their goal."""
+Ask your first question to start the discovery process."""
+
+        messages = [{"role": "system", "content": system_prompt.format(user_profile=json.dumps(user_profile))}]
+        
+        return AIService._call_openrouter(messages)
+
+    @staticmethod
+    def continue_discovery(user_message, conversation_history, user_profile):
+        """Continue the discovery conversation"""
+        system_prompt = """You are an AI discovery assistant for Depanku.id. Continue the conversation based on the user's response.
+
+CRITICAL RULES:
+- Ask exactly ONE follow-up question
+- Keep responses under 40 words
+- Use simple, clear language
+- Be encouraging and friendly
+- Build on their previous answers
+
+RESPONSE FORMAT:
+- Acknowledge their answer briefly
+- Ask ONE specific follow-up question
+- Be encouraging
+
+GOOD FOLLOW-UP QUESTIONS:
+- "That's great! What do you like most about [their interest]?"
+- "Interesting! Are you more interested in individual work or team projects?"
+- "Cool! What kind of problems do you enjoy solving?"
+
+NEVER:
+- Ask multiple questions
+- Give long explanations
+- Use complex language
+- Repeat previous questions
+
+Based on their response, ask one thoughtful follow-up question."""
 
         # Prepare conversation context
         history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in conversation_history[-5:]])
@@ -348,45 +354,8 @@ Based on their response, ask one Socratic question that helps them think deeper 
         return score
 
     @staticmethod
-    def analyze_goal_and_suggest_opportunities(user_message, conversation_history):
-        """Analyze user's goal and suggest specific opportunities using Socratic reasoning"""
-        system_prompt = """You are Socrates helping students achieve their goals through strategic questioning and opportunity identification.
-
-ANALYSIS FRAMEWORK:
-1. Extract the user's stated goal
-2. Identify current gaps in their profile
-3. Suggest specific opportunities that address those gaps
-4. Frame suggestions as Socratic questions
-
-GOAL-OPPORTUNITY MAPPING:
-- Stanford/IVY League → Research programs, leadership competitions, community service
-- Medical School → Medical research, healthcare volunteering, science competitions
-- Business/Entrepreneurship → Business competitions, startup programs, leadership roles
-- Research Career → Research programs, academic competitions, publication opportunities
-- Tech Industry → Coding competitions, tech internships, hackathons
-
-RESPONSE FORMAT:
-- Ask ONE Socratic question about their current approach
-- Suggest ONE specific opportunity type
-- Frame it as a question that makes them think
-
-EXAMPLES:
-- "What specific research experience do you have that demonstrates your academic potential?"
-- "How have you shown leadership in your community that aligns with Stanford's values?"
-- "What medical experiences have you had that confirm your passion for healthcare?"
-
-Based on their goal, ask one strategic question and suggest one opportunity type."""
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"User's latest response: {user_message}\nConversation history: {conversation_history}"}
-        ]
-        
-        return AIService._call_openrouter(messages)
-
-    @staticmethod
     def generate_opportunity_question(opportunity):
-        """Generate a Socratic question about a specific opportunity"""
+        """Generate a question about a specific opportunity"""
         return f"What do you think about this opportunity: {opportunity.get('title', 'Unknown')}? It's a {opportunity.get('type', 'program')} focused on {', '.join(opportunity.get('tags', [])[:3])}."
 
     @staticmethod
@@ -402,11 +371,11 @@ Based on their goal, ask one strategic question and suggest one opportunity type
         payload = {
             "model": "deepseek/deepseek-chat-v3.1:free",
             "messages": messages,
-            "temperature": 0.4,
-            "max_tokens": 150,
-            "top_p": 0.8,
-            "frequency_penalty": 0.2,
-            "presence_penalty": 0.2
+            "temperature": 0.3,
+            "max_tokens": 100,
+            "top_p": 0.9,
+            "frequency_penalty": 0.1,
+            "presence_penalty": 0.1
         }
 
         try:
