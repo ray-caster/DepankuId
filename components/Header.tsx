@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './AuthProvider';
+import { isAdmin } from '@/lib/adminCheck';
 import {
     UserCircleIcon,
     MagnifyingGlassIcon,
@@ -62,12 +63,22 @@ export default function Header() {
         { href: '/about', label: 'About Us', icon: InformationCircleIcon },
     ];
 
-    const profileMenuItems = [
+    // Build profile menu items based on user role
+    const baseProfileMenuItems = [
         { href: '/dashboard', label: 'Dashboard', icon: ChartBarIcon },
+    ];
+    
+    // Add admin link only for admins
+    const adminMenuItems = isAdmin(user) ? [
         { href: '/admin', label: 'Admin Panel', icon: Cog6ToothIcon },
+    ] : [];
+    
+    const userMenuItems = [
         { href: '/profile', label: 'My Profile', icon: UserCircleIcon },
         { href: '/settings', label: 'Settings', icon: Cog6ToothIcon },
     ];
+    
+    const profileMenuItems = [...baseProfileMenuItems, ...adminMenuItems, ...userMenuItems];
 
     const isActive = (path: string) => pathname === path;
 
