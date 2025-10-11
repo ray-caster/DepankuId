@@ -61,24 +61,14 @@ export default function Header() {
         { href: '/search', label: 'Browse', icon: MagnifyingGlassIcon },
         { href: '/features', label: 'Features', icon: CogIcon },
         { href: '/about', label: 'About Us', icon: InformationCircleIcon },
+        { href: '/admin-login', label: 'Admin', icon: Cog6ToothIcon },
     ];
 
-    // Build profile menu items based on user role
-    const baseProfileMenuItems = [
+    const profileMenuItems = [
         { href: '/dashboard', label: 'Dashboard', icon: ChartBarIcon },
-    ];
-    
-    // Add admin link only for admins
-    const adminMenuItems = isAdmin(user) ? [
-        { href: '/admin', label: 'Admin Panel', icon: Cog6ToothIcon },
-    ] : [];
-    
-    const userMenuItems = [
         { href: '/profile', label: 'My Profile', icon: UserCircleIcon },
         { href: '/settings', label: 'Settings', icon: Cog6ToothIcon },
     ];
-    
-    const profileMenuItems = [...baseProfileMenuItems, ...adminMenuItems, ...userMenuItems];
 
     const isActive = (path: string) => pathname === path;
 

@@ -14,10 +14,8 @@ import { User } from 'firebase/auth';
  * In production, this should be stored in Firebase Firestore
  * and managed through a secure admin interface.
  */
-const ADMIN_EMAILS = [
-  // Add your admin email addresses here
-  // Example: 'admin@depanku.id',
-  // Example: 'your-email@gmail.com',
+const ADMIN_EMAILS: string[] = [
+  'admin@depanku.id',
 ];
 
 /**
@@ -120,8 +118,10 @@ export async function getAdminStatus(user: User | null): Promise<boolean> {
  * ```
  */
 
-export default {
+const adminUtils = {
   isAdmin,
   isAdminEmail,
   getAdminStatus,
 };
+
+export default adminUtils;

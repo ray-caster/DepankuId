@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
-import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
 interface Opportunity {
@@ -22,7 +21,6 @@ interface Opportunity {
 }
 
 export default function AdminPage() {
-  const { user, loading } = useAuth();
   const router = useRouter();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,20 +29,32 @@ export default function AdminPage() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Check if user is authenticated
+  // Check if user is admin
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/');
-    }
-  }, [user, loading, router]);
+    const checkAdminSession = () => {
+      const adminSession = localStorage.getItem('admin_session');
+      const adminEmail = localStorage.getItem('admin_email');
+      
+      if (adminSession === 'true' && adminEmail === 'admin@depanku.id') {
+        setIsAdmin(true);
+      } else {
+        router.push('/admin-login');
+      }
+      setCheckingAuth(false);
+    };
+
+    checkAdminSession();
+  }, [router]);
 
   // Fetch opportunities
   useEffect(() => {
-    if (user) {
+    if (isAdmin) {
       fetchOpportunities();
     }
-  }, [user]);
+  }, [isAdmin]);
 
   const fetchOpportunities = async () => {
     try {
@@ -54,20 +64,19 @@ export default function AdminPage() {
       if (data.success) {
         setOpportunities(data.opportunities || []);
       }
-    } catch (error) {
+        } catch (error) {
       console.error('Error fetching opportunities:', error);
-    } finally {
+        } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
-      const token = await user?.getIdToken();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/opportunities/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
 
@@ -92,6 +101,12 @@ export default function AdminPage() {
     router.push('/admin/create');
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('admin_session');
+    localStorage.removeItem('admin_email');
+    router.push('/admin-login');
+  };
+
   // Filter opportunities
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -100,27 +115,40 @@ export default function AdminPage() {
     return matchesSearch && matchesType;
   });
 
-  if (loading || !user) {
+  if (checkingAuth) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-neutral-600">Loading...</p>
+          <p className="text-neutral-600">Checking admin access...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
+  if (!isAdmin) {
+    return null; // Will redirect to admin-login
+  }
+
+    return (
+        <div className="min-h-screen bg-background">
+            <Header />
+
       <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-            <p className="text-foreground-light">Manage opportunities</p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-2">Admin Dashboard</h1>
+              <p className="text-foreground-light">Manage opportunities</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-comfort transition-colors"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              Logout
+            </button>
           </div>
 
           {/* Controls */}
@@ -128,27 +156,27 @@ export default function AdminPage() {
             {/* Search */}
             <div className="flex-1 relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-600" />
-              <input
-                type="text"
+                            <input
+                                type="text"
                 placeholder="Search opportunities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
-              />
-            </div>
+                            />
+                        </div>
 
             {/* Filter */}
-            <select
+                                <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
             >
               <option value="all">All Types</option>
-              <option value="research">Research</option>
+                                    <option value="research">Research</option>
               <option value="competition">Competition</option>
-              <option value="youth-program">Youth Program</option>
-              <option value="community">Community</option>
-            </select>
+                                    <option value="youth-program">Youth Program</option>
+                                    <option value="community">Community</option>
+                                </select>
 
             {/* Create Button */}
             <button
@@ -158,7 +186,7 @@ export default function AdminPage() {
               <PlusIcon className="w-5 h-5" />
               Create New
             </button>
-          </div>
+                            </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -175,16 +203,16 @@ export default function AdminPage() {
             <div className="bg-background-light rounded-gentle p-4 border-2 border-neutral-400">
               <div className="text-2xl font-bold text-foreground">
                 {opportunities.filter(o => o.type === 'competition').length}
-              </div>
+                            </div>
               <div className="text-sm text-foreground-light">Competitions</div>
-            </div>
+                        </div>
             <div className="bg-background-light rounded-gentle p-4 border-2 border-neutral-400">
               <div className="text-2xl font-bold text-foreground">
                 {opportunities.filter(o => o.type === 'youth-program').length}
-              </div>
+                            </div>
               <div className="text-sm text-foreground-light">Programs</div>
-            </div>
-          </div>
+                            </div>
+                        </div>
 
           {/* Opportunities List */}
           {isLoading ? (
@@ -194,7 +222,7 @@ export default function AdminPage() {
           ) : filteredOpportunities.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-neutral-600">No opportunities found</p>
-            </div>
+                        </div>
           ) : (
             <div className="grid gap-4">
               {filteredOpportunities.map((opportunity, index) => (
@@ -222,26 +250,26 @@ export default function AdminPage() {
                       <div className="flex items-center gap-4 text-sm text-neutral-600">
                         <span>🏢 {opportunity.organization}</span>
                         {opportunity.location && <span>📍 {opportunity.location}</span>}
-                      </div>
+                            </div>
                       {opportunity.tags && opportunity.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-3">
                           {opportunity.tags.slice(0, 5).map((tag, i) => (
                             <span key={i} className="px-2 py-1 bg-neutral-300 text-neutral-700 text-xs rounded-soft">
                               {tag}
-                            </span>
-                          ))}
-                        </div>
+                                    </span>
+                                ))}
+                            </div>
                       )}
-                    </div>
+                        </div>
                     <div className="flex gap-2 ml-4">
-                      <button
+                                <button
                         onClick={() => handleEdit(opportunity)}
                         className="p-2 bg-primary-600 text-white rounded-soft hover:bg-primary-700 transition-colors"
                         title="Edit"
                       >
                         <PencilIcon className="w-5 h-5" />
-                      </button>
-                      <button
+                                </button>
+                                        <button
                         onClick={() => {
                           setDeleteId(opportunity.id);
                           setShowDeleteConfirm(true);
@@ -250,14 +278,14 @@ export default function AdminPage() {
                         title="Delete"
                       >
                         <TrashIcon className="w-5 h-5" />
-                      </button>
+                                        </button>
                     </div>
                   </div>
                 </motion.div>
-              ))}
-            </div>
+                                ))}
+                            </div>
           )}
-        </div>
+                        </div>
       </main>
 
       {/* Delete Confirmation Modal */}
@@ -282,16 +310,16 @@ export default function AdminPage() {
               >
                 Cancel
               </button>
-              <button
+                            <button
                 onClick={() => deleteId && handleDelete(deleteId)}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-comfort hover:bg-red-700 transition-colors"
-              >
+                            >
                 Delete
-              </button>
-            </div>
+                            </button>
+                        </div>
           </motion.div>
-        </div>
+                </div>
       )}
-    </div>
-  );
+        </div>
+    );
 }

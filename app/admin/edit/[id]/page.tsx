@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
-export default function CreateOpportunityPage() {
+export default function EditOpportunityPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -49,14 +53,58 @@ export default function CreateOpportunityPage() {
     checkAdminSession();
   }, [router]);
 
+  useEffect(() => {
+    if (isAdmin && id) {
+      fetchOpportunity();
+    }
+  }, [isAdmin, id]);
+
+  const fetchOpportunity = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/opportunities/${id}`);
+      const data = await response.json();
+      
+      if (data.success && data.opportunity) {
+        const opp = data.opportunity;
+        setFormData({
+          title: opp.title || '',
+          description: opp.description || '',
+          type: opp.type || 'research',
+          organization: opp.organization || '',
+          location: opp.location || '',
+          deadline: opp.deadline ? new Date(opp.deadline).toISOString().split('T')[0] : '',
+          url: opp.url || '',
+          category: opp.category || [],
+          tags: opp.tags || [],
+          requirements: opp.requirements || '',
+          benefits: opp.benefits || '',
+          eligibility: opp.eligibility || '',
+          cost: opp.cost || '',
+          duration: opp.duration || '',
+          application_process: opp.application_process || '',
+          contact_email: opp.contact_email || '',
+          has_indefinite_deadline: opp.has_indefinite_deadline || false,
+        });
+      } else {
+        setError('Opportunity not found');
+      }
+    } catch (error) {
+      console.error('Error fetching opportunity:', error);
+      setError('Failed to load opportunity');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/opportunities`, {
-        method: 'POST',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/opportunities/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -68,11 +116,11 @@ export default function CreateOpportunityPage() {
       if (data.success) {
         router.push('/admin');
       } else {
-        setError(data.message || 'Failed to create opportunity');
+        setError(data.message || 'Failed to update opportunity');
       }
     } catch (error) {
-      console.error('Error creating opportunity:', error);
-      setError('An error occurred while creating the opportunity');
+      console.error('Error updating opportunity:', error);
+      setError('An error occurred while updating the opportunity');
     } finally {
       setIsSubmitting(false);
     }
@@ -116,6 +164,38 @@ export default function CreateOpportunityPage() {
     return null; // Will redirect to admin-login
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-neutral-600">Loading opportunity...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !formData.title) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center py-12">
+              <p className="text-red-600 text-xl mb-4">{error}</p>
+              <button
+                onClick={() => router.push('/admin')}
+                className="px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700"
+              >
+                Back to Admin
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -125,14 +205,14 @@ export default function CreateOpportunityPage() {
           {/* Header */}
           <div className="mb-8">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/admin')}
               className="flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-4"
             >
               <ArrowLeftIcon className="w-5 h-5" />
               Back to Admin
             </button>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Create Opportunity</h1>
-            <p className="text-foreground-light">Add a new opportunity to the platform</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Edit Opportunity</h1>
+            <p className="text-foreground-light">Update opportunity details</p>
           </div>
 
           {error && (
@@ -141,7 +221,7 @@ export default function CreateOpportunityPage() {
             </div>
           )}
 
-          {/* Form */}
+          {/* Form - Same as create page */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Info */}
             <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
@@ -406,7 +486,7 @@ export default function CreateOpportunityPage() {
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => router.back()}
+                onClick={() => router.push('/admin')}
                 className="flex-1 px-6 py-3 border-2 border-neutral-400 rounded-comfort hover:bg-neutral-200 transition-colors"
               >
                 Cancel
@@ -416,7 +496,7 @@ export default function CreateOpportunityPage() {
                 disabled={isSubmitting}
                 className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? 'Creating...' : 'Create Opportunity'}
+                {isSubmitting ? 'Updating...' : 'Update Opportunity'}
               </button>
             </div>
           </form>

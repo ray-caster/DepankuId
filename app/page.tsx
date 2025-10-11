@@ -128,7 +128,7 @@ function HomeContent() {
                     {/* Hero Section */}
                     <AuroraBackground intensity="medium" className="h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)]">
                         <section className="flex items-center justify-center px-4 sm:px-6 lg:px-8 h-full">
-                            <div className="w-full max-w-7xl mx-auto text-center flex flex-col justify-center h-full py-8">
+                        <div className="w-full max-w-7xl mx-auto text-center flex flex-col justify-center h-full py-8">
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -165,8 +165,8 @@ function HomeContent() {
 
                             {/* Popular Tags & Browse Button */}
                             <SearchSection />
-                            </div>
-                        </section>
+                        </div>
+                    </section>
                     </AuroraBackground>
 
                     {/* Benefits Section */}
@@ -193,20 +193,20 @@ function HomeContent() {
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                                 {benefits.map((benefit, index) => (
                                     <AuroraCard key={index}>
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
-                                            transition={{ delay: index * 0.1 }}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1 }}
                                             className="group relative bg-background-light/80 backdrop-blur-sm rounded-gentle p-6 sm:p-8 border-2 border-neutral-400 hover:border-primary-400 transition-all duration-300"
-                                            style={{
-                                                boxShadow: '0 4px 12px -2px oklch(0% 0 0 / 0.08), 0 2px 8px -2px oklch(0% 0 0 / 0.05)'
-                                            }}
-                                        >
-                                            <benefit.icon className="w-10 h-10 sm:w-12 sm:h-12 text-primary-600 mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300" />
-                                            <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mb-3 sm:mb-4">{benefit.title}</h3>
-                                            <p className="text-sm sm:text-base lg:text-lg text-foreground-light leading-relaxed">{benefit.description}</p>
-                                        </motion.div>
+                                        style={{
+                                            boxShadow: '0 4px 12px -2px oklch(0% 0 0 / 0.08), 0 2px 8px -2px oklch(0% 0 0 / 0.05)'
+                                        }}
+                                    >
+                                        <benefit.icon className="w-10 h-10 sm:w-12 sm:h-12 text-primary-600 mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300" />
+                                        <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mb-3 sm:mb-4">{benefit.title}</h3>
+                                        <p className="text-sm sm:text-base lg:text-lg text-foreground-light leading-relaxed">{benefit.description}</p>
+                                    </motion.div>
                                     </AuroraCard>
                                 ))}
                             </div>
