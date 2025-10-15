@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { useAuth } from './AuthProvider';
 import { isAdmin } from '@/lib/adminCheck';
 import {
@@ -104,9 +105,11 @@ export default function Header() {
                                 href="/"
                                 className="flex items-center gap-3 text-xl md:text-2xl font-bold text-primary-800 hover:text-primary-950 transition-all"
                             >
-                                <img
+                                <Image
                                     src="/iconnobg.svg"
                                     alt="Depanku.id Logo"
+                                    width={40}
+                                    height={40}
                                     className="w-8 h-8 md:w-10 md:h-10"
                                 />
                                 <span>Depanku.id</span>
@@ -302,9 +305,11 @@ export default function Header() {
                                 {/* Mobile Menu Header */}
                                 <div className="flex items-center justify-between p-5 border-b-2 border-neutral-400 bg-background-light">
                                     <div className="flex items-center gap-3">
-                                        <img
+                                        <Image
                                             src="/iconnobg.svg"
                                             alt="Depanku.id Logo"
+                                            width={32}
+                                            height={32}
                                             className="w-8 h-8"
                                         />
                                         <span className="text-2xl font-bold text-primary-800">Menu</span>

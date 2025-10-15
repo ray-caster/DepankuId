@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -56,9 +56,9 @@ export default function EditOpportunityPage() {
     if (isAdmin && id) {
       fetchOpportunity();
     }
-  }, [isAdmin, id]);
+  }, [isAdmin, id, fetchOpportunity]);
 
-  const fetchOpportunity = async () => {
+  const fetchOpportunity = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/opportunities/${id}`);
@@ -74,7 +74,6 @@ export default function EditOpportunityPage() {
           location: opp.location || '',
           deadline: opp.deadline ? new Date(opp.deadline).toISOString().split('T')[0] : '',
           url: opp.url || '',
-          category: opp.category || [],
           tags: opp.tags || [],
           requirements: opp.requirements || '',
           benefits: opp.benefits || '',
@@ -94,7 +93,7 @@ export default function EditOpportunityPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
