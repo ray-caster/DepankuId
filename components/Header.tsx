@@ -19,7 +19,6 @@ import {
     Bars3Icon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthModal from './AuthModal';

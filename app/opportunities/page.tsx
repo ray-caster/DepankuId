@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
+import { getIdToken } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import AuthModal from '@/components/AuthModal';
 import Header from '@/components/Header';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
@@ -167,7 +169,17 @@ function OpportunitiesContent() {
         setMessage(null);
 
         try {
-            await api.createOpportunity(formData as Opportunity);
+            const idToken = await getIdToken(auth.currentUser!);
+            const result = await api.createOpportunity(formData as Opportunity, idToken);
+
+            if (result.status === 'rejected') {
+                setMessage({
+                    type: 'error',
+                    text: `Opportunity rejected: ${result.message}. Issues: ${result.issues?.join(', ')}`
+                });
+                return;
+            }
+
             setMessage({ type: 'success', text: 'Opportunity created successfully!' });
 
             // Reset form

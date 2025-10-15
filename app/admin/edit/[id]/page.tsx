@@ -52,12 +52,6 @@ export default function EditOpportunityPage() {
     checkAdminSession();
   }, [router]);
 
-  useEffect(() => {
-    if (isAdmin && id) {
-      fetchOpportunity();
-    }
-  }, [isAdmin, id, fetchOpportunity]);
-
   const fetchOpportunity = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -94,6 +88,12 @@ export default function EditOpportunityPage() {
       setIsLoading(false);
     }
   }, [id]);
+
+  useEffect(() => {
+    if (isAdmin && id) {
+      fetchOpportunity();
+    }
+  }, [isAdmin, id, fetchOpportunity]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

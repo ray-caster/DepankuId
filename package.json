@@ -13,7 +13,7 @@
     "dependencies": {
         "@headlessui/react": "^2.2.9",
         "@heroicons/react": "^2.1.5",
-        "@tanstack/react-query": "^5.90.2",
+        "@tanstack/react-query": "^5.90.3",
         "algoliasearch": "^4.24.0",
         "bcryptjs": "^3.0.2",
         "firebase": "^10.12.4",
