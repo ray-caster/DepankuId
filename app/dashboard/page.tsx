@@ -15,7 +15,9 @@ import {
     BuildingOfficeIcon,
     TagIcon,
     ClockIcon,
-    SparklesIcon
+    SparklesIcon,
+    ExclamationTriangleIcon,
+    PencilIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
@@ -595,6 +597,123 @@ function DashboardContent() {
                                             )}
                                         </motion.div>
                                     ))}
+                                </div>
+                            )
+                        ) : activeView === 'drafts' ? (
+                            loadingDrafts ? (
+                                <div className="text-center py-12">
+                                    <div className="inline-block w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            ) : myDrafts.length === 0 ? (
+                                <div className="card text-center py-12">
+                                    <ClockIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
+                                    <h3 className="text-xl font-semibold mb-2">No drafts yet</h3>
+                                    <p className="text-neutral-600 mb-6">Your rejected or saved opportunities will appear here.</p>
+                                    <Link href="/opportunities" className="btn-primary inline-block">
+                                        Create Opportunity
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <p className="text-neutral-600">You have {myDrafts.length} {myDrafts.length === 1 ? 'draft' : 'drafts'}</p>
+                                        <Link href="/opportunities" className="btn-secondary">
+                                            Create New
+                                        </Link>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        {myDrafts.map((opportunity, idx) => (
+                                            <motion.div
+                                                key={opportunity.id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: idx * 0.05 }}
+                                                className="card hover:shadow-card-hover transition-shadow"
+                                            >
+                                                <div className="mb-3">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <h3 className="text-xl font-bold text-foreground">
+                                                            {opportunity.title}
+                                                        </h3>
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${opportunity.status === 'rejected'
+                                                                ? 'bg-red-100 text-red-700'
+                                                                : 'bg-yellow-100 text-yellow-700'
+                                                            }`}>
+                                                            {opportunity.status === 'rejected' ? 'Rejected' : 'Draft'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2 mb-3">
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTypeColor(opportunity.type)}`}>
+                                                            {opportunity.type.replace('-', ' ')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <p className="text-neutral-700 mb-4 line-clamp-3">
+                                                    {opportunity.description}
+                                                </p>
+
+                                                {opportunity.moderation_notes && (
+                                                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                                        <div className="flex items-start gap-2">
+                                                            <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                                                            <div>
+                                                                <p className="text-sm font-medium text-red-800 mb-1">Moderation Feedback:</p>
+                                                                <p className="text-sm text-red-700">{opportunity.moderation_notes}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                                        <BuildingOfficeIcon className="w-4 h-4" />
+                                                        {opportunity.organization}
+                                                    </div>
+                                                    {opportunity.location && (
+                                                        <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                                            <MapPinIcon className="w-4 h-4" />
+                                                            {opportunity.location}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-2 mb-4">
+                                                    {opportunity.tags.slice(0, 5).map(tag => (
+                                                        <span key={tag} className="px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full text-xs flex items-center gap-1">
+                                                            <TagIcon className="w-3 h-3" />
+                                                            #{tag}
+                                                        </span>
+                                                    ))}
+                                                    {opportunity.tags.length > 5 && (
+                                                        <span className="px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full text-xs">
+                                                            +{opportunity.tags.length - 5} more
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex gap-2">
+                                                    <Link
+                                                        href={`/opportunities?edit=${opportunity.id}`}
+                                                        className="btn-primary flex-1 flex items-center justify-center gap-2"
+                                                    >
+                                                        <PencilIcon className="w-4 h-4" />
+                                                        Edit & Resubmit
+                                                    </Link>
+                                                    {opportunity.url && (
+                                                        <a
+                                                            href={opportunity.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn-secondary flex items-center justify-center gap-2 px-3"
+                                                        >
+                                                            <LinkIcon className="w-4 h-4" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
                                 </div>
                             )
                         ) : (
