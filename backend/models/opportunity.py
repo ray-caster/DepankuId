@@ -26,6 +26,8 @@ class Opportunity:
     type: str  # 'research', 'youth-program', 'community', 'competition'
     organization: str
     tags: List[str]
+    created_by_uid: Optional[str] = None  # Firebase user ID
+    created_by_email: Optional[str] = None  # User email for reference
     location: Optional[str] = None
     deadline: Optional[str] = None  # ISO format or "indefinite"
     url: Optional[str] = None
@@ -38,6 +40,8 @@ class Opportunity:
     application_process: Optional[str] = None
     contact_email: Optional[str] = None
     has_indefinite_deadline: bool = False
+    status: str = "published"  # 'draft', 'published', 'rejected'
+    moderation_notes: Optional[str] = None
     
     def to_dict(self):
         data = asdict(self)

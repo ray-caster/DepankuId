@@ -1,7 +1,11 @@
 """Opportunity routes"""
 from flask import Blueprint, request, jsonify
 from services.opportunity_service import OpportunityService
+from services.moderation_service import ModerationService
 from models.opportunity import OPPORTUNITY_TEMPLATES, TAG_PRESETS
+from utils.decorators import require_auth
+from utils.logging_config import logger
+from config.settings import db
 
 opportunity_bp = Blueprint('opportunities', __name__, url_prefix='/api/opportunities')
 
@@ -21,18 +25,51 @@ def get_opportunities():
         }), 500
 
 @opportunity_bp.route('', methods=['POST'])
-def create_opportunity():
-    """Create a new opportunity"""
+@require_auth
+def create_opportunity(user_id: str, user_email: str):
+    """Create a new opportunity with AI moderation"""
     try:
         data = request.json
+        
+        # Add user tracking
+        data['created_by_uid'] = user_id
+        data['created_by_email'] = user_email
+        
+        # Moderate content with AI
+        is_approved, issues = ModerationService.moderate_opportunity(data)
+        
+        if not is_approved:
+            # Save as draft with moderation notes
+            data['status'] = 'rejected'
+            data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
+            doc_id, _ = OpportunityService.create_opportunity(data)
+            
+            logger.info(f"Opportunity rejected by moderation: {doc_id}")
+            
+            return jsonify({
+                "success": False,
+                "status": "rejected",
+                "id": doc_id,
+                "message": "Your opportunity needs revision",
+                "issues": issues,
+                "moderation_notes": data['moderation_notes']
+            }), 400
+        
+        # Content approved, create as published
+        data['status'] = 'published'
         doc_id, algolia_data = OpportunityService.create_opportunity(data)
+        
+        logger.info(f"Opportunity created and published: {doc_id} by {user_email}")
         
         return jsonify({
             "success": True,
+            "status": "published",
             "id": doc_id,
             "data": algolia_data
         }), 201
+        
     except Exception as e:
+        logger.error(f"Error creating opportunity: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
@@ -108,4 +145,57 @@ def get_tag_presets():
         "success": True,
         "data": TAG_PRESETS
     }), 200
+
+@opportunity_bp.route('/my-opportunities', methods=['GET'])
+@require_auth
+def get_my_opportunities(user_id: str, user_email: str):
+    """Get opportunities created by the authenticated user"""
+    try:
+        # Query opportunities created by this user
+        opportunities_ref = db.collection('opportunities')
+        docs = opportunities_ref.where('created_by_uid', '==', user_id).stream()
+        
+        opportunities = []
+        for doc in docs:
+            data = doc.to_dict()
+            data['id'] = doc.id
+            opportunities.append(data)
+        
+        return jsonify({
+            "success": True,
+            "data": opportunities
+        }), 200
+    except Exception as e:
+        logger.error(f"Error fetching user opportunities: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@opportunity_bp.route('/drafts', methods=['GET'])
+@require_auth
+def get_my_drafts(user_id: str, user_email: str):
+    """Get draft/rejected opportunities for the authenticated user"""
+    try:
+        # Query drafts and rejected opportunities
+        opportunities_ref = db.collection('opportunities')
+        docs = opportunities_ref.where('created_by_uid', '==', user_id)\
+                               .where('status', 'in', ['draft', 'rejected']).stream()
+        
+        drafts = []
+        for doc in docs:
+            data = doc.to_dict()
+            data['id'] = doc.id
+            drafts.append(data)
+        
+        return jsonify({
+            "success": True,
+            "data": drafts
+        }), 200
+    except Exception as e:
+        logger.error(f"Error fetching drafts: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 

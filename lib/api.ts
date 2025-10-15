@@ -53,6 +53,10 @@ export interface Opportunity {
     application_process?: string;
     contact_email?: string;
     has_indefinite_deadline?: boolean;
+    created_by_uid?: string;
+    created_by_email?: string;
+    status?: 'published' | 'draft' | 'rejected';
+    moderation_notes?: string;
 }
 
 export interface OpportunityTemplate {
@@ -199,21 +203,58 @@ class API {
         return data.data || null;
     }
 
-    async createOpportunity(opportunity: Opportunity): Promise<Opportunity> {
+    async createOpportunity(opportunity: Opportunity, idToken: string): Promise<{ success: boolean; status?: string; id?: string; data?: any; message?: string; issues?: string[]; moderation_notes?: string }> {
         const response = await fetch(`${this.baseURL}/api/opportunities`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
             },
             body: JSON.stringify(opportunity),
         });
 
+        const data = await response.json();
+
+        if (!response.ok && data.status === 'rejected') {
+            // Return the rejection data
+            return data;
+        }
+
         if (!response.ok) {
-            throw new Error('Failed to create opportunity');
+            throw new Error(data.error || 'Failed to create opportunity');
+        }
+
+        return data;
+    }
+
+    async getMyOpportunities(idToken: string): Promise<Opportunity[]> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/my-opportunities`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch your opportunities');
         }
 
         const data = await response.json();
-        return data.data;
+        return data.data || [];
+    }
+
+    async getMyDrafts(idToken: string): Promise<Opportunity[]> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/drafts`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch drafts');
+        }
+
+        const data = await response.json();
+        return data.data || [];
     }
 
     async saveUserPreferences(userId: string, preferences: UserPreferences): Promise<void> {

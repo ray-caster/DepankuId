@@ -35,10 +35,12 @@ function DashboardContent() {
     const router = useRouter();
     const [bookmarks, setBookmarks] = useState<Opportunity[]>([]);
     const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
+    const [myDrafts, setMyDrafts] = useState<Opportunity[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
+    const [loadingDrafts, setLoadingDrafts] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
-    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
+    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities' | 'drafts'>('bookmarks');
 
     const processDeadlines = useCallback((opportunities: Opportunity[]) => {
         const events: DeadlineEvent[] = opportunities
@@ -82,11 +84,11 @@ function DashboardContent() {
         try {
             const idToken = await getIdToken();
             if (idToken && user) {
-                // Get all opportunities and filter by user email
-                const allOpps = await api.getOpportunities();
-                // Filter opportunities created by this user (you may need to add a createdBy field to opportunities)
-                // For now, we'll just show all opportunities - you should add user tracking to the backend
-                setMyOpportunities(allOpps);
+                // Get opportunities created by this user
+                const myOpps = await api.getMyOpportunities(idToken);
+                // Filter to only show published opportunities
+                const published = myOpps.filter(opp => opp.status === 'published');
+                setMyOpportunities(published);
             }
         } catch (error) {
             console.error('Failed to load my opportunities:', error);
@@ -95,11 +97,32 @@ function DashboardContent() {
         }
     }, [getIdToken, user]);
 
+    const loadMyDrafts = useCallback(async () => {
+        setLoadingDrafts(true);
+        try {
+            const idToken = await getIdToken();
+            if (idToken && user) {
+                const drafts = await api.getMyDrafts(idToken);
+                setMyDrafts(drafts);
+            }
+        } catch (error) {
+            console.error('Failed to load drafts:', error);
+        } finally {
+            setLoadingDrafts(false);
+        }
+    }, [getIdToken, user]);
+
     useEffect(() => {
         if (user && activeView === 'myOpportunities') {
             loadMyOpportunities();
         }
     }, [user, activeView, loadMyOpportunities]);
+
+    useEffect(() => {
+        if (user && activeView === 'drafts') {
+            loadMyDrafts();
+        }
+    }, [user, activeView, loadMyDrafts]);
 
     const handleRemoveBookmark = async (opportunityId: string) => {
         try {
@@ -324,8 +347,8 @@ function DashboardContent() {
                         <button
                             onClick={() => setActiveView('bookmarks')}
                             className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'bookmarks'
-                                    ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
-                                    : 'text-neutral-600 hover:text-neutral-900'
+                                ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
+                                : 'text-neutral-600 hover:text-neutral-900'
                                 }`}
                         >
                             <BookmarkIcon className="w-5 h-5" />
@@ -334,18 +357,33 @@ function DashboardContent() {
                         <button
                             onClick={() => setActiveView('myOpportunities')}
                             className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'myOpportunities'
-                                    ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
-                                    : 'text-neutral-600 hover:text-neutral-900'
+                                ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
+                                : 'text-neutral-600 hover:text-neutral-900'
                                 }`}
                         >
                             <SparklesIcon className="w-5 h-5" />
                             My Opportunities
                         </button>
                         <button
+                            onClick={() => setActiveView('drafts')}
+                            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap relative ${activeView === 'drafts'
+                                ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
+                                : 'text-neutral-600 hover:text-neutral-900'
+                                }`}
+                        >
+                            <ClockIcon className="w-5 h-5" />
+                            Drafts
+                            {myDrafts.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    {myDrafts.length}
+                                </span>
+                            )}
+                        </button>
+                        <button
                             onClick={() => setActiveView('gantt')}
                             className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'gantt'
-                                    ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
-                                    : 'text-neutral-600 hover:text-neutral-900'
+                                ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
+                                : 'text-neutral-600 hover:text-neutral-900'
                                 }`}
                         >
                             <ChartBarIcon className="w-5 h-5" />
