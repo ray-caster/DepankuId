@@ -1,6 +1,6 @@
 """Authentication service - Business logic for auth"""
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from firebase_admin import auth, firestore
 from google.cloud.firestore import SERVER_TIMESTAMP
 from config.settings import db, brevo_api_instance, FRONTEND_URL, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME
@@ -37,7 +37,7 @@ class AuthService:
         
         # Store pending user data in Firestore ONLY (NO Firebase Auth user created yet)
         pending_user_ref = db.collection('pending_users').document()
-        expires_at = datetime.utcnow() + timedelta(hours=1)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         pending_user_ref.set({
             'email': email,
             'password_hash': password,  # Store temporarily for verification
@@ -131,7 +131,7 @@ class AuthService:
         
         # Check if verification has expired
         expires_at = pending_user_data.get('expires_at')
-        if expires_at and expires_at < datetime.utcnow():
+        if expires_at and expires_at < datetime.now(timezone.utc):
             # Clean up expired verification
             pending_user_ref.delete()
             raise ValueError("Verification link has expired. Please request a new one.")
@@ -191,7 +191,7 @@ class AuthService:
         
         # Check if verification has expired
         expires_at = pending_user_data.get('expires_at')
-        if expires_at and expires_at < firestore.SERVER_TIMESTAMP:
+        if expires_at and expires_at < datetime.now(timezone.utc):
             # Delete expired verification
             pending_user_doc.reference.delete()
             raise ValueError("Verification link has expired. Please sign up again.")
@@ -200,7 +200,7 @@ class AuthService:
         new_verification_token = secrets.token_urlsafe(32)
         
         # Update the pending user with new token
-        new_expires_at = datetime.utcnow() + timedelta(hours=1)
+        new_expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         pending_user_doc.reference.update({
             'verification_token': new_verification_token,
             'expires_at': new_expires_at
