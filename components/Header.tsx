@@ -97,9 +97,14 @@ export default function Header() {
                         <div className="flex-shrink-0 z-10 relative">
                             <Link
                                 href="/"
-                                className="text-xl md:text-2xl font-bold text-primary-800 hover:text-primary-950 transition-all"
+                                className="flex items-center gap-3 text-xl md:text-2xl font-bold text-primary-800 hover:text-primary-950 transition-all"
                             >
-                                Depanku.id
+                                <img
+                                    src="/icon.svg"
+                                    alt="Depanku.id Logo"
+                                    className="w-8 h-8 md:w-10 md:h-10"
+                                />
+                                <span>Depanku.id</span>
                             </Link>
                         </div>
 
@@ -291,7 +296,14 @@ export default function Header() {
                             <div className="flex flex-col h-full">
                                 {/* Mobile Menu Header */}
                                 <div className="flex items-center justify-between p-5 border-b-2 border-neutral-400 bg-background-light">
-                                    <span className="text-2xl font-bold text-primary-800">Menu</span>
+                                    <div className="flex items-center gap-3">
+                                        <img
+                                            src="/icon.svg"
+                                            alt="Depanku.id Logo"
+                                            className="w-8 h-8"
+                                        />
+                                        <span className="text-2xl font-bold text-primary-800">Menu</span>
+                                    </div>
                                     <button
                                         onClick={closeMobileMenu}
                                         className="flex items-center justify-center w-11 h-11 rounded-soft bg-background border-2 border-neutral-400 hover:bg-neutral-100 active:bg-neutral-200 active:scale-95 transition-all"
