@@ -161,6 +161,9 @@ class AuthService:
                 }
             })
             
+            # Generate custom token for auto sign-in
+            custom_token = auth.create_custom_token(firebase_user.uid)
+            
             # Clean up pending user data
             pending_user_ref.delete()
             
@@ -169,7 +172,8 @@ class AuthService:
             return {
                 'uid': firebase_user.uid,
                 'email': pending_user_data['email'],
-                'name': pending_user_data['name']
+                'name': pending_user_data['name'],
+                'customToken': custom_token.decode('utf-8') if isinstance(custom_token, bytes) else custom_token
             }
             
         except Exception as e:

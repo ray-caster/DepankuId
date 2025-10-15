@@ -124,7 +124,7 @@ function HomeContent() {
                     <Configure hitsPerPage={5} />
 
                     {/* Hero Section */}
-                    <section className="flex items-center justify-center px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] bg-gradient-to-b from-primary-50 to-background">
+                    <section className="flex items-center justify-center px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] bg-secondary-50">
                         <div className="w-full max-w-7xl mx-auto text-center flex flex-col justify-center py-12 sm:py-16">
                             <h1 className="text-[clamp(2rem,7vw,4rem)] sm:text-[clamp(2.5rem,6vw,4.5rem)] lg:text-[clamp(3rem,5.5vw,5rem)] font-bold text-foreground tracking-tight leading-[1.15] mb-4 sm:mb-5">
                                 <div className="mb-2">Find your next{' '}
@@ -140,8 +140,11 @@ function HomeContent() {
                                 </div>
                             </h1>
 
-                            <p className="text-base sm:text-lg lg:text-xl text-foreground-light max-w-3xl mx-auto leading-relaxed mb-6 sm:mb-8 px-4">
+                            <p className="text-base sm:text-lg lg:text-xl text-foreground-light max-w-3xl mx-auto leading-relaxed mb-4 sm:mb-6 px-4">
                                 Free platform for Indonesian students. Search 500+ verified research programs, competitions, and youth opportunities.
+                            </p>
+                            <p className="text-sm text-foreground-lighter max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8 px-4">
+                                Powered by <span className="font-semibold text-secondary-700">FulcraWorks.io</span> • Empowering the next generation of innovators
                             </p>
 
                             {/* Search Bar */}
@@ -296,9 +299,12 @@ function HomeContent() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 mb-8 sm:mb-10 lg:mb-12">
                         <div className="sm:col-span-2">
                             <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4">Depanku.id</h3>
-                            <p className="text-sm sm:text-base text-foreground-light leading-relaxed max-w-md">
+                            <p className="text-sm sm:text-base text-foreground-light leading-relaxed max-w-md mb-2">
                                 Find research programs, competitions, and youth opportunities across Indonesia.
                                 Free platform for students and young professionals.
+                            </p>
+                            <p className="text-xs text-foreground-lighter">
+                                A product of <span className="font-semibold text-secondary-700">FulcraWorks.io</span>
                             </p>
                         </div>
                         <div>
@@ -320,7 +326,7 @@ function HomeContent() {
                     </div>
                     <div className="border-t border-neutral-200 pt-6 sm:pt-8 text-center">
                         <p className="text-xs sm:text-sm text-foreground-lighter font-medium">
-                            Built with care to help you find your path • Depanku.id © 2025
+                            Built with care to help you find your path • Depanku.id © 2025 • <span className="text-secondary-700 font-semibold">FulcraWorks.io</span>
                         </p>
                     </div>
                 </div>

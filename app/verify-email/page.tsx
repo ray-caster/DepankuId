@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { api } from '@/lib/api';
+import { signInWithCustomToken } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 
 function VerifyEmailContent() {
@@ -29,12 +31,29 @@ function VerifyEmailContent() {
 
                 if (response.success) {
                     setStatus('success');
-                    setMessage('Your email has been verified successfully!');
+                    setMessage('Your email has been verified successfully! Logging you in...');
 
-                    // Redirect to home page after 3 seconds
-                    setTimeout(() => {
-                        router.push('/');
-                    }, 3000);
+                    // Sign in with custom token if provided
+                    if (response.customToken) {
+                        try {
+                            await signInWithCustomToken(auth, response.customToken);
+                            // Redirect to dashboard after successful sign-in
+                            setTimeout(() => {
+                                router.push('/dashboard');
+                            }, 2000);
+                        } catch (signInError) {
+                            console.error('Error signing in with custom token:', signInError);
+                            // Still redirect to home page if sign-in fails
+                            setTimeout(() => {
+                                router.push('/');
+                            }, 2000);
+                        }
+                    } else {
+                        // Redirect to home page if no custom token
+                        setTimeout(() => {
+                            router.push('/');
+                        }, 2000);
+                    }
                 } else {
                     setStatus('error');
                     setMessage(response.message || 'Verification failed');

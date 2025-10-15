@@ -56,12 +56,17 @@ export default function Header() {
         };
     }, [showMobileMenu]);
 
-    const navItems = [
+    const navItems = user ? [
         { href: '/', label: 'Home', icon: HomeIcon },
         { href: '/search', label: 'Browse', icon: MagnifyingGlassIcon },
         { href: '/features', label: 'Features', icon: CogIcon },
         { href: '/about', label: 'About Us', icon: InformationCircleIcon },
-        { href: '/admin-login', label: 'Admin', icon: Cog6ToothIcon },
+    ] : [
+        { href: '/', label: 'Home', icon: HomeIcon },
+        { href: '/search', label: 'Browse', icon: MagnifyingGlassIcon },
+        { href: '/features', label: 'Features', icon: CogIcon },
+        { href: '/about', label: 'About Us', icon: InformationCircleIcon },
+        { href: '/admin', label: 'Admin', icon: Cog6ToothIcon },
     ];
 
     const profileMenuItems = [

@@ -24,7 +24,6 @@ class Opportunity:
     title: str
     description: str
     type: str  # 'research', 'youth-program', 'community', 'competition'
-    category: List[str]
     organization: str
     tags: List[str]
     location: Optional[str] = None
@@ -49,70 +48,72 @@ class Opportunity:
 OPPORTUNITY_TEMPLATES = {
     "research": {
         "type": "research",
-        "category": ["STEM", "Research"],
-        "tags": ["research", "academic", "science"],
+        "tags": ["research", "academic", "science", "stem"],
         "description": "A research opportunity for students interested in...",
         "requirements": "• Undergraduate or graduate student\n• Strong academic record\n• Interest in research",
         "benefits": "• Hands-on research experience\n• Mentorship from faculty\n• Potential publication opportunities",
     },
     "competition": {
         "type": "competition",
-        "category": ["Competition"],
-        "tags": ["competition", "challenge"],
+        "tags": ["competition", "challenge", "contest"],
         "description": "A competitive program where participants...",
         "requirements": "• Age requirements\n• Team size requirements\n• Submission format",
         "benefits": "• Prize money\n• Recognition\n• Networking opportunities",
     },
     "youth-program": {
         "type": "youth-program",
-        "category": ["Youth Development", "Leadership"],
-        "tags": ["youth", "leadership", "development"],
+        "tags": ["youth", "leadership", "development", "mentorship"],
         "description": "A youth program designed to...",
         "requirements": "• Age range: 15-25\n• Leadership interest\n• Community engagement",
         "benefits": "• Leadership training\n• Certificate of completion\n• Networking with peers",
     },
     "community": {
         "type": "community",
-        "category": ["Community", "Networking"],
-        "tags": ["community", "networking", "collaboration"],
+        "tags": ["community", "networking", "collaboration", "social"],
         "description": "A community for individuals interested in...",
         "requirements": "• Open to all\n• Interest in the field\n• Active participation",
         "benefits": "• Peer support\n• Knowledge sharing\n• Collaborative projects",
     }
 }
 
-# Preset categories by type
-CATEGORY_PRESETS = {
-    "research": [
-        "STEM", "Research", "Science", "Engineering", "Technology", 
-        "Mathematics", "Biology", "Chemistry", "Physics", "Computer Science"
-    ],
-    "competition": [
-        "Competition", "Hackathon", "Challenge", "Contest", "Innovation",
-        "Coding", "Design", "Business", "Case Study"
-    ],
-    "youth-program": [
-        "Youth Development", "Leadership", "Skills Training", "Mentorship",
-        "Volunteer", "Exchange Program", "Summer Program"
-    ],
-    "community": [
-        "Community", "Networking", "Social", "Discussion", "Collaboration",
-        "Support Group", "Interest Group"
-    ]
-}
-
-# Tag presets
+# Tag presets - now includes all previous categories as tags
 TAG_PRESETS = [
+    # STEM & Research
     "stem", "research", "science", "technology", "engineering", "math",
+    "biology", "chemistry", "physics", "computer-science",
+    
+    # Tech & Programming
     "coding", "programming", "ai", "machine-learning", "data-science",
     "web-development", "mobile-development", "cybersecurity",
-    "leadership", "entrepreneurship", "business", "innovation",
+    
+    # Competition & Challenges
+    "competition", "hackathon", "challenge", "contest", "innovation",
+    "case-study",
+    
+    # Leadership & Professional
+    "leadership", "entrepreneurship", "business", "skills-training",
+    "mentorship", "professional-development",
+    
+    # Creative
     "design", "art", "music", "writing", "literature",
+    
+    # Social Impact
     "environment", "sustainability", "climate", "social-impact",
+    "community", "volunteer",
+    
+    # Health & Education
     "health", "medicine", "psychology", "education",
-    "international", "exchange", "scholarship", "fellowship",
-    "hackathon", "competition", "challenge", "contest",
+    
+    # Programs
+    "youth", "exchange", "scholarship", "fellowship", "summer-program",
+    
+    # Format
     "online", "hybrid", "in-person", "remote",
-    "free", "paid", "funded", "stipend"
+    
+    # Cost
+    "free", "paid", "funded", "stipend",
+    
+    # Networking & Collaboration
+    "networking", "collaboration", "discussion"
 ]
 

@@ -38,7 +38,6 @@ export interface Opportunity {
     title: string;
     description: string;
     type: 'research' | 'youth-program' | 'community' | 'competition';
-    category: string[];
     deadline?: string;
     location?: string;
     organization: string;
@@ -58,7 +57,6 @@ export interface Opportunity {
 
 export interface OpportunityTemplate {
     type: string;
-    category: string[];
     tags: string[];
     description: string;
     requirements?: string;
@@ -117,8 +115,8 @@ class API {
         history: AIMessage[];
         user_profile: UserPreferences;
         user_answers: Record<string, any>;
-    }): Promise<AIChatResponse & { 
-        user_profile: UserPreferences; 
+    }): Promise<AIChatResponse & {
+        user_profile: UserPreferences;
         should_show_opportunities: boolean;
         opportunities?: Opportunity[];
     }> {
@@ -267,17 +265,6 @@ class API {
         return data.data || {};
     }
 
-    async getCategoryPresets(): Promise<Record<string, string[]>> {
-        const response = await fetch(`${this.baseURL}/api/opportunities/presets/categories`);
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch category presets');
-        }
-
-        const data = await response.json();
-        return data.data || {};
-    }
-
     async getTagPresets(): Promise<string[]> {
         const response = await fetch(`${this.baseURL}/api/opportunities/presets/tags`);
 
@@ -313,7 +300,7 @@ class API {
         return response.json();
     }
 
-    async verifyEmail(data: { token: string; uid: string }): Promise<{ success: boolean; message: string }> {
+    async verifyEmail(data: { token: string; uid: string }): Promise<{ success: boolean; message: string; customToken?: string; user?: any }> {
         const response = await fetch(`${this.baseURL}/api/auth/verify-email`, {
             method: 'POST',
             headers: {

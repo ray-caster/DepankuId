@@ -1,7 +1,7 @@
 """Opportunity routes"""
 from flask import Blueprint, request, jsonify
 from services.opportunity_service import OpportunityService
-from models.opportunity import OPPORTUNITY_TEMPLATES, CATEGORY_PRESETS, TAG_PRESETS
+from models.opportunity import OPPORTUNITY_TEMPLATES, TAG_PRESETS
 
 opportunity_bp = Blueprint('opportunities', __name__, url_prefix='/api/opportunities')
 
@@ -99,14 +99,6 @@ def get_templates():
     return jsonify({
         "success": True,
         "data": OPPORTUNITY_TEMPLATES
-    }), 200
-
-@opportunity_bp.route('/presets/categories', methods=['GET'])
-def get_category_presets():
-    """Get category presets"""
-    return jsonify({
-        "success": True,
-        "data": CATEGORY_PRESETS
     }), 200
 
 @opportunity_bp.route('/presets/tags', methods=['GET'])

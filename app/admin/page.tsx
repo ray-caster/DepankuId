@@ -13,7 +13,6 @@ interface Opportunity {
   type: string;
   organization: string;
   deadline?: string;
-  category: string[];
   tags: string[];
   location?: string;
   url?: string;
@@ -37,11 +36,11 @@ export default function AdminPage() {
     const checkAdminSession = () => {
       const adminSession = localStorage.getItem('admin_session');
       const adminEmail = localStorage.getItem('admin_email');
-      
+
       if (adminSession === 'true' && adminEmail === 'admin@depanku.id') {
         setIsAdmin(true);
       } else {
-        router.push('/admin-login');
+        router.push('/admin/login');
       }
       setCheckingAuth(false);
     };
@@ -64,9 +63,9 @@ export default function AdminPage() {
       if (data.success) {
         setOpportunities(data.opportunities || []);
       }
-        } catch (error) {
+    } catch (error) {
       console.error('Error fetching opportunities:', error);
-        } finally {
+    } finally {
       setIsLoading(false);
     }
   };
@@ -104,13 +103,13 @@ export default function AdminPage() {
   const handleLogout = () => {
     localStorage.removeItem('admin_session');
     localStorage.removeItem('admin_email');
-    router.push('/admin-login');
+    router.push('/admin/login');
   };
 
   // Filter opportunities
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         opp.organization.toLowerCase().includes(searchQuery.toLowerCase());
+      opp.organization.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || opp.type === filterType;
     return matchesSearch && matchesType;
   });
@@ -127,12 +126,12 @@ export default function AdminPage() {
   }
 
   if (!isAdmin) {
-    return null; // Will redirect to admin-login
+    return null; // Will redirect to admin/login
   }
 
-    return (
-        <div className="min-h-screen bg-background">
-            <Header />
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
 
       <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -156,27 +155,27 @@ export default function AdminPage() {
             {/* Search */}
             <div className="flex-1 relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-600" />
-                            <input
-                                type="text"
+              <input
+                type="text"
                 placeholder="Search opportunities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
-                            />
-                        </div>
+              />
+            </div>
 
             {/* Filter */}
-                                <select
+            <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
             >
               <option value="all">All Types</option>
-                                    <option value="research">Research</option>
+              <option value="research">Research</option>
               <option value="competition">Competition</option>
-                                    <option value="youth-program">Youth Program</option>
-                                    <option value="community">Community</option>
-                                </select>
+              <option value="youth-program">Youth Program</option>
+              <option value="community">Community</option>
+            </select>
 
             {/* Create Button */}
             <button
@@ -186,7 +185,7 @@ export default function AdminPage() {
               <PlusIcon className="w-5 h-5" />
               Create New
             </button>
-                            </div>
+          </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -203,16 +202,16 @@ export default function AdminPage() {
             <div className="bg-background-light rounded-gentle p-4 border-2 border-neutral-400">
               <div className="text-2xl font-bold text-foreground">
                 {opportunities.filter(o => o.type === 'competition').length}
-                            </div>
+              </div>
               <div className="text-sm text-foreground-light">Competitions</div>
-                        </div>
+            </div>
             <div className="bg-background-light rounded-gentle p-4 border-2 border-neutral-400">
               <div className="text-2xl font-bold text-foreground">
                 {opportunities.filter(o => o.type === 'youth-program').length}
-                            </div>
+              </div>
               <div className="text-sm text-foreground-light">Programs</div>
-                            </div>
-                        </div>
+            </div>
+          </div>
 
           {/* Opportunities List */}
           {isLoading ? (
@@ -222,7 +221,7 @@ export default function AdminPage() {
           ) : filteredOpportunities.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-neutral-600">No opportunities found</p>
-                        </div>
+            </div>
           ) : (
             <div className="grid gap-4">
               {filteredOpportunities.map((opportunity, index) => (
@@ -250,26 +249,26 @@ export default function AdminPage() {
                       <div className="flex items-center gap-4 text-sm text-neutral-600">
                         <span>🏢 {opportunity.organization}</span>
                         {opportunity.location && <span>📍 {opportunity.location}</span>}
-                            </div>
+                      </div>
                       {opportunity.tags && opportunity.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-3">
                           {opportunity.tags.slice(0, 5).map((tag, i) => (
                             <span key={i} className="px-2 py-1 bg-neutral-300 text-neutral-700 text-xs rounded-soft">
                               {tag}
-                                    </span>
-                                ))}
-                            </div>
-                      )}
+                            </span>
+                          ))}
                         </div>
+                      )}
+                    </div>
                     <div className="flex gap-2 ml-4">
-                                <button
+                      <button
                         onClick={() => handleEdit(opportunity)}
                         className="p-2 bg-primary-600 text-white rounded-soft hover:bg-primary-700 transition-colors"
                         title="Edit"
                       >
                         <PencilIcon className="w-5 h-5" />
-                                </button>
-                                        <button
+                      </button>
+                      <button
                         onClick={() => {
                           setDeleteId(opportunity.id);
                           setShowDeleteConfirm(true);
@@ -278,14 +277,14 @@ export default function AdminPage() {
                         title="Delete"
                       >
                         <TrashIcon className="w-5 h-5" />
-                                        </button>
+                      </button>
                     </div>
                   </div>
                 </motion.div>
-                                ))}
-                            </div>
+              ))}
+            </div>
           )}
-                        </div>
+        </div>
       </main>
 
       {/* Delete Confirmation Modal */}
@@ -310,16 +309,16 @@ export default function AdminPage() {
               >
                 Cancel
               </button>
-                            <button
+              <button
                 onClick={() => deleteId && handleDelete(deleteId)}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-comfort hover:bg-red-700 transition-colors"
-                            >
+              >
                 Delete
-                            </button>
-                        </div>
+              </button>
+            </div>
           </motion.div>
-                </div>
-      )}
         </div>
-    );
+      )}
+    </div>
+  );
 }

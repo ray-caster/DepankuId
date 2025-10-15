@@ -78,11 +78,17 @@ def verify_email():
             }), 400
         
         try:
-            AuthService.verify_email(validated_data['token'], validated_data['uid'])
+            result = AuthService.verify_email(validated_data['token'], validated_data['uid'])
             logger.info(f"Email verified successfully for UID: {validated_data['uid']}")
             return jsonify({
                 "success": True,
-                "message": "Email verified successfully"
+                "message": "Email verified successfully",
+                "customToken": result.get('customToken'),
+                "user": {
+                    "uid": result.get('uid'),
+                    "email": result.get('email'),
+                    "name": result.get('name')
+                }
             }), 200
         except ValueError as e:
             logger.warning(f"Email verification failed: {str(e)}")

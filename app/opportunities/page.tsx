@@ -17,7 +17,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 const SOCIAL_PLATFORMS = [
-    { key: 'website', label: 'Website', placeholder: 'https://example.com' },
     { key: 'twitter', label: 'Twitter/X', placeholder: 'https://twitter.com/...' },
     { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/...' },
     { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/...' },
@@ -36,7 +35,6 @@ function OpportunitiesContent() {
         title: '',
         description: '',
         type: 'research',
-        category: [],
         organization: '',
         location: '',
         deadline: '',
@@ -54,10 +52,8 @@ function OpportunitiesContent() {
     });
 
     const [templates, setTemplates] = useState<Record<string, OpportunityTemplate>>({});
-    const [categoryPresets, setCategoryPresets] = useState<Record<string, string[]>>({});
     const [tagPresets, setTagPresets] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
-    const [categoryInput, setCategoryInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [showSocialMedia, setShowSocialMedia] = useState(false);
@@ -132,14 +128,12 @@ function OpportunitiesContent() {
 
     const loadPresetsAndTemplates = async () => {
         try {
-            const [templatesData, categoriesData, tagsData] = await Promise.all([
+            const [templatesData, tagsData] = await Promise.all([
                 api.getOpportunityTemplates(),
-                api.getCategoryPresets(),
                 api.getTagPresets()
             ]);
 
             setTemplates(templatesData);
-            setCategoryPresets(categoriesData);
             setTagPresets(tagsData);
         } catch (error) {
             console.error('Failed to load presets:', error);
@@ -152,7 +146,6 @@ function OpportunitiesContent() {
             setFormData({
                 ...formData,
                 type: template.type as any,
-                category: [...template.category],
                 tags: [...template.tags],
                 description: template.description,
                 requirements: template.requirements || '',
@@ -182,7 +175,6 @@ function OpportunitiesContent() {
                 title: '',
                 description: '',
                 type: 'research',
-                category: [],
                 organization: '',
                 location: '',
                 deadline: '',
@@ -199,7 +191,6 @@ function OpportunitiesContent() {
                 has_indefinite_deadline: false,
             });
             setTagInput('');
-            setCategoryInput('');
             setSelectedTemplate('');
 
             // Trigger Algolia sync
@@ -230,23 +221,6 @@ function OpportunitiesContent() {
         });
     };
 
-    const addCategory = (cat?: string) => {
-        const newCat = cat || categoryInput.trim();
-        if (newCat && !formData.category?.includes(newCat)) {
-            setFormData({
-                ...formData,
-                category: [...(formData.category || []), newCat],
-            });
-            setCategoryInput('');
-        }
-    };
-
-    const removeCategory = (cat: string) => {
-        setFormData({
-            ...formData,
-            category: formData.category?.filter(c => c !== cat) || [],
-        });
-    };
 
     const updateSocialMedia = (platform: string, value: string) => {
         setFormData({
@@ -262,7 +236,7 @@ function OpportunitiesContent() {
         return (
             <div className="min-h-screen bg-background">
                 <Header />
-                <AuthModal 
+                <AuthModal
                     isOpen={showAuthModal}
                     onClose={() => {
                         setShowAuthModal(false);
@@ -285,7 +259,7 @@ function OpportunitiesContent() {
                             Share Your Opportunity
                         </h1>
                         <p className="text-lg text-neutral-600 mb-6 max-w-2xl mx-auto">
-                            Help other students discover amazing opportunities by sharing what you know. 
+                            Help other students discover amazing opportunities by sharing what you know.
                             Sign in to get started!
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -490,76 +464,15 @@ function OpportunitiesContent() {
                             </div>
                         </div>
 
-                        {/* Categories & Tags */}
+                        {/* Tags */}
                         <div className="space-y-6">
                             <h3 className="text-xl font-semibold text-foreground border-b-2 border-neutral-200 pb-2">
-                                Classification
+                                Tags
                             </h3>
 
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">
-                                    Categories
-                                </label>
-                                <div className="flex gap-2 mb-3">
-                                    <input
-                                        type="text"
-                                        value={categoryInput}
-                                        onChange={(e) => setCategoryInput(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCategory())}
-                                        className="flex-1 px-4 py-2 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="Add category..."
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => addCategory()}
-                                        className="btn-secondary"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-
-                                {/* Category Presets */}
-                                {formData.type && categoryPresets[formData.type] && (
-                                    <div className="mb-3">
-                                        <p className="text-xs text-neutral-500 mb-2">Quick add:</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {categoryPresets[formData.type].map((cat) => (
-                                                <button
-                                                    key={cat}
-                                                    type="button"
-                                                    onClick={() => addCategory(cat)}
-                                                    disabled={formData.category?.includes(cat)}
-                                                    className="text-xs px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    + {cat}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex flex-wrap gap-2">
-                                    {formData.category?.map((cat) => (
-                                        <span
-                                            key={cat}
-                                            className="px-3 py-1 bg-secondary-light text-secondary-dark rounded-full text-sm flex items-center gap-2"
-                                        >
-                                            {cat}
-                                            <button
-                                                type="button"
-                                                onClick={() => removeCategory(cat)}
-                                                className="hover:text-secondary"
-                                            >
-                                                <XMarkIcon className="w-4 h-4" />
-                                            </button>
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Tags
+                                    Tags (will be prefixed with #)
                                 </label>
                                 <div className="flex gap-2 mb-3">
                                     <input
@@ -568,7 +481,7 @@ function OpportunitiesContent() {
                                         onChange={(e) => setTagInput(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                                         className="flex-1 px-4 py-2 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="Add tag..."
+                                        placeholder="Add tag (e.g., stem, research, funded)..."
                                     />
                                     <button
                                         type="button"
@@ -591,7 +504,7 @@ function OpportunitiesContent() {
                                                 disabled={formData.tags?.includes(tag)}
                                                 className="text-xs px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                + {tag}
+                                                #{tag}
                                             </button>
                                         ))}
                                     </div>

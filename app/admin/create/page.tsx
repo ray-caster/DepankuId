@@ -11,7 +11,7 @@ export default function CreateOpportunityPage() {
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -20,7 +20,6 @@ export default function CreateOpportunityPage() {
     location: '',
     deadline: '',
     url: '',
-    category: [] as string[],
     tags: [] as string[],
     requirements: '',
     benefits: '',
@@ -37,11 +36,11 @@ export default function CreateOpportunityPage() {
     const checkAdminSession = () => {
       const adminSession = localStorage.getItem('admin_session');
       const adminEmail = localStorage.getItem('admin_email');
-      
+
       if (adminSession === 'true' && adminEmail === 'admin@depanku.id') {
         setIsAdmin(true);
       } else {
-        router.push('/admin-login');
+        router.push('/admin/login');
       }
       setCheckingAuth(false);
     };
@@ -55,6 +54,8 @@ export default function CreateOpportunityPage() {
     setError('');
 
     try {
+      console.log('Submitting opportunity data:', formData);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/opportunities`, {
         method: 'POST',
         headers: {
@@ -63,19 +64,31 @@ export default function CreateOpportunityPage() {
         body: JSON.stringify(formData),
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
-      if (data.success) {
+      if (response.ok && data.success) {
+        alert('Opportunity created successfully!');
         router.push('/admin');
       } else {
-        setError(data.message || 'Failed to create opportunity');
+        setError(data.message || data.error || 'Failed to create opportunity');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating opportunity:', error);
-      setError('An error occurred while creating the opportunity');
+      setError(error.message || 'An error occurred while creating the opportunity');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const normalizeUrl = (url: string) => {
+    if (!url) return url;
+    url = url.trim();
+    if (url && !url.match(/^https?:\/\//i)) {
+      return 'https://' + url;
+    }
+    return url;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -86,14 +99,19 @@ export default function CreateOpportunityPage() {
         [name]: (e.target as HTMLInputElement).checked,
       }));
     } else {
+      let processedValue = value;
+      // Auto-add https:// to URL fields
+      if (name === 'url' && value) {
+        processedValue = normalizeUrl(value);
+      }
       setFormData(prev => ({
         ...prev,
-        [name]: value,
+        [name]: processedValue,
       }));
     }
   };
 
-  const handleArrayChange = (field: 'category' | 'tags', value: string) => {
+  const handleArrayChange = (field: 'tags', value: string) => {
     const items = value.split(',').map(item => item.trim()).filter(item => item);
     setFormData(prev => ({
       ...prev,
@@ -113,13 +131,13 @@ export default function CreateOpportunityPage() {
   }
 
   if (!isAdmin) {
-    return null; // Will redirect to admin-login
+    return null; // Will redirect to admin/login
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -146,7 +164,7 @@ export default function CreateOpportunityPage() {
             {/* Basic Info */}
             <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
               <h2 className="text-2xl font-bold text-foreground mb-4">Basic Information</h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
@@ -267,35 +285,25 @@ export default function CreateOpportunityPage() {
               </div>
             </div>
 
-            {/* Categories & Tags */}
+            {/* Tags */}
             <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
-              <h2 className="text-2xl font-bold text-foreground mb-4">Categories & Tags</h2>
-              
+              <h2 className="text-2xl font-bold text-foreground mb-4">Tags</h2>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Categories (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.category.join(', ')}
-                    onChange={(e) => handleArrayChange('category', e.target.value)}
-                    placeholder="e.g. Science, Technology, Engineering"
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Tags (comma-separated)
+                    Tags (comma-separated, will be prefixed with #)
                   </label>
                   <input
                     type="text"
                     value={formData.tags.join(', ')}
                     onChange={(e) => handleArrayChange('tags', e.target.value)}
-                    placeholder="e.g. undergraduate, funded, international"
+                    placeholder="e.g. stem, research, undergraduate, funded, international"
                     className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
                   />
+                  <p className="mt-2 text-sm text-neutral-600">
+                    Suggested: stem, research, science, technology, engineering, coding, leadership, competition, online, free, scholarship
+                  </p>
                 </div>
               </div>
             </div>
@@ -303,7 +311,7 @@ export default function CreateOpportunityPage() {
             {/* Additional Details */}
             <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
               <h2 className="text-2xl font-bold text-foreground mb-4">Additional Details</h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">

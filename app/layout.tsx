@@ -13,8 +13,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
     title: "Depanku.id - Find Research Programs and Youth Opportunities in Indonesia",
-    description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities. Search 500+ verified opportunities.",
-    keywords: ["research programs Indonesia", "youth opportunities", "student competitions", "academic programs", "scholarships Indonesia", "student research", "youth development"],
+    description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities. Search 500+ verified opportunities. Powered by FulcraWorks.io.",
+    keywords: ["research programs Indonesia", "youth opportunities", "student competitions", "academic programs", "scholarships Indonesia", "student research", "youth development", "FulcraWorks.io"],
     icons: {
         icon: [
             { url: '/icon.svg', type: 'image/svg+xml' },
@@ -51,14 +51,14 @@ export const metadata: Metadata = {
     manifest: '/manifest.json',
     openGraph: {
         title: "Depanku.id - Find Research Programs and Youth Opportunities",
-        description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities.",
+        description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities. Powered by FulcraWorks.io.",
         type: "website",
         locale: "en_US",
     },
     twitter: {
         card: "summary_large_image",
         title: "Depanku.id - Find Research Programs and Youth Opportunities",
-        description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities.",
+        description: "Free platform for Indonesian students to discover research programs, competitions, and youth opportunities. Powered by FulcraWorks.io.",
     },
     robots: {
         index: true,

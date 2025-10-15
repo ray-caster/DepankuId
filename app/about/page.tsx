@@ -131,6 +131,34 @@ export default function AboutPage() {
                             </div>
                         </motion.div>
 
+                        {/* FulcraWorks.io Section */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.0 }}
+                            className="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-comfort p-8 sm:p-12 border-2 border-secondary-200 mb-12 sm:mb-16"
+                            style={{
+                                boxShadow: '0 8px 16px -4px oklch(0% 0 0 / 0.1), inset 0 2px 0 0 oklch(100% 0 0 / 0.1)'
+                            }}
+                        >
+                            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
+                                Powered by <span className="text-secondary-700">FulcraWorks.io</span>
+                            </h2>
+                            <div className="space-y-4 text-base sm:text-lg text-foreground-light leading-relaxed">
+                                <p>
+                                    Depanku.id is proudly developed and maintained by <span className="font-semibold text-secondary-700">FulcraWorks.io</span>,
+                                    a technology company dedicated to building innovative solutions that empower communities and drive positive change.
+                                </p>
+                                <p>
+                                    At FulcraWorks.io, we believe technology should serve humanity. Our mission is to create digital tools that break down barriers,
+                                    connect people with opportunities, and foster growth in communities around the world.
+                                </p>
+                                <p className="pt-2 text-sm text-foreground-lighter">
+                                    Learn more about our work at <a href="https://fulcraworks.io" target="_blank" rel="noopener noreferrer" className="text-secondary-700 hover:text-secondary-800 font-semibold underline">fulcraworks.io</a>
+                                </p>
+                            </div>
+                        </motion.div>
+
                         {/* CTA */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}

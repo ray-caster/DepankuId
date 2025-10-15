@@ -5,9 +5,9 @@ import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { 
-    BookmarkIcon, 
-    CalendarIcon, 
+import {
+    BookmarkIcon,
+    CalendarIcon,
     ChartBarIcon,
     TrashIcon,
     LinkIcon,
@@ -34,9 +34,11 @@ function DashboardContent() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
     const [bookmarks, setBookmarks] = useState<Opportunity[]>([]);
+    const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMyOpps, setLoadingMyOpps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
-    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt'>('bookmarks');
+    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
 
     const processDeadlines = useCallback((opportunities: Opportunity[]) => {
         const events: DeadlineEvent[] = opportunities
@@ -50,7 +52,7 @@ function DashboardContent() {
                 url: opp.url
             }))
             .sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
-        
+
         setDeadlineEvents(events);
     }, []);
 
@@ -74,6 +76,30 @@ function DashboardContent() {
             loadBookmarks();
         }
     }, [user, loadBookmarks]);
+
+    const loadMyOpportunities = useCallback(async () => {
+        setLoadingMyOpps(true);
+        try {
+            const idToken = await getIdToken();
+            if (idToken && user) {
+                // Get all opportunities and filter by user email
+                const allOpps = await api.getOpportunities();
+                // Filter opportunities created by this user (you may need to add a createdBy field to opportunities)
+                // For now, we'll just show all opportunities - you should add user tracking to the backend
+                setMyOpportunities(allOpps);
+            }
+        } catch (error) {
+            console.error('Failed to load my opportunities:', error);
+        } finally {
+            setLoadingMyOpps(false);
+        }
+    }, [getIdToken, user]);
+
+    useEffect(() => {
+        if (user && activeView === 'myOpportunities') {
+            loadMyOpportunities();
+        }
+    }, [user, activeView, loadMyOpportunities]);
 
     const handleRemoveBookmark = async (opportunityId: string) => {
         try {
@@ -161,10 +187,10 @@ function DashboardContent() {
                                     </div>
                                     <div className="text-xs text-neutral-500">{event.organization}</div>
                                 </div>
-                                
+
                                 <div className="flex-1 relative h-12">
                                     <div className="absolute top-0 left-0 right-0 h-2 bg-neutral-100 rounded-full mt-4"></div>
-                                    <div 
+                                    <div
                                         className="absolute top-0 h-12 flex items-center"
                                         style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
                                     >
@@ -294,25 +320,33 @@ function DashboardContent() {
                     </div>
 
                     {/* View Tabs */}
-                    <div className="flex gap-2 mb-6 border-b-2 border-neutral-200">
+                    <div className="flex gap-2 mb-6 border-b-2 border-neutral-200 overflow-x-auto">
                         <button
                             onClick={() => setActiveView('bookmarks')}
-                            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all ${
-                                activeView === 'bookmarks'
+                            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'bookmarks'
                                     ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
                                     : 'text-neutral-600 hover:text-neutral-900'
-                            }`}
+                                }`}
                         >
                             <BookmarkIcon className="w-5 h-5" />
                             Bookmarks
                         </button>
                         <button
-                            onClick={() => setActiveView('gantt')}
-                            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all ${
-                                activeView === 'gantt'
+                            onClick={() => setActiveView('myOpportunities')}
+                            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'myOpportunities'
                                     ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
                                     : 'text-neutral-600 hover:text-neutral-900'
-                            }`}
+                                }`}
+                        >
+                            <SparklesIcon className="w-5 h-5" />
+                            My Opportunities
+                        </button>
+                        <button
+                            onClick={() => setActiveView('gantt')}
+                            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'gantt'
+                                    ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
+                                    : 'text-neutral-600 hover:text-neutral-900'
+                                }`}
                         >
                             <ChartBarIcon className="w-5 h-5" />
                             Timeline
@@ -325,7 +359,101 @@ function DashboardContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        {activeView === 'bookmarks' ? (
+                        {activeView === 'myOpportunities' ? (
+                            loadingMyOpps ? (
+                                <div className="text-center py-12">
+                                    <div className="inline-block w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            ) : myOpportunities.length === 0 ? (
+                                <div className="card text-center py-12">
+                                    <SparklesIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
+                                    <h3 className="text-xl font-semibold mb-2">No opportunities created yet</h3>
+                                    <p className="text-neutral-600 mb-6">Share amazing opportunities with the community!</p>
+                                    <Link href="/opportunities" className="btn-primary inline-block">
+                                        Create Opportunity
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <p className="text-neutral-600">You have shared {myOpportunities.length} {myOpportunities.length === 1 ? 'opportunity' : 'opportunities'}</p>
+                                        <Link href="/opportunities" className="btn-secondary">
+                                            Create New
+                                        </Link>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        {myOpportunities.map((opportunity, idx) => (
+                                            <motion.div
+                                                key={opportunity.id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: idx * 0.05 }}
+                                                className="card hover:shadow-card-hover transition-shadow"
+                                            >
+                                                <div className="mb-3">
+                                                    <h3 className="text-xl font-bold text-foreground mb-2">
+                                                        {opportunity.title}
+                                                    </h3>
+                                                    <div className="flex flex-wrap gap-2 mb-3">
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTypeColor(opportunity.type)}`}>
+                                                            {opportunity.type.replace('-', ' ')}
+                                                        </span>
+                                                        {opportunity.deadline && opportunity.deadline !== 'indefinite' && !opportunity.has_indefinite_deadline && (
+                                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getDeadlineStatus(getDaysUntil(new Date(opportunity.deadline))).color}`}>
+                                                                {getDeadlineStatus(getDaysUntil(new Date(opportunity.deadline))).text}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <p className="text-neutral-700 mb-4 line-clamp-3">
+                                                    {opportunity.description}
+                                                </p>
+
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                                        <BuildingOfficeIcon className="w-4 h-4" />
+                                                        {opportunity.organization}
+                                                    </div>
+                                                    {opportunity.location && (
+                                                        <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                                            <MapPinIcon className="w-4 h-4" />
+                                                            {opportunity.location}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-2 mb-4">
+                                                    {opportunity.tags.slice(0, 5).map(tag => (
+                                                        <span key={tag} className="px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full text-xs flex items-center gap-1">
+                                                            <TagIcon className="w-3 h-3" />
+                                                            #{tag}
+                                                        </span>
+                                                    ))}
+                                                    {opportunity.tags.length > 5 && (
+                                                        <span className="px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full text-xs">
+                                                            +{opportunity.tags.length - 5} more
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {opportunity.url && (
+                                                    <a
+                                                        href={opportunity.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn-primary w-full flex items-center justify-center gap-2"
+                                                    >
+                                                        <LinkIcon className="w-4 h-4" />
+                                                        Visit Website
+                                                    </a>
+                                                )}
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )
+                        ) : activeView === 'bookmarks' ? (
                             loading ? (
                                 <div className="text-center py-12">
                                     <div className="inline-block w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
