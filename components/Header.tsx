@@ -100,7 +100,7 @@ export default function Header() {
                                 className="flex items-center gap-3 text-xl md:text-2xl font-bold text-primary-800 hover:text-primary-950 transition-all"
                             >
                                 <img
-                                    src="/icon.svg"
+                                    src="/iconnobg.svg"
                                     alt="Depanku.id Logo"
                                     className="w-8 h-8 md:w-10 md:h-10"
                                 />
@@ -298,7 +298,7 @@ export default function Header() {
                                 <div className="flex items-center justify-between p-5 border-b-2 border-neutral-400 bg-background-light">
                                     <div className="flex items-center gap-3">
                                         <img
-                                            src="/icon.svg"
+                                            src="/iconnobg.svg"
                                             alt="Depanku.id Logo"
                                             className="w-8 h-8"
                                         />
