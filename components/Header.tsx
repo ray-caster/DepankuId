@@ -261,183 +261,184 @@ export default function Header() {
                     </div>
                 </div>
 
-                {/* Mobile Menu Overlay */}
-                <AnimatePresence>
-                    {showMobileMenu && (
-                        <>
-                            {/* Backdrop */}
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[45] lg:hidden"
-                                onClick={closeMobileMenu}
-                            />
+            </header>
 
-                            {/* Mobile Menu Panel */}
-                            <motion.div
-                                initial={{ x: '100%' }}
-                                animate={{ x: 0 }}
-                                exit={{ x: '100%' }}
-                                transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                                className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md bg-background border-l-2 border-neutral-400 z-[50] lg:hidden overflow-y-auto safe-top safe-bottom"
-                                style={{
-                                    boxShadow: '-8px 0 32px -4px oklch(0% 0 0 / 0.25)'
-                                }}
-                            >
-                                <div className="flex flex-col h-full">
-                                    {/* Mobile Menu Header */}
-                                    <div className="flex items-center justify-between p-5 border-b-2 border-neutral-400 bg-background-light">
-                                        <span className="text-2xl font-bold text-primary-800">Menu</span>
-                                        <button
-                                            onClick={closeMobileMenu}
-                                            className="flex items-center justify-center w-11 h-11 rounded-soft bg-background border-2 border-neutral-400 hover:bg-neutral-100 active:bg-neutral-200 active:scale-95 transition-all"
-                                            aria-label="Close menu"
-                                        >
-                                            <XMarkIcon className="w-6 h-6 text-foreground" />
-                                        </button>
-                                    </div>
+            {/* Mobile Menu Overlay - Outside header to prevent clipping */}
+            <AnimatePresence>
+                {showMobileMenu && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] lg:hidden"
+                            onClick={closeMobileMenu}
+                        />
 
-                                    {/* User Info - If Logged In */}
-                                    {user && (
-                                        <div className="p-5 border-b-2 border-neutral-400 bg-gradient-to-br from-primary-50 to-accent-50">
-                                            <div className="flex items-center gap-4">
-                                                {user.photoURL ? (
-                                                    <div className="relative w-14 h-14">
-                                                        <Image
-                                                            src={user.photoURL}
-                                                            alt={user.displayName || 'User'}
-                                                            width={56}
-                                                            height={56}
-                                                            className="rounded-full ring-2 ring-primary-400 shadow-md"
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-14 h-14 rounded-full bg-primary-200 flex items-center justify-center">
-                                                        <UserCircleIcon className="w-10 h-10 text-primary-600" />
-                                                    </div>
-                                                )}
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-base font-bold text-foreground truncate">{user.displayName}</p>
-                                                    <p className="text-sm text-neutral-700 truncate">{user.email}</p>
+                        {/* Mobile Menu Panel */}
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                            className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md bg-background border-l-2 border-neutral-400 z-[70] lg:hidden overflow-y-auto safe-top safe-bottom"
+                            style={{
+                                boxShadow: '-8px 0 32px -4px oklch(0% 0 0 / 0.25)'
+                            }}
+                        >
+                            <div className="flex flex-col h-full">
+                                {/* Mobile Menu Header */}
+                                <div className="flex items-center justify-between p-5 border-b-2 border-neutral-400 bg-background-light">
+                                    <span className="text-2xl font-bold text-primary-800">Menu</span>
+                                    <button
+                                        onClick={closeMobileMenu}
+                                        className="flex items-center justify-center w-11 h-11 rounded-soft bg-background border-2 border-neutral-400 hover:bg-neutral-100 active:bg-neutral-200 active:scale-95 transition-all"
+                                        aria-label="Close menu"
+                                    >
+                                        <XMarkIcon className="w-6 h-6 text-foreground" />
+                                    </button>
+                                </div>
+
+                                {/* User Info - If Logged In */}
+                                {user && (
+                                    <div className="p-5 border-b-2 border-neutral-400 bg-gradient-to-br from-primary-50 to-accent-50">
+                                        <div className="flex items-center gap-4">
+                                            {user.photoURL ? (
+                                                <div className="relative w-14 h-14">
+                                                    <Image
+                                                        src={user.photoURL}
+                                                        alt={user.displayName || 'User'}
+                                                        width={56}
+                                                        height={56}
+                                                        className="rounded-full ring-2 ring-primary-400 shadow-md"
+                                                    />
                                                 </div>
+                                            ) : (
+                                                <div className="w-14 h-14 rounded-full bg-primary-200 flex items-center justify-center">
+                                                    <UserCircleIcon className="w-10 h-10 text-primary-600" />
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-base font-bold text-foreground truncate">{user.displayName}</p>
+                                                <p className="text-sm text-neutral-700 truncate">{user.email}</p>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+                                )}
 
-                                    {/* Navigation Links */}
-                                    <nav className="flex-1 p-5 space-y-2 overflow-y-auto">
-                                        {navItems.map((item, index) => {
-                                            const Icon = item.icon;
-                                            const active = isActive(item.href);
+                                {/* Navigation Links */}
+                                <nav className="flex-1 p-5 space-y-2 overflow-y-auto">
+                                    {navItems.map((item, index) => {
+                                        const Icon = item.icon;
+                                        const active = isActive(item.href);
 
-                                            return (
-                                                <Link
-                                                    key={item.href}
-                                                    href={item.href}
-                                                    onClick={closeMobileMenu}
-                                                    className={`flex items-center gap-4 px-5 py-4 rounded-soft font-semibold transition-all duration-200 min-h-[56px] active:scale-98
+                                        return (
+                                            <Link
+                                                key={item.href}
+                                                href={item.href}
+                                                onClick={closeMobileMenu}
+                                                className={`flex items-center gap-4 px-5 py-4 rounded-soft font-semibold transition-all duration-200 min-h-[56px] active:scale-98
                                                         ${active
-                                                            ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white border-2 border-neutral-500 shadow-lg'
-                                                            : 'bg-background-light text-foreground border-2 border-neutral-400 hover:border-primary-400 hover:bg-background-lighter active:bg-neutral-100'
-                                                        }`}
-                                                    style={{
-                                                        boxShadow: active
-                                                            ? '0 6px 12px -2px oklch(0% 0 0 / 0.2), inset 0 2px 0 0 oklch(100% 0 0 / 0.15)'
-                                                            : '0 2px 6px -1px oklch(0% 0 0 / 0.08)'
-                                                    }}
-                                                >
-                                                    <Icon className="w-6 h-6 flex-shrink-0" />
-                                                    <span className="text-base">{item.label}</span>
-                                                </Link>
-                                            );
-                                        })}
+                                                        ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white border-2 border-neutral-500 shadow-lg'
+                                                        : 'bg-background-light text-foreground border-2 border-neutral-400 hover:border-primary-400 hover:bg-background-lighter active:bg-neutral-100'
+                                                    }`}
+                                                style={{
+                                                    boxShadow: active
+                                                        ? '0 6px 12px -2px oklch(0% 0 0 / 0.2), inset 0 2px 0 0 oklch(100% 0 0 / 0.15)'
+                                                        : '0 2px 6px -1px oklch(0% 0 0 / 0.08)'
+                                                }}
+                                            >
+                                                <Icon className="w-6 h-6 flex-shrink-0" />
+                                                <span className="text-base">{item.label}</span>
+                                            </Link>
+                                        );
+                                    })}
 
-                                        {/* Divider */}
-                                        <div className="py-3">
-                                            <div className="border-t-2 border-neutral-300" />
-                                        </div>
+                                    {/* Divider */}
+                                    <div className="py-3">
+                                        <div className="border-t-2 border-neutral-300" />
+                                    </div>
 
-                                        {/* Create Opportunity CTA */}
-                                        <Link
-                                            href="/opportunities"
-                                            onClick={closeMobileMenu}
-                                            className="flex items-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-200 min-h-[56px] active:scale-98
+                                    {/* Create Opportunity CTA */}
+                                    <Link
+                                        href="/opportunities"
+                                        onClick={closeMobileMenu}
+                                        className="flex items-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-200 min-h-[56px] active:scale-98
                                                      bg-gradient-to-r from-accent-600 to-accent-700 text-white border-2 border-neutral-500 hover:from-accent-700 hover:to-accent-800 shadow-lg"
+                                        style={{
+                                            boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
+                                        }}
+                                    >
+                                        <SparklesIcon className="w-6 h-6 flex-shrink-0" />
+                                        <span className="text-base">Create Opportunity</span>
+                                    </Link>
+
+                                    {/* User Menu Items - If Logged In */}
+                                    {user && (
+                                        <>
+                                            <div className="py-3">
+                                                <div className="border-t-2 border-neutral-300" />
+                                            </div>
+                                            {profileMenuItems.map((item, index) => {
+                                                const Icon = item.icon;
+                                                return (
+                                                    <Link
+                                                        key={item.href}
+                                                        href={item.href}
+                                                        onClick={closeMobileMenu}
+                                                        className="flex items-center gap-4 px-5 py-4 rounded-soft font-medium transition-all duration-200 min-h-[56px] active:scale-98
+                                                                     bg-background-light text-foreground border-2 border-neutral-400 hover:border-primary-400 hover:bg-background-lighter active:bg-neutral-100"
+                                                        style={{
+                                                            boxShadow: '0 2px 6px -1px oklch(0% 0 0 / 0.08)'
+                                                        }}
+                                                    >
+                                                        <Icon className="w-6 h-6 text-neutral-600 flex-shrink-0" />
+                                                        <span className="text-base">{item.label}</span>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </>
+                                    )}
+                                </nav>
+
+                                {/* Bottom Actions */}
+                                <div className="p-5 border-t-2 border-neutral-400 bg-background-light space-y-3">
+                                    {user ? (
+                                        <button
+                                            onClick={handleSignOut}
+                                            className="w-full flex items-center justify-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-200 min-h-[56px]
+                                                         bg-gradient-to-r from-red-600 to-red-700 text-white border-2 border-neutral-500 hover:from-red-700 hover:to-red-800 active:scale-95 shadow-lg"
                                             style={{
                                                 boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
                                             }}
                                         >
-                                            <SparklesIcon className="w-6 h-6 flex-shrink-0" />
-                                            <span className="text-base">Create Opportunity</span>
-                                        </Link>
-
-                                        {/* User Menu Items - If Logged In */}
-                                        {user && (
-                                            <>
-                                                <div className="py-3">
-                                                    <div className="border-t-2 border-neutral-300" />
-                                                </div>
-                                                {profileMenuItems.map((item, index) => {
-                                                    const Icon = item.icon;
-                                                    return (
-                                                        <Link
-                                                            key={item.href}
-                                                            href={item.href}
-                                                            onClick={closeMobileMenu}
-                                                            className="flex items-center gap-4 px-5 py-4 rounded-soft font-medium transition-all duration-200 min-h-[56px] active:scale-98
-                                                                     bg-background-light text-foreground border-2 border-neutral-400 hover:border-primary-400 hover:bg-background-lighter active:bg-neutral-100"
-                                                            style={{
-                                                                boxShadow: '0 2px 6px -1px oklch(0% 0 0 / 0.08)'
-                                                            }}
-                                                        >
-                                                            <Icon className="w-6 h-6 text-neutral-600 flex-shrink-0" />
-                                                            <span className="text-base">{item.label}</span>
-                                                        </Link>
-                                                    );
-                                                })}
-                                            </>
-                                        )}
-                                    </nav>
-
-                                    {/* Bottom Actions */}
-                                    <div className="p-5 border-t-2 border-neutral-400 bg-background-light space-y-3">
-                                        {user ? (
-                                            <button
-                                                onClick={handleSignOut}
-                                                className="w-full flex items-center justify-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-200 min-h-[56px]
-                                                         bg-gradient-to-r from-red-600 to-red-700 text-white border-2 border-neutral-500 hover:from-red-700 hover:to-red-800 active:scale-95 shadow-lg"
-                                                style={{
-                                                    boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
-                                                }}
-                                            >
-                                                <ArrowRightOnRectangleIcon className="w-6 h-6" />
-                                                <span className="text-base">Sign Out</span>
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => {
-                                                    setShowAuthModal(true);
-                                                    closeMobileMenu();
-                                                }}
-                                                className="w-full flex items-center justify-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-200 min-h-[56px]
+                                            <ArrowRightOnRectangleIcon className="w-6 h-6" />
+                                            <span className="text-base">Sign Out</span>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                setShowAuthModal(true);
+                                                closeMobileMenu();
+                                            }}
+                                            className="w-full flex items-center justify-center gap-4 px-5 py-4 rounded-soft font-bold transition-all duration-200 min-h-[56px]
                                                          bg-gradient-to-r from-primary-600 to-primary-700 text-white border-2 border-neutral-500 hover:from-primary-700 hover:to-primary-800 active:scale-95 shadow-lg"
-                                                style={{
-                                                    boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
-                                                }}
-                                            >
-                                                <UserCircleIcon className="w-6 h-6" />
-                                                <span className="text-base">Sign In</span>
-                                            </button>
-                                        )}
-                                    </div>
+                                            style={{
+                                                boxShadow: '0 6px 12px -2px oklch(0% 0 0 / 0.25), inset 0 2px 0 0 oklch(100% 0 0 / 0.2)'
+                                            }}
+                                        >
+                                            <UserCircleIcon className="w-6 h-6" />
+                                            <span className="text-base">Sign In</span>
+                                        </button>
+                                    )}
                                 </div>
-                            </motion.div>
-                        </>
-                    )}
-                </AnimatePresence>
-            </header>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
 
             {/* Auth Modal */}
             <AuthModal
