@@ -26,7 +26,7 @@ def get_opportunities():
 
 @opportunity_bp.route('', methods=['POST'])
 @require_auth
-def create_opportunity(user_id: str, user_email: str):
+async def create_opportunity(user_id: str, user_email: str):
     """Create a new opportunity with AI moderation"""
     try:
         data = request.json
@@ -42,7 +42,7 @@ def create_opportunity(user_id: str, user_email: str):
             # Save as draft with moderation notes
             data['status'] = 'rejected'
             data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
-            doc_id, _ = OpportunityService.create_opportunity(data)
+            doc_id, _ = await OpportunityService.create_opportunity(data)
             
             logger.info(f"Opportunity rejected by moderation: {doc_id}")
             
@@ -57,7 +57,7 @@ def create_opportunity(user_id: str, user_email: str):
         
         # Content approved, create as published
         data['status'] = 'published'
-        doc_id, algolia_data = OpportunityService.create_opportunity(data)
+        doc_id, algolia_data = await OpportunityService.create_opportunity(data)
         
         logger.info(f"Opportunity created and published: {doc_id} by {user_email}")
         
@@ -98,11 +98,11 @@ def get_opportunity(opportunity_id):
         }), 500
 
 @opportunity_bp.route('/<opportunity_id>', methods=['PUT'])
-def update_opportunity(opportunity_id):
+async def update_opportunity(opportunity_id):
     """Update an opportunity"""
     try:
         data = request.json
-        OpportunityService.update_opportunity(opportunity_id, data)
+        await OpportunityService.update_opportunity(opportunity_id, data)
         
         return jsonify({
             "success": True,
@@ -115,10 +115,10 @@ def update_opportunity(opportunity_id):
         }), 500
 
 @opportunity_bp.route('/<opportunity_id>', methods=['DELETE'])
-def delete_opportunity(opportunity_id):
+async def delete_opportunity(opportunity_id):
     """Delete an opportunity"""
     try:
-        OpportunityService.delete_opportunity(opportunity_id)
+        await OpportunityService.delete_opportunity(opportunity_id)
         
         return jsonify({
             "success": True,

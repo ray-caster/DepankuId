@@ -67,11 +67,7 @@ Keep responses concise (2-3 sentences max) and end with a relevant question to c
             # Generate response using Gemini 2.5 Flash
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
-                contents=full_prompt,
-                generation_config={
-                    "temperature": 0.7,
-                    "max_output_tokens": 300
-                }
+                contents=full_prompt
             )
             
             return response.text.strip()
@@ -125,11 +121,7 @@ Respond in Indonesian and end with a question to start the conversation."""
             # Generate discovery message using Gemini 2.5 Flash
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
-                contents=discovery_prompt,
-                generation_config={
-                    "temperature": 0.8,
-                    "max_output_tokens": 200
-                }
+                contents=discovery_prompt
             )
             
             return response.text.strip()
@@ -177,11 +169,7 @@ Format as a numbered list with brief explanations."""
             # Generate suggestions using Gemini 2.5 Flash
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
-                contents=suggestion_prompt,
-                generation_config={
-                    "temperature": 0.6,
-                    "max_output_tokens": 400
-                }
+                contents=suggestion_prompt
             )
             
             return response.text.strip()

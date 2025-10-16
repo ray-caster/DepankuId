@@ -33,7 +33,7 @@ class OpportunityService:
         return None
     
     @staticmethod
-    def create_opportunity(data):
+    async def create_opportunity(data):
         """Create a new opportunity"""
         # Add to Firestore
         doc_ref = db.collection('opportunities').document()
@@ -45,7 +45,7 @@ class OpportunityService:
         algolia_data = data.copy()
         algolia_data['objectID'] = doc_ref.id
         algolia_data['createdAt'] = datetime.now().isoformat()
-        algolia_client.save_objects(
+        await algolia_client.save_objects(
             index_name=ALGOLIA_INDEX_NAME,
             objects=[algolia_data]
         )
@@ -53,7 +53,7 @@ class OpportunityService:
         return doc_ref.id, algolia_data
     
     @staticmethod
-    def update_opportunity(opportunity_id, data):
+    async def update_opportunity(opportunity_id, data):
         """Update an existing opportunity"""
         doc_ref = db.collection('opportunities').document(opportunity_id)
         doc_ref.update(data)
@@ -61,7 +61,7 @@ class OpportunityService:
         # Update Algolia
         algolia_data = data.copy()
         algolia_data['objectID'] = opportunity_id
-        algolia_client.save_objects(
+        await algolia_client.save_objects(
             index_name=ALGOLIA_INDEX_NAME,
             objects=[algolia_data]
         )
@@ -69,13 +69,13 @@ class OpportunityService:
         return True
     
     @staticmethod
-    def delete_opportunity(opportunity_id):
+    async def delete_opportunity(opportunity_id):
         """Delete an opportunity"""
         # Delete from Firestore
         db.collection('opportunities').document(opportunity_id).delete()
         
         # Delete from Algolia
-        algolia_client.delete_objects(
+        await algolia_client.delete_objects(
             index_name=ALGOLIA_INDEX_NAME,
             object_ids=[opportunity_id]
         )
@@ -83,7 +83,7 @@ class OpportunityService:
         return True
     
     @staticmethod
-    def sync_to_algolia():
+    async def sync_to_algolia():
         """Sync all Firestore opportunities to Algolia"""
         opportunities_ref = db.collection('opportunities')
         docs = opportunities_ref.stream()
@@ -100,7 +100,7 @@ class OpportunityService:
             records.append(data)
         
         if records:
-            algolia_client.save_objects(
+            await algolia_client.save_objects(
                 index_name=ALGOLIA_INDEX_NAME,
                 objects=records
             )

@@ -77,11 +77,7 @@ Examples:
             # Generate content using Gemini 2.5 Flash
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
-                contents=full_prompt,
-                generation_config={
-                    "temperature": 0.3,
-                    "max_output_tokens": 500
-                }
+                contents=full_prompt
             )
             
             ai_response = response.text.strip()
