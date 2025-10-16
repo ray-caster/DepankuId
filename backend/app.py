@@ -33,6 +33,10 @@ app = Flask(__name__)
 # Set maximum request size (16 MB)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
+# Additional Flask configuration for better request handling
+app.config['JSON_SORT_KEYS'] = False
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+
 # Configure CORS with security settings
 ALLOWED_ORIGINS = [
     'http://localhost:7550',
@@ -62,18 +66,30 @@ logger.info(f"CORS configured for origins: {ALLOWED_ORIGINS}")
 # Add global CORS handler for ASGI compatibility
 @app.before_request
 def handle_preflight():
-    if request.method == "OPTIONS":
-        origin = request.headers.get('Origin')
-        if origin in ALLOWED_ORIGINS:
-            response = jsonify({"message": "OK"})
-            response.headers.add("Access-Control-Allow-Origin", origin)
-            response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
-            response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
-            response.headers.add('Access-Control-Allow-Credentials', 'true')
-            return response
-        else:
-            # Reject unauthorized origins
-            return jsonify({"error": "Origin not allowed"}), 403
+    try:
+        logger.info(f"Before request: {request.method} {request.path}")
+        logger.info(f"Origin: {request.headers.get('Origin')}")
+        logger.info(f"Content-Type: {request.headers.get('Content-Type')}")
+        logger.info(f"Headers: {dict(request.headers)}")
+        
+        if request.method == "OPTIONS":
+            origin = request.headers.get('Origin')
+            if origin in ALLOWED_ORIGINS:
+                response = jsonify({"message": "OK"})
+                response.headers.add("Access-Control-Allow-Origin", origin)
+                response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
+                response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
+                response.headers.add('Access-Control-Allow-Credentials', 'true')
+                return response
+            else:
+                # Reject unauthorized origins
+                return jsonify({"error": "Origin not allowed"}), 403
+    except Exception as e:
+        logger.error(f"Error in handle_preflight: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        # Don't return anything, let the request continue
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")

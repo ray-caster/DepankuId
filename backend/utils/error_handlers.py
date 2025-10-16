@@ -39,6 +39,20 @@ def handle_errors(f):
 def register_error_handlers(app):
     """Register global error handlers for the Flask app"""
     
+    @app.errorhandler(400)
+    def bad_request(e):
+        from flask import request
+        logger.warning(f"400 error: {str(e)}")
+        logger.warning(f"Request method: {request.method if hasattr(request, 'method') else 'Unknown'}")
+        logger.warning(f"Request path: {request.path if hasattr(request, 'path') else 'Unknown'}")
+        logger.warning(f"Request headers: {dict(request.headers) if hasattr(request, 'headers') else 'Unknown'}")
+        return jsonify({
+            "success": False,
+            "error": "Bad request",
+            "message": str(e),
+            "type": "bad_request"
+        }), 400
+    
     @app.errorhandler(404)
     def not_found(e):
         logger.warning(f"404 error: {str(e)}")
