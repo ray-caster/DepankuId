@@ -1,4 +1,5 @@
 """Opportunity routes"""
+import asyncio
 from flask import Blueprint, request, jsonify
 from services.opportunity_service import OpportunityService
 from services.moderation_service import ModerationService
@@ -35,38 +36,55 @@ def create_opportunity(user_id: str, user_email: str):
         data['created_by_uid'] = user_id
         data['created_by_email'] = user_email
         
-        # Moderate content with AI
-        is_approved, issues = ModerationService.moderate_opportunity(data)
+        # Check if this is a draft or published submission
+        is_draft = data.get('status') == 'draft'
         
-        if not is_approved:
-            # Save as draft with moderation notes
-            data['status'] = 'rejected'
-            data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
+        if is_draft:
+            # Save as draft without moderation
+            data['status'] = 'draft'
             doc_id, _ = asyncio.run(OpportunityService.create_opportunity(data))
             
-            logger.info(f"Opportunity rejected by moderation: {doc_id}")
+            logger.info(f"Opportunity saved as draft: {doc_id} by {user_email}")
             
             return jsonify({
-                "success": False,
-                "status": "rejected",
+                "success": True,
+                "status": "draft",
                 "id": doc_id,
-                "message": "Your opportunity needs revision",
-                "issues": issues,
-                "moderation_notes": data['moderation_notes']
-            }), 400
-        
-        # Content approved, create as published
-        data['status'] = 'published'
-        doc_id, algolia_data = asyncio.run(OpportunityService.create_opportunity(data))
-        
-        logger.info(f"Opportunity created and published: {doc_id} by {user_email}")
-        
-        return jsonify({
-            "success": True,
-            "status": "published",
-            "id": doc_id,
-            "data": algolia_data
-        }), 201
+                "message": "Opportunity saved as draft"
+            }), 201
+        else:
+            # Moderate content with AI for published submissions
+            is_approved, issues = ModerationService.moderate_opportunity(data)
+            
+            if not is_approved:
+                # Save as rejected with moderation notes
+                data['status'] = 'rejected'
+                data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
+                doc_id, _ = asyncio.run(OpportunityService.create_opportunity(data))
+                
+                logger.info(f"Opportunity rejected by moderation: {doc_id}")
+                
+                return jsonify({
+                    "success": False,
+                    "status": "rejected",
+                    "id": doc_id,
+                    "message": "Your opportunity needs revision",
+                    "issues": issues,
+                    "moderation_notes": data['moderation_notes']
+                }), 400
+            
+            # Content approved, create as published
+            data['status'] = 'published'
+            doc_id, algolia_data = asyncio.run(OpportunityService.create_opportunity(data))
+            
+            logger.info(f"Opportunity created and published: {doc_id} by {user_email}")
+            
+            return jsonify({
+                "success": True,
+                "status": "published",
+                "id": doc_id,
+                "data": algolia_data
+            }), 201
         
     except Exception as e:
         logger.error(f"Error creating opportunity: {str(e)}")
@@ -98,33 +116,64 @@ def get_opportunity(opportunity_id):
         }), 500
 
 @opportunity_bp.route('/<opportunity_id>', methods=['PUT'])
-def update_opportunity(opportunity_id):
+@require_auth
+def update_opportunity(opportunity_id, user_id: str, user_email: str):
     """Update an opportunity"""
     try:
         data = request.json
+        
+        # Check if status is changing to published
+        if data.get('status') == 'published':
+            # Moderate content with AI for published submissions
+            is_approved, issues = ModerationService.moderate_opportunity(data)
+            
+            if not is_approved:
+                # Update as rejected with moderation notes
+                data['status'] = 'rejected'
+                data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
+                asyncio.run(OpportunityService.update_opportunity(opportunity_id, data))
+                
+                logger.info(f"Opportunity update rejected by moderation: {opportunity_id}")
+                
+                return jsonify({
+                    "success": False,
+                    "status": "rejected",
+                    "message": "Your opportunity needs revision",
+                    "issues": issues,
+                    "moderation_notes": data['moderation_notes']
+                }), 400
+        
+        # Update the opportunity
         asyncio.run(OpportunityService.update_opportunity(opportunity_id, data))
+        
+        logger.info(f"Opportunity updated: {opportunity_id} by {user_email}")
         
         return jsonify({
             "success": True,
             "message": "Opportunity updated successfully"
         }), 200
     except Exception as e:
+        logger.error(f"Error updating opportunity: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
 
 @opportunity_bp.route('/<opportunity_id>', methods=['DELETE'])
-def delete_opportunity(opportunity_id):
+@require_auth
+def delete_opportunity(opportunity_id, user_id: str, user_email: str):
     """Delete an opportunity"""
     try:
         asyncio.run(OpportunityService.delete_opportunity(opportunity_id))
+        
+        logger.info(f"Opportunity deleted: {opportunity_id} by {user_email}")
         
         return jsonify({
             "success": True,
             "message": "Opportunity deleted successfully"
         }), 200
     except Exception as e:
+        logger.error(f"Error deleting opportunity: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
@@ -149,7 +198,7 @@ def get_tag_presets():
 @opportunity_bp.route('/my-opportunities', methods=['GET'])
 @require_auth
 def get_my_opportunities(user_id: str, user_email: str):
-    """Get opportunities created by the authenticated user"""
+    """Get all opportunities created by the authenticated user (published and drafts)"""
     try:
         # Query opportunities created by this user
         opportunities_ref = db.collection('opportunities')
@@ -160,6 +209,18 @@ def get_my_opportunities(user_id: str, user_email: str):
             data = doc.to_dict()
             data['id'] = doc.id
             opportunities.append(data)
+        
+        # Sort by status: drafts first, then published
+        def sort_key(opp):
+            status = opp.get('status', 'published')
+            if status == 'draft':
+                return 0
+            elif status == 'rejected':
+                return 1
+            else:  # published
+                return 2
+        
+        opportunities.sort(key=sort_key)
         
         return jsonify({
             "success": True,
@@ -172,30 +233,4 @@ def get_my_opportunities(user_id: str, user_email: str):
             "error": str(e)
         }), 500
 
-@opportunity_bp.route('/drafts', methods=['GET'])
-@require_auth
-def get_my_drafts(user_id: str, user_email: str):
-    """Get draft/rejected opportunities for the authenticated user"""
-    try:
-        # Query drafts and rejected opportunities
-        opportunities_ref = db.collection('opportunities')
-        docs = opportunities_ref.where('created_by_uid', '==', user_id)\
-                               .where('status', 'in', ['draft', 'rejected']).stream()
-        
-        drafts = []
-        for doc in docs:
-            data = doc.to_dict()
-            data['id'] = doc.id
-            drafts.append(data)
-        
-        return jsonify({
-            "success": True,
-            "data": drafts
-        }), 200
-    except Exception as e:
-        logger.error(f"Error fetching drafts: {str(e)}")
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
 

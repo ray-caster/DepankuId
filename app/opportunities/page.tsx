@@ -74,6 +74,8 @@ function OpportunitiesContent() {
     const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [isDraft, setIsDraft] = useState(false);
     const [draftId, setDraftId] = useState<string | null>(null);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editId, setEditId] = useState<string | null>(null);
 
     // Auto-save functionality
     const autoSave = useCallback(async () => {
@@ -96,6 +98,32 @@ function OpportunitiesContent() {
             console.error('Auto-save failed:', error);
         }
     }, [user, formData, draftId]);
+
+    // Handle edit mode
+    useEffect(() => {
+        const editParam = searchParams.get('edit');
+        if (editParam && user) {
+            setIsEditMode(true);
+            setEditId(editParam);
+            // Load the opportunity data for editing
+            loadOpportunityForEdit(editParam);
+        }
+    }, [searchParams, user]);
+
+    const loadOpportunityForEdit = async (opportunityId: string) => {
+        try {
+            const idToken = await getIdToken(auth.currentUser!);
+            const opportunity = await api.getOpportunity(opportunityId);
+            if (opportunity) {
+                setFormData(opportunity);
+                setIsDraft(opportunity.status === 'draft');
+                setDraftId(opportunityId);
+            }
+        } catch (error) {
+            console.error('Failed to load opportunity for edit:', error);
+            setMessage({ type: 'error', text: 'Failed to load opportunity for editing' });
+        }
+    };
 
     // Auto-save on form changes
     useEffect(() => {
@@ -158,7 +186,14 @@ function OpportunitiesContent() {
 
         try {
             const idToken = await getIdToken(auth.currentUser!);
-            const result = await api.createOpportunity(formData as Opportunity, idToken);
+            const submissionData = { ...formData, status: 'published' } as Opportunity;
+            
+            let result;
+            if (isEditMode && editId) {
+                result = await api.updateOpportunity(editId, submissionData, idToken);
+            } else {
+                result = await api.createOpportunity(submissionData, idToken);
+            }
 
             if (result.status === 'rejected') {
                 setMessage({
@@ -168,9 +203,14 @@ function OpportunitiesContent() {
                 return;
             }
 
-            setMessage({ type: 'success', text: 'Opportunity created successfully!' });
+            setMessage({ 
+                type: 'success', 
+                text: isEditMode ? 'Opportunity updated successfully!' : 'Opportunity created successfully!' 
+            });
             setIsDraft(false);
             setDraftId(null);
+            setIsEditMode(false);
+            setEditId(null);
 
             // Reset form
             setFormData({
@@ -680,8 +720,12 @@ function OpportunitiesContent() {
             <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
                     <div className="mb-8">
-                        <h1 className="text-4xl font-bold text-foreground mb-2">Create Opportunity</h1>
-                        <p className="text-foreground-light">Share an educational opportunity with the community</p>
+                        <h1 className="text-4xl font-bold text-foreground mb-2">
+                            {isEditMode ? 'Edit Opportunity' : 'Create Opportunity'}
+                        </h1>
+                        <p className="text-foreground-light">
+                            {isEditMode ? 'Update your opportunity details' : 'Share an educational opportunity with the community'}
+                        </p>
                     </div>
 
                     {/* Section Tabs */}
@@ -741,7 +785,7 @@ function OpportunitiesContent() {
                                         ) : (
                                             <>
                                                 <SparklesIcon className="w-4 h-4" />
-                                                Create Opportunity
+                                                {isEditMode ? 'Update Opportunity' : 'Create Opportunity'}
                                             </>
                                         )}
                                     </button>

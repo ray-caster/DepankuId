@@ -266,20 +266,6 @@ class API {
         return data.data || [];
     }
 
-    async getMyDrafts(idToken: string): Promise<Opportunity[]> {
-        const response = await fetch(`${this.baseURL}/api/opportunities/drafts`, {
-            headers: {
-                'Authorization': `Bearer ${idToken}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch drafts');
-        }
-
-        const data = await response.json();
-        return data.data || [];
-    }
 
     async deleteOpportunity(opportunityId: string, idToken: string): Promise<void> {
         const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}`, {
