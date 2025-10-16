@@ -1,7 +1,7 @@
 """
 Depanku.id Backend API - Modular Flask Application with ASGI Support
 """
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 import dotenv
