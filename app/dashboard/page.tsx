@@ -5,9 +5,6 @@ import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { useNotifications } from '@/lib/notifications';
-import NotificationContainer from '@/components/NotificationToast';
-import { auth } from '@/lib/firebase';
 import {
     BookmarkIcon,
     CalendarIcon,
@@ -39,15 +36,12 @@ interface DeadlineEvent {
 function DashboardContent() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
-    const { error: showError, success: showSuccess } = useNotifications();
     const [bookmarks, setBookmarks] = useState<Opportunity[]>([]);
     const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
-    const [retryCount, setRetryCount] = useState(0);
-    const [myOppsRetryCount, setMyOppsRetryCount] = useState(0);
 
     // Load active view from localStorage on mount
     useEffect(() => {
@@ -82,84 +76,43 @@ function DashboardContent() {
     }, []);
 
     const loadBookmarks = useCallback(async () => {
-        const MAX_RETRIES = 3;
-        
         try {
-            if (user) {
-                const idToken = await user.getIdToken(true); // Force refresh
+            const idToken = await getIdToken();
+            if (idToken) {
                 const data = await api.getBookmarks(idToken);
                 setBookmarks(data);
                 processDeadlines(data);
                 setLastRefresh(new Date());
-                setRetryCount(0); // Reset retry count on success
-            } else {
-                showError('Authentication Required', 'Please sign in to view your bookmarks.');
             }
         } catch (error) {
             console.error('Failed to load bookmarks:', error);
-            
-            if (error instanceof Error && error.message.includes('Authentication failed')) {
-                if (retryCount < MAX_RETRIES) {
-                    console.log(`Retrying bookmarks load (${retryCount + 1}/${MAX_RETRIES})`);
-                    setRetryCount(prev => prev + 1);
-                    // Retry after a short delay
-                    setTimeout(() => loadBookmarks(), 1000 * (retryCount + 1));
-                    return;
-                } else {
-                    showError('Session Expired', 'Your session has expired. Please sign in again.');
-                    setRetryCount(0);
-                }
-            } else {
-                showError('Load Failed', 'Failed to load bookmarks. Please try again.');
-            }
         } finally {
             setLoading(false);
         }
-    }, [user, processDeadlines, showError, retryCount]);
+    }, [getIdToken, processDeadlines]);
 
     useEffect(() => {
         if (user) {
             loadBookmarks();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]); // Remove loadBookmarks dependency to prevent loops
+    }, [user, loadBookmarks]);
 
     const loadMyOpportunities = useCallback(async () => {
-        const MAX_RETRIES = 3;
         setLoadingMyOpps(true);
-        
         try {
-            if (user) {
-                const idToken = await user.getIdToken(true); // Force refresh
+            const idToken = await getIdToken();
+            if (idToken && user) {
                 // Get all opportunities created by this user (published, drafts, rejected)
                 const myOpps = await api.getMyOpportunities(idToken);
                 setMyOpportunities(myOpps);
                 setLastRefresh(new Date());
-                setMyOppsRetryCount(0); // Reset retry count on success
-            } else {
-                showError('Authentication Required', 'Please sign in to view your opportunities.');
             }
         } catch (error) {
             console.error('Failed to load my opportunities:', error);
-            
-            if (error instanceof Error && error.message.includes('Authentication failed')) {
-                if (myOppsRetryCount < MAX_RETRIES) {
-                    console.log(`Retrying my opportunities load (${myOppsRetryCount + 1}/${MAX_RETRIES})`);
-                    setMyOppsRetryCount(prev => prev + 1);
-                    // Retry after a short delay
-                    setTimeout(() => loadMyOpportunities(), 1000 * (myOppsRetryCount + 1));
-                    return;
-                } else {
-                    showError('Session Expired', 'Your session has expired. Please sign in again.');
-                    setMyOppsRetryCount(0);
-                }
-            } else {
-                showError('Load Failed', 'Failed to load your opportunities. Please try again.');
-            }
         } finally {
             setLoadingMyOpps(false);
         }
-    }, [user, showError, myOppsRetryCount]);
+    }, [getIdToken, user]);
 
     const handleDeleteOpportunity = async (id: string) => {
         if (!user) return;
@@ -173,10 +126,9 @@ function DashboardContent() {
             await api.deleteOpportunity(id, idToken as string);
 
             setMyOpportunities(prev => prev.filter(opp => opp.id !== id));
-            showSuccess('Deleted', 'Opportunity deleted successfully.');
         } catch (error) {
             console.error('Error deleting opportunity:', error);
-            showError('Delete Failed', 'Failed to delete opportunity. Please try again.');
+            alert('Failed to delete opportunity');
         } finally {
             setDeletingId(null);
         }
@@ -186,23 +138,20 @@ function DashboardContent() {
         if (user && activeView === 'myOpportunities') {
             loadMyOpportunities();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, activeView]); // Remove loadMyOpportunities dependency to prevent loops
+    }, [user, activeView, loadMyOpportunities]);
 
     const handleRemoveBookmark = async (opportunityId: string) => {
         try {
-            if (user) {
-                const idToken = await user.getIdToken(true); // Force refresh
+            const idToken = await getIdToken();
+            if (idToken) {
                 await api.removeBookmark(opportunityId, idToken);
                 const updatedBookmarks = bookmarks.filter(b => b.id !== opportunityId);
                 setBookmarks(updatedBookmarks);
                 processDeadlines(updatedBookmarks);
                 setLastRefresh(new Date());
-                showSuccess('Bookmark Removed', 'Opportunity removed from bookmarks.');
             }
         } catch (error) {
             console.error('Failed to remove bookmark:', error);
-            showError('Bookmark Failed', 'Failed to remove bookmark. Please try again.');
         }
     };
 
@@ -333,7 +282,6 @@ function DashboardContent() {
     return (
         <div className="min-h-screen bg-background">
             <Header />
-            <NotificationContainer />
 
             <main className="pt-16 md:pt-20">
                 {/* Hero Section */}
