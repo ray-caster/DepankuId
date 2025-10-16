@@ -22,20 +22,14 @@ interface OpportunityCardProps {
 }
 
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
-    const { user, getIdToken } = useAuth();
+    const { user, idToken } = useAuth();
     const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
     const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
     const handleBookmark = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        if (!user) {
-            alert('Please sign in to bookmark opportunities');
-            return;
-        }
-
-        const idToken = await getIdToken();
-        if (!idToken) {
+        if (!user || !idToken) {
             alert('Please sign in to bookmark opportunities');
             return;
         }
@@ -62,13 +56,7 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
     const handleApply = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        if (!user) {
-            alert('Please sign in to apply for opportunities');
-            return;
-        }
-
-        const idToken = await getIdToken();
-        if (!idToken) {
+        if (!user || !idToken) {
             alert('Please sign in to apply for opportunities');
             return;
         }
