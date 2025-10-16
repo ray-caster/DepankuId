@@ -12,9 +12,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { api } from '@/lib/api';
 
 function SettingsContentInner() {
-    const { user } = useAuth();
+    const { user, getIdToken } = useAuth();
     const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
     const [profileData, setProfileData] = useState({
@@ -37,6 +38,7 @@ function SettingsContentInner() {
         showBookmarks: false,
     });
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const tabs = [
         { id: 'profile', label: 'Profile', icon: UserCircleIcon },
@@ -50,33 +52,102 @@ function SettingsContentInner() {
         if (tab) setActiveTab(tab);
     }, [searchParams]);
 
+    // Load settings data on mount
+    useEffect(() => {
+        const loadSettings = async () => {
+            if (!user) return;
+
+            try {
+                const idToken = await getIdToken();
+                if (!idToken) return;
+
+                // Load profile data
+                const profile = await api.getProfile(idToken);
+                if (profile.profile) {
+                    setProfileData(prev => ({
+                        ...prev,
+                        bio: profile.profile.bio || '',
+                        website: profile.profile.website || '',
+                        location: profile.profile.location || '',
+                    }));
+                }
+
+                // Load notification settings
+                const notifications = await api.getNotificationSettings(idToken);
+                setNotificationSettings(notifications);
+
+                // Load privacy settings
+                const privacy = await api.getPrivacySettings(idToken);
+                setPrivacySettings(privacy);
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+            }
+        };
+
+        loadSettings();
+    }, [user, getIdToken]);
+
     const handleSaveProfile = async () => {
+        if (!user) return;
+
+        setLoading(true);
         try {
-            // TODO: API call to save profile
+            const idToken = await getIdToken();
+            if (!idToken) throw new Error('No authentication token');
+
+            await api.updateProfile({
+                bio: profileData.bio,
+                website: profileData.website,
+                location: profileData.location,
+            }, idToken);
+
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {
+            console.error('Failed to update profile:', error);
             setMessage({ type: 'error', text: 'Failed to update profile' });
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleSaveNotifications = async () => {
+        if (!user) return;
+
+        setLoading(true);
         try {
-            // TODO: API call to save notifications
+            const idToken = await getIdToken();
+            if (!idToken) throw new Error('No authentication token');
+
+            await api.updateNotificationSettings(notificationSettings, idToken);
+
             setMessage({ type: 'success', text: 'Notification settings updated!' });
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {
+            console.error('Failed to update notifications:', error);
             setMessage({ type: 'error', text: 'Failed to update settings' });
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleSavePrivacy = async () => {
+        if (!user) return;
+
+        setLoading(true);
         try {
-            // TODO: API call to save privacy settings
+            const idToken = await getIdToken();
+            if (!idToken) throw new Error('No authentication token');
+
+            await api.updatePrivacySettings(privacySettings, idToken);
+
             setMessage({ type: 'success', text: 'Privacy settings updated!' });
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {
+            console.error('Failed to update privacy:', error);
             setMessage({ type: 'error', text: 'Failed to update settings' });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -118,8 +189,8 @@ function SettingsContentInner() {
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={`mb-6 p-4 rounded-soft ${message.type === 'success'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-red-100 text-red-700'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
                                 }`}
                         >
                             {message.text}
@@ -138,8 +209,8 @@ function SettingsContentInner() {
                                                 key={tab.id}
                                                 onClick={() => setActiveTab(tab.id)}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-soft transition-all ${activeTab === tab.id
-                                                        ? 'bg-primary-600 text-white'
-                                                        : 'text-foreground hover:bg-neutral-100'
+                                                    ? 'bg-primary-600 text-white'
+                                                    : 'text-foreground hover:bg-neutral-100'
                                                     }`}
                                             >
                                                 <Icon className="w-5 h-5" />
@@ -258,8 +329,12 @@ function SettingsContentInner() {
                                         </div>
 
                                         <div className="pt-4 border-t border-neutral-200">
-                                            <button onClick={handleSaveProfile} className="btn-primary">
-                                                Save Changes
+                                            <button
+                                                onClick={handleSaveProfile}
+                                                disabled={loading}
+                                                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {loading ? 'Saving...' : 'Save Changes'}
                                             </button>
                                         </div>
                                     </div>
@@ -336,8 +411,12 @@ function SettingsContentInner() {
                                         </div>
 
                                         <div className="pt-4 border-t border-neutral-200">
-                                            <button onClick={handleSaveNotifications} className="btn-primary">
-                                                Save Preferences
+                                            <button
+                                                onClick={handleSaveNotifications}
+                                                disabled={loading}
+                                                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {loading ? 'Saving...' : 'Save Preferences'}
                                             </button>
                                         </div>
                                     </div>
@@ -397,8 +476,12 @@ function SettingsContentInner() {
                                         </div>
 
                                         <div className="pt-4 border-t border-neutral-200">
-                                            <button onClick={handleSavePrivacy} className="btn-primary">
-                                                Save Settings
+                                            <button
+                                                onClick={handleSavePrivacy}
+                                                disabled={loading}
+                                                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {loading ? 'Saving...' : 'Save Settings'}
                                             </button>
                                         </div>
                                     </div>

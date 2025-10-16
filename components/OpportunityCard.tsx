@@ -53,6 +53,31 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
         }
     };
 
+    const handleApply = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        if (!user || !idToken) {
+            alert('Please sign in to apply for opportunities');
+            return;
+        }
+
+        try {
+            // Track application
+            await api.trackApplication(opportunity.id || opportunity.objectID || '', idToken);
+
+            // Open the opportunity URL
+            if (opportunity.url) {
+                window.open(opportunity.url, '_blank', 'noopener,noreferrer');
+            }
+        } catch (error) {
+            console.error('Error tracking application:', error);
+            // Still open the URL even if tracking fails
+            if (opportunity.url) {
+                window.open(opportunity.url, '_blank', 'noopener,noreferrer');
+            }
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -151,15 +176,13 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                 {/* Link with better emphasis */}
                 {opportunity.url && (
                     <div className="mt-auto pt-5 border-t border-neutral-200">
-                        <a
-                            href={opportunity.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <button
+                            onClick={handleApply}
                             className="inline-flex items-center gap-2 text-primary-700 hover:text-primary-900 font-semibold transition-all group/link"
                         >
-                            <span className="group-hover/link:translate-x-0.5 transition-transform">Learn more</span>
+                            <span className="group-hover/link:translate-x-0.5 transition-transform">Apply Now</span>
                             <ArrowTopRightOnSquareIcon className="h-4 w-4 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-                        </a>
+                        </button>
                     </div>
                 )}
             </div>

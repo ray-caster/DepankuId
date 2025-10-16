@@ -57,6 +57,7 @@ function DashboardContent() {
         localStorage.setItem('dashboardActiveView', view);
     };
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
     const processDeadlines = useCallback((opportunities: Opportunity[]) => {
         const events: DeadlineEvent[] = opportunities
@@ -81,6 +82,7 @@ function DashboardContent() {
                 const data = await api.getBookmarks(idToken);
                 setBookmarks(data);
                 processDeadlines(data);
+                setLastRefresh(new Date());
             }
         } catch (error) {
             console.error('Failed to load bookmarks:', error);
@@ -103,6 +105,7 @@ function DashboardContent() {
                 // Get all opportunities created by this user (published, drafts, rejected)
                 const myOpps = await api.getMyOpportunities(idToken);
                 setMyOpportunities(myOpps);
+                setLastRefresh(new Date());
             }
         } catch (error) {
             console.error('Failed to load my opportunities:', error);
@@ -142,13 +145,23 @@ function DashboardContent() {
             const idToken = await getIdToken();
             if (idToken) {
                 await api.removeBookmark(opportunityId, idToken);
-                setBookmarks(bookmarks.filter(b => b.id !== opportunityId));
-                processDeadlines(bookmarks.filter(b => b.id !== opportunityId));
+                const updatedBookmarks = bookmarks.filter(b => b.id !== opportunityId);
+                setBookmarks(updatedBookmarks);
+                processDeadlines(updatedBookmarks);
+                setLastRefresh(new Date());
             }
         } catch (error) {
             console.error('Failed to remove bookmark:', error);
         }
     };
+
+    const refreshData = useCallback(async () => {
+        if (activeView === 'bookmarks') {
+            await loadBookmarks();
+        } else if (activeView === 'myOpportunities') {
+            await loadMyOpportunities();
+        }
+    }, [activeView, loadBookmarks, loadMyOpportunities]);
 
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -277,8 +290,23 @@ function DashboardContent() {
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-8"
                     >
-                        <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
-                        <p className="text-neutral-600">Track your bookmarked opportunities and upcoming deadlines</p>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
+                                <p className="text-neutral-600">Track your bookmarked opportunities and upcoming deadlines</p>
+                            </div>
+                            <button
+                                onClick={refreshData}
+                                className="flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-soft transition-colors text-sm font-medium"
+                                title="Refresh data"
+                            >
+                                <ArrowPathIcon className="w-4 h-4" />
+                                Refresh
+                            </button>
+                        </div>
+                        <div className="text-xs text-neutral-500 mt-2">
+                            Last updated: {lastRefresh.toLocaleTimeString()}
+                        </div>
                     </motion.div>
 
                     {/* Stats Cards */}
@@ -435,10 +463,10 @@ function DashboardContent() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: idx * 0.05 }}
                                                 className={`card hover:shadow-card-hover transition-shadow ${opportunity.status === 'draft'
-                                                        ? 'border-l-4 border-orange-500'
-                                                        : opportunity.status === 'published'
-                                                            ? 'border-l-4 border-green-500'
-                                                            : 'border-l-4 border-red-500'
+                                                    ? 'border-l-4 border-orange-500'
+                                                    : opportunity.status === 'published'
+                                                        ? 'border-l-4 border-green-500'
+                                                        : 'border-l-4 border-red-500'
                                                     }`}
                                             >
                                                 <div className="mb-3">
@@ -447,10 +475,10 @@ function DashboardContent() {
                                                             {opportunity.title}
                                                         </h3>
                                                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${opportunity.status === 'draft'
-                                                                ? 'bg-orange-100 text-orange-700'
-                                                                : opportunity.status === 'published'
-                                                                    ? 'bg-green-100 text-green-700'
-                                                                    : 'bg-red-100 text-red-700'
+                                                            ? 'bg-orange-100 text-orange-700'
+                                                            : opportunity.status === 'published'
+                                                                ? 'bg-green-100 text-green-700'
+                                                                : 'bg-red-100 text-red-700'
                                                             }`}>
                                                             {opportunity.status === 'draft' ? 'Draft' :
                                                                 opportunity.status === 'published' ? 'Published' : 'Rejected'}

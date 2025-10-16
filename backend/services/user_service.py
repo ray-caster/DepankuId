@@ -153,6 +153,61 @@ class UserService:
         return True
     
     @staticmethod
+    def get_activity(user_id):
+        """Get user activity"""
+        user_ref = db.collection('users').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return []
+        
+        user_data = user_doc.to_dict()
+        return user_data.get('activity', [])
+    
+    @staticmethod
+    def track_application(user_id, opportunity_id):
+        """Track user application"""
+        user_ref = db.collection('users').document(user_id)
+        
+        # Add application to activity
+        activity_item = {
+            'type': 'application',
+            'opportunity_id': opportunity_id,
+            'timestamp': firestore.SERVER_TIMESTAMP
+        }
+        
+        user_ref.update({
+            'activity': firestore.ArrayUnion([activity_item]),
+            'applications': firestore.ArrayUnion([opportunity_id])
+        })
+        
+        return True
+    
+    @staticmethod
+    def get_applications(user_id):
+        """Get user applications"""
+        user_ref = db.collection('users').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            return []
+        
+        user_data = user_doc.to_dict()
+        application_ids = user_data.get('applications', [])
+        
+        # Fetch opportunity details for applications
+        applications = []
+        for opp_id in application_ids:
+            opp_doc = db.collection('opportunities').document(opp_id).get()
+            if opp_doc.exists:
+                opp_data = opp_doc.to_dict()
+                opp_data['id'] = opp_doc.id
+                opp_data['applied_at'] = user_data.get('activity', [])
+                applications.append(opp_data)
+        
+        return applications
+    
+    @staticmethod
     def verify_token(id_token):
         """Verify Firebase ID token and return user ID"""
         decoded_token = auth.verify_id_token(id_token)

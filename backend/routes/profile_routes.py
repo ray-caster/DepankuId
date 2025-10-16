@@ -122,3 +122,66 @@ def update_privacy_settings():
             "error": str(e)
         }), 500
 
+@profile_bp.route('/activity', methods=['GET'])
+@require_auth
+def get_activity():
+    """Get user activity"""
+    try:
+        activity = UserService.get_activity(request.user_id)
+        
+        return jsonify({
+            "success": True,
+            "data": activity
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@profile_bp.route('/activity/application', methods=['POST'])
+@require_auth
+def track_application():
+    """Track user application"""
+    try:
+        data = request.json
+        opportunity_id = data.get('opportunityId')
+        
+        if not opportunity_id:
+            return jsonify({
+                "success": False,
+                "error": "Opportunity ID is required"
+            }), 400
+        
+        UserService.track_application(request.user_id, opportunity_id)
+        
+        return jsonify({
+            "success": True,
+            "message": "Application tracked successfully"
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@profile_bp.route('/applications', methods=['GET'])
+@require_auth
+def get_applications():
+    """Get user applications"""
+    try:
+        applications = UserService.get_applications(request.user_id)
+        
+        return jsonify({
+            "success": True,
+            "data": applications
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+

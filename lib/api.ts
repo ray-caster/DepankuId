@@ -485,6 +485,143 @@ class API {
             throw new Error('Failed to remove bookmark');
         }
     }
+
+    // Profile API methods
+    async getProfile(idToken: string): Promise<any> {
+        const response = await fetch(`${this.baseURL}/api/profile`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch profile');
+        }
+
+        const data = await response.json();
+        return data.data || {};
+    }
+
+    async updateProfile(profileData: any, idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ profile: profileData }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update profile');
+        }
+    }
+
+    async getNotificationSettings(idToken: string): Promise<any> {
+        const response = await fetch(`${this.baseURL}/api/profile/settings/notifications`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch notification settings');
+        }
+
+        const data = await response.json();
+        return data.data || {};
+    }
+
+    async updateNotificationSettings(settings: any, idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/profile/settings/notifications`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ settings }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update notification settings');
+        }
+    }
+
+    async getPrivacySettings(idToken: string): Promise<any> {
+        const response = await fetch(`${this.baseURL}/api/profile/settings/privacy`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch privacy settings');
+        }
+
+        const data = await response.json();
+        return data.data || {};
+    }
+
+    async updatePrivacySettings(settings: any, idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/profile/settings/privacy`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ settings }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update privacy settings');
+        }
+    }
+
+    // Activity tracking methods
+    async getActivity(idToken: string): Promise<any[]> {
+        const response = await fetch(`${this.baseURL}/api/profile/activity`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch activity');
+        }
+
+        const data = await response.json();
+        return data.data || [];
+    }
+
+    async trackApplication(opportunityId: string, idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/profile/activity/application`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ opportunityId }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to track application');
+        }
+    }
+
+    async getApplications(idToken: string): Promise<any[]> {
+        const response = await fetch(`${this.baseURL}/api/profile/applications`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch applications');
+        }
+
+        const data = await response.json();
+        return data.data || [];
+    }
 }
 
 export const api = new API();
