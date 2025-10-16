@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import { getIdToken } from 'firebase/auth';
@@ -71,7 +71,7 @@ function OpportunitiesContent() {
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [showSocialMedia, setShowSocialMedia] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState('');
-    const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+    const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [isDraft, setIsDraft] = useState(false);
     const [draftId, setDraftId] = useState<string | null>(null);
 
@@ -99,17 +99,21 @@ function OpportunitiesContent() {
 
     // Auto-save on form changes
     useEffect(() => {
-        if (autoSaveTimeout) {
-            clearTimeout(autoSaveTimeout);
+        if (autoSaveTimeoutRef.current) {
+            clearTimeout(autoSaveTimeoutRef.current);
         }
         
         const timeout = setTimeout(() => {
             autoSave();
         }, 2000); // Auto-save after 2 seconds of inactivity
         
-        setAutoSaveTimeout(timeout);
+        autoSaveTimeoutRef.current = timeout;
         
-        return () => clearTimeout(timeout);
+        return () => {
+            if (autoSaveTimeoutRef.current) {
+                clearTimeout(autoSaveTimeoutRef.current);
+            }
+        };
     }, [formData, autoSave]);
 
     // Load templates and presets
