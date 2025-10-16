@@ -80,6 +80,8 @@ logger.info("All blueprints registered successfully")
 logger.info("Registered routes:")
 for rule in app.url_map.iter_rules():
     logger.info(f"  {rule.methods} {rule.rule}")
+    if 'publish' in rule.rule:
+        logger.info(f"    -> PUBLISH ROUTE FOUND: {rule.methods} {rule.rule}")
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
