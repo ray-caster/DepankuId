@@ -1,5 +1,4 @@
 """Opportunity routes"""
-import asyncio
 from flask import Blueprint, request, jsonify
 from services.opportunity_service import OpportunityService
 from services.moderation_service import ModerationService
@@ -42,7 +41,7 @@ def create_opportunity(user_id: str, user_email: str):
         if is_draft:
             # Save as draft without moderation
             data['status'] = 'draft'
-            doc_id, _ = asyncio.run(OpportunityService.create_opportunity(data))
+            doc_id, _ = OpportunityService.create_opportunity(data)
             
             logger.info(f"Opportunity saved as draft: {doc_id} by {user_email}")
             
@@ -60,7 +59,7 @@ def create_opportunity(user_id: str, user_email: str):
                 # Save as rejected with moderation notes
                 data['status'] = 'rejected'
                 data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
-                doc_id, _ = asyncio.run(OpportunityService.create_opportunity(data))
+                doc_id, _ = OpportunityService.create_opportunity(data)
                 
                 logger.info(f"Opportunity rejected by moderation: {doc_id}")
                 
@@ -75,7 +74,7 @@ def create_opportunity(user_id: str, user_email: str):
             
             # Content approved, create as published
             data['status'] = 'published'
-            doc_id, algolia_data = asyncio.run(OpportunityService.create_opportunity(data))
+            doc_id, algolia_data = OpportunityService.create_opportunity(data)
             
             logger.info(f"Opportunity created and published: {doc_id} by {user_email}")
             
@@ -131,7 +130,7 @@ def update_opportunity(opportunity_id, user_id: str, user_email: str):
                 # Update as rejected with moderation notes
                 data['status'] = 'rejected'
                 data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
-                asyncio.run(OpportunityService.update_opportunity(opportunity_id, data))
+                OpportunityService.update_opportunity(opportunity_id, data)
                 
                 logger.info(f"Opportunity update rejected by moderation: {opportunity_id}")
                 
@@ -144,7 +143,7 @@ def update_opportunity(opportunity_id, user_id: str, user_email: str):
                 }), 400
         
         # Update the opportunity
-        asyncio.run(OpportunityService.update_opportunity(opportunity_id, data))
+        OpportunityService.update_opportunity(opportunity_id, data)
         
         logger.info(f"Opportunity updated: {opportunity_id} by {user_email}")
         
@@ -164,7 +163,7 @@ def update_opportunity(opportunity_id, user_id: str, user_email: str):
 def delete_opportunity(opportunity_id, user_id: str, user_email: str):
     """Delete an opportunity"""
     try:
-        asyncio.run(OpportunityService.delete_opportunity(opportunity_id))
+        OpportunityService.delete_opportunity(opportunity_id)
         
         logger.info(f"Opportunity deleted: {opportunity_id} by {user_email}")
         
@@ -200,15 +199,11 @@ def get_tag_presets():
 def get_my_opportunities(user_id: str, user_email: str):
     """Get all opportunities created by the authenticated user (published and drafts)"""
     try:
-        # Query opportunities created by this user
-        opportunities_ref = db.collection('opportunities')
-        docs = opportunities_ref.where('created_by_uid', '==', user_id).stream()
+        # Get status filter from query params
+        status = request.args.get('status')
         
-        opportunities = []
-        for doc in docs:
-            data = doc.to_dict()
-            data['id'] = doc.id
-            opportunities.append(data)
+        # Query opportunities created by this user
+        opportunities = OpportunityService.get_user_opportunities(user_id, status)
         
         # Sort by status: drafts first, then published
         def sort_key(opp):

@@ -79,25 +79,28 @@ function OpportunitiesContent() {
 
     // Auto-save functionality
     const autoSave = useCallback(async () => {
-        if (!user || !formData.title) return;
-        
+        if (!user || !formData.title || loading) return; // Don't auto-save while submitting
+
         try {
             const idToken = await getIdToken(auth.currentUser!);
             const draftData = { ...formData, status: 'draft' } as Opportunity;
-            
+
             if (draftId) {
                 // Update existing draft
                 await api.updateOpportunity(draftId, draftData, idToken);
+                console.log('Draft updated:', draftId);
             } else {
-                // Create new draft
+                // Create new draft only if we don't have one
                 const result = await api.createOpportunity(draftData, idToken);
-                setDraftId(result.id || null);
+                if (result.id) {
+                    setDraftId(result.id);
+                    console.log('New draft created:', result.id);
+                }
             }
-            console.log('Draft auto-saved');
         } catch (error) {
             console.error('Auto-save failed:', error);
         }
-    }, [user, formData, draftId]);
+    }, [user, formData, draftId, loading]);
 
     // Handle edit mode
     useEffect(() => {
@@ -130,19 +133,24 @@ function OpportunitiesContent() {
         if (autoSaveTimeoutRef.current) {
             clearTimeout(autoSaveTimeoutRef.current);
         }
-        
+
+        // Don't auto-save if loading or if we're in edit mode with a published opportunity
+        if (loading || (isEditMode && editId && !isDraft)) {
+            return;
+        }
+
         const timeout = setTimeout(() => {
             autoSave();
         }, 2000); // Auto-save after 2 seconds of inactivity
-        
+
         autoSaveTimeoutRef.current = timeout;
-        
+
         return () => {
             if (autoSaveTimeoutRef.current) {
                 clearTimeout(autoSaveTimeoutRef.current);
             }
         };
-    }, [formData, autoSave]);
+    }, [formData, autoSave, loading, isEditMode, editId, isDraft]);
 
     // Load templates and presets
     useEffect(() => {
@@ -190,7 +198,7 @@ function OpportunitiesContent() {
         try {
             const idToken = await getIdToken(auth.currentUser!);
             const submissionData = { ...formData, status: 'published' } as Opportunity;
-            
+
             let result;
             if (isEditMode && editId) {
                 result = await api.updateOpportunity(editId, submissionData, idToken);
@@ -206,10 +214,17 @@ function OpportunitiesContent() {
                 return;
             }
 
-            setMessage({ 
-                type: 'success', 
-                text: isEditMode ? 'Opportunity updated successfully!' : 'Opportunity created successfully!' 
+            setMessage({
+                type: 'success',
+                text: isEditMode ? 'Opportunity updated successfully!' : 'Opportunity created successfully!'
             });
+
+            // Clear auto-save timeout
+            if (autoSaveTimeoutRef.current) {
+                clearTimeout(autoSaveTimeoutRef.current);
+                autoSaveTimeoutRef.current = null;
+            }
+
             setIsDraft(false);
             setDraftId(null);
             setIsEditMode(false);
@@ -343,11 +358,10 @@ function OpportunitiesContent() {
                             key={key}
                             type="button"
                             onClick={() => applyTemplate(key)}
-                            className={`p-3 text-left rounded-comfort border-2 transition-all ${
-                                selectedTemplate === key
+                            className={`p-3 text-left rounded-comfort border-2 transition-all ${selectedTemplate === key
                                     ? 'border-primary-500 bg-primary-100'
                                     : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
-                            }`}
+                                }`}
                         >
                             <div className="font-medium text-sm text-foreground">{key.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
                             <div className="text-xs text-neutral-600 mt-1">{template.description}</div>
@@ -741,11 +755,10 @@ function OpportunitiesContent() {
                                     <button
                                         key={section.id}
                                         onClick={() => setCurrentSection(section.id)}
-                                        className={`flex items-center gap-2 px-4 py-3 rounded-comfort border-2 transition-all ${
-                                            isActive
+                                        className={`flex items-center gap-2 px-4 py-3 rounded-comfort border-2 transition-all ${isActive
                                                 ? 'border-primary-500 bg-primary-100 text-primary-700'
                                                 : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
-                                        }`}
+                                            }`}
                                     >
                                         <Icon className="w-4 h-4" />
                                         <span className="text-sm font-medium">{section.label}</span>
@@ -812,11 +825,10 @@ function OpportunitiesContent() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className={`mt-6 p-4 rounded-comfort ${
-                                message.type === 'success'
+                            className={`mt-6 p-4 rounded-comfort ${message.type === 'success'
                                     ? 'bg-green-100 text-green-700 border-2 border-green-300'
                                     : 'bg-red-100 text-red-700 border-2 border-red-300'
-                            }`}
+                                }`}
                         >
                             {message.text}
                         </motion.div>
