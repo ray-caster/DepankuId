@@ -35,9 +35,18 @@ class AlgoliaService:
                     return future.result(timeout=30)  # 30 second timeout
             else:
                 return loop.run_until_complete(coro)
-        except RuntimeError:
-            # No event loop exists, create a new one
-            return asyncio.run(coro)
+        except RuntimeError as e:
+            if "Event loop is closed" in str(e):
+                # Event loop was closed, create a new one
+                new_loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(new_loop)
+                try:
+                    return new_loop.run_until_complete(coro)
+                finally:
+                    new_loop.close()
+            else:
+                # No event loop exists, create a new one
+                return asyncio.run(coro)
     
     async def save_objects_async(self, objects: List[Dict[str, Any]]) -> bool:
         """Save objects to Algolia asynchronously"""

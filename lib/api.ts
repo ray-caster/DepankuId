@@ -469,7 +469,11 @@ class API {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to add bookmark');
+            const errorData = await response.json().catch(() => ({}));
+            if (response.status === 401) {
+                throw new Error('Authentication failed. Please sign in again.');
+            }
+            throw new Error(errorData.message || 'Failed to add bookmark');
         }
     }
 
@@ -482,7 +486,11 @@ class API {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to remove bookmark');
+            const errorData = await response.json().catch(() => ({}));
+            if (response.status === 401) {
+                throw new Error('Authentication failed. Please sign in again.');
+            }
+            throw new Error(errorData.message || 'Failed to remove bookmark');
         }
     }
 

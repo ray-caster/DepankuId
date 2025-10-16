@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity } from '@/lib/api';
 import { motion } from 'framer-motion';
+import { useNotifications } from '@/lib/notifications';
+import NotificationContainer from '@/components/NotificationToast';
 import {
     BookmarkIcon,
     CalendarIcon,
@@ -36,6 +38,7 @@ interface DeadlineEvent {
 function DashboardContent() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
+    const { error: showError, success: showSuccess } = useNotifications();
     const [bookmarks, setBookmarks] = useState<Opportunity[]>([]);
     const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
     const [loading, setLoading] = useState(true);
@@ -86,10 +89,11 @@ function DashboardContent() {
             }
         } catch (error) {
             console.error('Failed to load bookmarks:', error);
+            showError('Load Failed', 'Failed to load bookmarks. Please try again.');
         } finally {
             setLoading(false);
         }
-    }, [getIdToken, processDeadlines]);
+    }, [getIdToken, processDeadlines, showError]);
 
     useEffect(() => {
         if (user) {
@@ -109,10 +113,11 @@ function DashboardContent() {
             }
         } catch (error) {
             console.error('Failed to load my opportunities:', error);
+            showError('Load Failed', 'Failed to load your opportunities. Please try again.');
         } finally {
             setLoadingMyOpps(false);
         }
-    }, [getIdToken, user]);
+    }, [getIdToken, user, showError]);
 
     const handleDeleteOpportunity = async (id: string) => {
         if (!user) return;
@@ -126,9 +131,10 @@ function DashboardContent() {
             await api.deleteOpportunity(id, idToken as string);
 
             setMyOpportunities(prev => prev.filter(opp => opp.id !== id));
+            showSuccess('Deleted', 'Opportunity deleted successfully.');
         } catch (error) {
             console.error('Error deleting opportunity:', error);
-            alert('Failed to delete opportunity');
+            showError('Delete Failed', 'Failed to delete opportunity. Please try again.');
         } finally {
             setDeletingId(null);
         }
@@ -149,9 +155,11 @@ function DashboardContent() {
                 setBookmarks(updatedBookmarks);
                 processDeadlines(updatedBookmarks);
                 setLastRefresh(new Date());
+                showSuccess('Bookmark Removed', 'Opportunity removed from bookmarks.');
             }
         } catch (error) {
             console.error('Failed to remove bookmark:', error);
+            showError('Bookmark Failed', 'Failed to remove bookmark. Please try again.');
         }
     };
 
@@ -282,6 +290,7 @@ function DashboardContent() {
     return (
         <div className="min-h-screen bg-background">
             <Header />
+            <NotificationContainer />
 
             <main className="pt-16 md:pt-20">
                 {/* Hero Section */}
