@@ -21,9 +21,17 @@ class AlgoliaService:
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                # If we're already in an event loop, create a new thread
+                # If we're already in an event loop, create a new thread with a new event loop
+                def run_in_new_loop():
+                    new_loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(new_loop)
+                    try:
+                        return new_loop.run_until_complete(coro)
+                    finally:
+                        new_loop.close()
+                
                 with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(asyncio.run, coro)
+                    future = executor.submit(run_in_new_loop)
                     return future.result(timeout=30)  # 30 second timeout
             else:
                 return loop.run_until_complete(coro)
