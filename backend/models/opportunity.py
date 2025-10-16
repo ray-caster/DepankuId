@@ -32,7 +32,6 @@ class Opportunity:
     deadline: Optional[str] = None  # ISO format or "indefinite"
     url: Optional[str] = None
     social_media: Optional[dict] = None
-    requirements: Optional[str] = None
     benefits: Optional[str] = None
     eligibility: Optional[str] = None
     cost: Optional[str] = None
@@ -54,28 +53,24 @@ OPPORTUNITY_TEMPLATES = {
         "type": "research",
         "tags": ["research", "academic", "science", "stem"],
         "description": "A research opportunity for students interested in...",
-        "requirements": "• Undergraduate or graduate student\n• Strong academic record\n• Interest in research",
         "benefits": "• Hands-on research experience\n• Mentorship from faculty\n• Potential publication opportunities",
     },
     "competition": {
         "type": "competition",
         "tags": ["competition", "challenge", "contest"],
         "description": "A competitive program where participants...",
-        "requirements": "• Age requirements\n• Team size requirements\n• Submission format",
         "benefits": "• Prize money\n• Recognition\n• Networking opportunities",
     },
     "youth-program": {
         "type": "youth-program",
         "tags": ["youth", "leadership", "development", "mentorship"],
         "description": "A youth program designed to...",
-        "requirements": "• Age range: 15-25\n• Leadership interest\n• Community engagement",
         "benefits": "• Leadership training\n• Certificate of completion\n• Networking with peers",
     },
     "community": {
         "type": "community",
         "tags": ["community", "networking", "collaboration", "social"],
         "description": "A community for individuals interested in...",
-        "requirements": "• Open to all\n• Interest in the field\n• Active participation",
         "benefits": "• Peer support\n• Knowledge sharing\n• Collaborative projects",
     }
 }

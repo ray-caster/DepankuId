@@ -3,10 +3,33 @@ from google import genai
 from typing import Dict, List, Tuple
 from config.settings import GEMINI_API_KEY
 from utils.logging_config import logger
+import asyncio
+import concurrent.futures
 
 
 class ModerationService:
     """Service for AI-powered content moderation"""
+    
+    @staticmethod
+    def _run_gemini_safely(prompt: str) -> str:
+        """Safely run Gemini client in sync context"""
+        try:
+            # Initialize Gemini client
+            client = genai.Client(api_key=GEMINI_API_KEY)
+            
+            # Run in a separate thread to avoid event loop issues
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    client.models.generate_content,
+                    model="gemini-2.5-flash",
+                    contents=prompt
+                )
+                response = future.result(timeout=30)  # 30 second timeout
+                return response.text.strip()
+                
+        except Exception as e:
+            logger.error(f"Gemini client error: {str(e)}")
+            raise e
     
     @staticmethod
     def moderate_opportunity(opportunity_data: dict) -> Tuple[bool, List[str]]:
@@ -29,7 +52,6 @@ class ModerationService:
     <title>{opportunity_data.get('title', '')}</title>
     <description>{opportunity_data.get('description', '')}</description>
     <organization>{opportunity_data.get('organization', '')}</organization>
-    <requirements>{opportunity_data.get('requirements', '')}</requirements>
     <benefits>{opportunity_data.get('benefits', '')}</benefits>
     <eligibility>{opportunity_data.get('eligibility', '')}</eligibility>
     <application_process>{opportunity_data.get('application_process', '')}</application_process>
@@ -68,19 +90,11 @@ Examples:
 """
         
         try:
-            # Initialize Gemini client
-            client = genai.Client(api_key=GEMINI_API_KEY)
-            
             # Create the full prompt
             full_prompt = f"{system_prompt}\n\nPlease review this opportunity submission:\n\n{content_to_check}"
             
-            # Generate content using Gemini 2.5 Flash
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=full_prompt
-            )
-            
-            ai_response = response.text.strip()
+            # Generate content using Gemini 2.5 Flash safely
+            ai_response = ModerationService._run_gemini_safely(full_prompt)
             
             logger.info(f"Moderation response: {ai_response}")
             

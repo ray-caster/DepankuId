@@ -45,7 +45,6 @@ export interface Opportunity {
     tags: string[];
     createdAt?: any;
     social_media?: SocialMediaLinks;
-    requirements?: string;
     benefits?: string;
     eligibility?: string;
     cost?: string;

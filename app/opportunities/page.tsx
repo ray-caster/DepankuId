@@ -54,7 +54,6 @@ function OpportunitiesContent() {
         url: '',
         tags: [],
         social_media: {},
-        requirements: '',
         benefits: '',
         eligibility: '',
         cost: '',
@@ -177,7 +176,6 @@ function OpportunitiesContent() {
                 type: template.type as 'research' | 'competition' | 'youth-program' | 'community',
                 tags: template.tags,
                 description: template.description,
-                requirements: template.requirements || '',
                 benefits: template.benefits || ''
             }));
             setSelectedTemplate(templateKey);
@@ -241,7 +239,6 @@ function OpportunitiesContent() {
                 url: '',
                 tags: [],
                 social_media: {},
-                requirements: '',
                 benefits: '',
                 eligibility: '',
                 cost: '',
@@ -330,7 +327,7 @@ function OpportunitiesContent() {
             case 'basic':
                 return formData.title && formData.description && formData.organization;
             case 'application':
-                return formData.requirements && formData.benefits;
+                return formData.benefits;
             case 'links':
                 return true;
             default:
@@ -359,8 +356,8 @@ function OpportunitiesContent() {
                             type="button"
                             onClick={() => applyTemplate(key)}
                             className={`p-3 text-left rounded-comfort border-2 transition-all ${selectedTemplate === key
-                                    ? 'border-primary-500 bg-primary-100'
-                                    : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
+                                ? 'border-primary-500 bg-primary-100'
+                                : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
                                 }`}
                         >
                             <div className="font-medium text-sm text-foreground">{key.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
@@ -490,20 +487,6 @@ function OpportunitiesContent() {
             <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Application Details</h3>
                 <div className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                            Requirements *
-                        </label>
-                        <textarea
-                            name="requirements"
-                            value={formData.requirements || ''}
-                            onChange={handleChange}
-                            rows={4}
-                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
-                            placeholder="What are the requirements for this opportunity?"
-                            required
-                        />
-                    </div>
 
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-2">
@@ -756,8 +739,8 @@ function OpportunitiesContent() {
                                         key={section.id}
                                         onClick={() => setCurrentSection(section.id)}
                                         className={`flex items-center gap-2 px-4 py-3 rounded-comfort border-2 transition-all ${isActive
-                                                ? 'border-primary-500 bg-primary-100 text-primary-700'
-                                                : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
+                                            ? 'border-primary-500 bg-primary-100 text-primary-700'
+                                            : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
                                             }`}
                                     >
                                         <Icon className="w-4 h-4" />
@@ -796,7 +779,7 @@ function OpportunitiesContent() {
                                         {loading ? (
                                             <>
                                                 <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                                                Creating...
+                                                {isEditMode ? 'Updating...' : 'Creating...'}
                                             </>
                                         ) : (
                                             <>
@@ -826,8 +809,8 @@ function OpportunitiesContent() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={`mt-6 p-4 rounded-comfort ${message.type === 'success'
-                                    ? 'bg-green-100 text-green-700 border-2 border-green-300'
-                                    : 'bg-red-100 text-red-700 border-2 border-red-300'
+                                ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                                : 'bg-red-100 text-red-700 border-2 border-red-300'
                                 }`}
                         >
                             {message.text}
