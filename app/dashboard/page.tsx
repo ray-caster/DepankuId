@@ -122,6 +122,9 @@ function DashboardContent() {
         setDeletingId(id);
         try {
             const idToken = await getIdToken();
+            if (!idToken) {
+                throw new Error('No authentication token available');
+            }
             await api.deleteOpportunity(id, idToken);
             
             if (type === 'opportunity') {
