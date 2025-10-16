@@ -50,13 +50,30 @@ for origin in env_origins:
 CORS(app, 
      resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
      supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     expose_headers=["Content-Length", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"]
+     expose_headers=["Content-Length", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
+     always_send=True
 )
 
 # Log CORS configuration
 logger.info(f"CORS configured for origins: {ALLOWED_ORIGINS}")
+
+# Add global CORS handler for ASGI compatibility
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        origin = request.headers.get('Origin')
+        if origin in ALLOWED_ORIGINS:
+            response = jsonify({"message": "OK"})
+            response.headers.add("Access-Control-Allow-Origin", origin)
+            response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
+            response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
+            return response
+        else:
+            # Reject unauthorized origins
+            return jsonify({"error": "Origin not allowed"}), 403
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")
@@ -88,6 +105,33 @@ for rule in app.url_map.iter_rules():
 def health_check():
     """Health check endpoint"""
     return jsonify({"status": "healthy", "service": "Depanku.id Backend"}), 200
+
+# CORS test endpoint
+@app.route('/api/test-cors', methods=['GET', 'POST', 'OPTIONS'])
+def test_cors():
+    """Test CORS functionality"""
+    logger.info(f"CORS test endpoint called: {request.method}")
+    logger.info(f"Origin: {request.headers.get('Origin')}")
+    logger.info(f"Headers: {dict(request.headers)}")
+    
+    if request.method == 'OPTIONS':
+        origin = request.headers.get('Origin')
+        if origin in ALLOWED_ORIGINS:
+            response = jsonify({"message": "CORS test OK"})
+            response.headers.add("Access-Control-Allow-Origin", origin)
+            response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin")
+            response.headers.add('Access-Control-Allow-Methods', "GET,POST,OPTIONS")
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
+            return response
+        else:
+            return jsonify({"error": "Origin not allowed"}), 403
+    
+    return jsonify({
+        "message": "CORS test successful",
+        "method": request.method,
+        "origin": request.headers.get('Origin'),
+        "allowed_origins": ALLOWED_ORIGINS
+    }), 200
 
 # Root endpoint
 @app.route('/', methods=['GET'])

@@ -49,7 +49,17 @@ def test_post_route(opportunity_id):
 def publish_opportunity_options(opportunity_id):
     """Handle OPTIONS request for CORS"""
     logger.info(f"OPTIONS request for publish opportunity {opportunity_id}")
-    return jsonify({"message": "OK"}), 200
+    logger.info(f"Origin: {request.headers.get('Origin')}")
+    logger.info(f"Headers: {dict(request.headers)}")
+    
+    origin = request.headers.get('Origin')
+    response = jsonify({"message": "OK"})
+    if origin:
+        response.headers.add("Access-Control-Allow-Origin", origin)
+    response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin")
+    response.headers.add('Access-Control-Allow-Methods', "POST,OPTIONS")
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 # PUBLISH ROUTE - MOVED TO TOP FOR DEBUGGING
 @publish_bp.route('/<opportunity_id>/publish', methods=['POST'])
