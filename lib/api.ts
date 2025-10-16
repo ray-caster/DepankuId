@@ -286,6 +286,7 @@ class API {
                 'Authorization': `Bearer ${idToken}`,
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({}), // Send empty JSON object instead of no body
         });
 
         const data = await response.json();
@@ -304,6 +305,7 @@ class API {
                 'Authorization': `Bearer ${idToken}`,
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({}), // Send empty JSON object instead of no body
         });
 
         const data = await response.json();

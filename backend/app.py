@@ -37,6 +37,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['JSON_SORT_KEYS'] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
+
 # Configure CORS with security settings
 ALLOWED_ORIGINS = [
     'http://localhost:7550',
@@ -69,8 +70,7 @@ def handle_preflight():
     try:
         logger.info(f"Before request: {request.method} {request.path}")
         logger.info(f"Origin: {request.headers.get('Origin')}")
-        logger.info(f"Content-Type: {request.headers.get('Content-Type')}")
-        logger.info(f"Headers: {dict(request.headers)}")
+        
         
         if request.method == "OPTIONS":
             origin = request.headers.get('Origin')

@@ -71,13 +71,18 @@ def publish_opportunity(opportunity_id, user_id: str, user_email: str):
         logger.info(f"Request method: {request.method}")
         logger.info(f"Request headers: {dict(request.headers)}")
         logger.info(f"Request content type: {request.content_type}")
+        logger.info(f"Content length: {request.content_length}")
         
-        # Check if request has JSON data (optional for publish)
-        if request.is_json:
-            data = request.get_json()
-            logger.info(f"Request JSON data: {data}")
+        # Handle empty requests gracefully
+        if request.content_length == 0:
+            logger.info("Empty request body detected - this is normal for publish requests")
         else:
-            logger.info("No JSON data in request")
+            # Check if request has JSON data (optional for publish)
+            if request.is_json:
+                data = request.get_json()
+                logger.info(f"Request JSON data: {data}")
+            else:
+                logger.info("No JSON data in request")
         
         success, result = OpportunityPublishService.publish_opportunity(opportunity_id)
         
