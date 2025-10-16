@@ -307,7 +307,7 @@ class API {
             if (!response.ok) {
                 // Handle moderation rejection with detailed feedback
                 if (data.issues && data.status === 'rejected') {
-                    const error = ErrorManager.createError(ERROR_CODES.VAL_001, 'Opportunity Publishing');
+                    const error = ErrorManager.createError(ERROR_CODES.REQUIRED_FIELD, 'Opportunity Publishing');
                     (error as any).moderationData = {
                         issues: data.issues,
                         moderation_notes: data.moderation_notes,

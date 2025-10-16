@@ -384,7 +384,7 @@ function DashboardContent() {
                     </div>
 
                     {/* View Tabs */}
-                    <div className="flex gap-2 mb-6 border-b-2 border-neutral-200 overflow-x-auto">
+                    <div className="flex gap-2 mb-6 border-b-2 border-neutral-200 overflow-x-auto pt-2">
                         <button
                             onClick={() => handleViewChange('bookmarks')}
                             className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'bookmarks'
@@ -405,7 +405,7 @@ function DashboardContent() {
                             <SparklesIcon className="w-5 h-5" />
                             My Opportunities
                             {myOpportunities.filter(opp => opp.status === 'draft' || opp.status === 'rejected').length > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg border-2 border-white">
                                     {myOpportunities.filter(opp => opp.status === 'draft' || opp.status === 'rejected').length}
                                 </span>
                             )}
@@ -444,16 +444,43 @@ function DashboardContent() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <p className="text-neutral-600">
-                                            You have {myOpportunities.length} {myOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
-                                            ({myOpportunities.filter(opp => opp.status === 'published').length} published,
-                                            {myOpportunities.filter(opp => opp.status === 'draft').length} drafts,
-                                            {myOpportunities.filter(opp => opp.status === 'rejected').length} rejected)
-                                        </p>
-                                        <Link href="/opportunities" className="btn-secondary">
-                                            Create New
-                                        </Link>
+                                    {/* Opportunity Summary Card */}
+                                    <div className="card bg-gradient-to-r from-primary-50 to-accent-50 border-primary-200 mb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-3 bg-primary-100 rounded-soft">
+                                                    <SparklesIcon className="w-6 h-6 text-primary-600" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-semibold text-foreground mb-1">
+                                                        {myOpportunities.length} {myOpportunities.length === 1 ? 'Opportunity' : 'Opportunities'}
+                                                    </h3>
+                                                    <div className="flex items-center gap-4 text-sm">
+                                                        <div className="flex items-center gap-1">
+                                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                            <span className="text-neutral-600">
+                                                                {myOpportunities.filter(opp => opp.status === 'published').length} Published
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                                            <span className="text-neutral-600">
+                                                                {myOpportunities.filter(opp => opp.status === 'draft').length} Drafts
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                                            <span className="text-neutral-600">
+                                                                {myOpportunities.filter(opp => opp.status === 'rejected').length} Rejected
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Link href="/opportunities" className="btn-primary">
+                                                Create New
+                                            </Link>
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         {myOpportunities.map((opportunity, idx) => (

@@ -75,7 +75,7 @@ function OpportunitiesContent() {
 
     // Error modal states
     const [showErrorModal, setShowErrorModal] = useState(false);
-    const [currentError, setCurrentError] = useState<AppError | null>(null);
+    const [currentError, setCurrentError] = useState<AppError | undefined>(undefined);
     const [showModerationModal, setShowModerationModal] = useState(false);
     const [moderationData, setModerationData] = useState<{ issues: string[]; moderation_notes: string } | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -86,6 +86,7 @@ function OpportunitiesContent() {
     const [draftId, setDraftId] = useState<string | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
+    const [loadingEdit, setLoadingEdit] = useState(false);
 
     // Auto-save functionality - only for drafts
     const autoSave = useCallback(async () => {
@@ -125,6 +126,7 @@ function OpportunitiesContent() {
     }, [searchParams, user]);
 
     const loadOpportunityForEdit = async (opportunityId: string) => {
+        setLoadingEdit(true);
         try {
             const idToken = await getIdToken(auth.currentUser!);
             const opportunity = await api.getOpportunity(opportunityId);
@@ -136,6 +138,8 @@ function OpportunitiesContent() {
         } catch (error) {
             console.error('Failed to load opportunity for edit:', error);
             setMessage({ type: 'error', text: 'Failed to load opportunity for editing' });
+        } finally {
+            setLoadingEdit(false);
         }
     };
 
@@ -781,6 +785,26 @@ function OpportunitiesContent() {
                 return renderBasicInfo();
         }
     };
+
+    // Show loading screen when loading edit data
+    if (loadingEdit) {
+        return (
+            <div className="min-h-screen bg-background">
+                <Header />
+                <main className="pt-20 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="flex items-center justify-center min-h-[400px]">
+                            <div className="text-center">
+                                <div className="inline-block w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                <h2 className="text-xl font-semibold text-foreground mb-2">Loading Opportunity</h2>
+                                <p className="text-neutral-600">Please wait while we load the opportunity details...</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background">

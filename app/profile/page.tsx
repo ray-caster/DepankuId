@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { motion } from 'framer-motion';
@@ -32,13 +32,13 @@ function ProfileContent() {
         joinedDate: '',
         bookmarksCount: 0,
     });
-    const [applications, setApplications] = useState([]);
-    const [activity, setActivity] = useState([]);
+    const [applications, setApplications] = useState<any[]>([]);
+    const [activity, setActivity] = useState<any[]>([]);
     const [loadingData, setLoadingData] = useState(true);
-    const [profileCompletion, setProfileCompletion] = useState(null);
+    const [profileCompletion, setProfileCompletion] = useState<any>(null);
     const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-    const loadProfileData = async () => {
+    const loadProfileData = useCallback(async () => {
         if (!user) return;
 
         try {
@@ -71,12 +71,13 @@ function ProfileContent() {
         } finally {
             setLoadingData(false);
         }
-    };
+    }, [user, getIdToken]);
 
     useEffect(() => {
         if (user) {
             loadProfileData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const refreshData = async () => {
