@@ -1,14 +1,15 @@
 """Sync routes"""
+import asyncio
 from flask import Blueprint, jsonify
 from services.opportunity_service import OpportunityService
 
 sync_bp = Blueprint('sync', __name__, url_prefix='/api/sync')
 
 @sync_bp.route('/algolia', methods=['POST'])
-async def sync_algolia():
+def sync_algolia():
     """Sync all Firestore opportunities to Algolia"""
     try:
-        count = await OpportunityService.sync_to_algolia()
+        count = asyncio.run(OpportunityService.sync_to_algolia())
         
         return jsonify({
             "success": True,

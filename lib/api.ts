@@ -257,6 +257,19 @@ class API {
         return data.data || [];
     }
 
+    async deleteOpportunity(opportunityId: string, idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete opportunity');
+        }
+    }
+
     async saveUserPreferences(userId: string, preferences: UserPreferences): Promise<void> {
         const response = await fetch(`${this.baseURL}/api/user/preferences`, {
             method: 'POST',

@@ -8,14 +8,18 @@ import { auth } from '@/lib/firebase';
 import AuthModal from '@/components/AuthModal';
 import Header from '@/components/Header';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     SparklesIcon,
     DocumentDuplicateIcon,
     CalendarIcon,
     ArrowPathIcon,
     LinkIcon,
-    XMarkIcon
+    XMarkIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    TrashIcon,
+    PencilIcon
 } from '@heroicons/react/24/outline';
 
 const SOCIAL_PLATFORMS = [
@@ -28,11 +32,18 @@ const SOCIAL_PLATFORMS = [
     { key: 'telegram', label: 'Telegram', placeholder: 'https://t.me/...' },
 ];
 
+const SECTIONS = [
+    { id: 'basic', label: 'Basic Info', icon: DocumentDuplicateIcon },
+    { id: 'application', label: 'Application Form', icon: CalendarIcon },
+    { id: 'links', label: 'Links & Social', icon: LinkIcon },
+];
+
 function OpportunitiesContent() {
     const { user } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [currentSection, setCurrentSection] = useState('basic');
     const [formData, setFormData] = useState<Partial<Opportunity>>({
         title: '',
         description: '',
@@ -59,100 +70,73 @@ function OpportunitiesContent() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [showSocialMedia, setShowSocialMedia] = useState(false);
-    // Security: Input validation and sanitization
-    const validateInput = useCallback((field: string, value: any): string | null => {
-        switch (field) {
-            case 'title':
-                if (!value || value.trim().length < 3) return 'Title must be at least 3 characters';
-                if (value.length > 200) return 'Title must be less than 200 characters';
-                break;
-            case 'description':
-                if (!value || value.trim().length < 10) return 'Description must be at least 10 characters';
-                if (value.length > 2000) return 'Description must be less than 2000 characters';
-                break;
-            case 'organization':
-                if (!value || value.trim().length < 2) return 'Organization must be at least 2 characters';
-                if (value.length > 100) return 'Organization must be less than 100 characters';
-                break;
-            case 'url':
-                if (value && !isValidUrl(value)) return 'Please enter a valid URL';
-                break;
-            case 'contact_email':
-                if (value && !isValidEmail(value)) return 'Please enter a valid email address';
-                break;
-            case 'deadline':
-                if (!formData.has_indefinite_deadline && value && !isValidDate(value)) {
-                    return 'Please enter a valid date';
-                }
-                break;
-        }
-        return null;
-    }, [formData.has_indefinite_deadline]);
+    const [selectedTemplate, setSelectedTemplate] = useState('');
+    const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+    const [isDraft, setIsDraft] = useState(false);
+    const [draftId, setDraftId] = useState<string | null>(null);
 
-    const isValidUrl = (url: string): boolean => {
+    // Auto-save functionality
+    const autoSave = useCallback(async () => {
+        if (!user || !formData.title) return;
+        
         try {
-            new URL(url);
-            return true;
-        } catch {
-            return false;
-        }
-    };
-
-    const isValidEmail = (email: string): boolean => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
-    const isValidDate = (dateString: string): boolean => {
-        const date = new Date(dateString);
-        return date instanceof Date && !isNaN(date.getTime()) && date > new Date();
-    };
-
-    const sanitizeInput = (input: string): string => {
-        return input
-            .replace(/[<>]/g, '') // Remove potential HTML tags
-            .replace(/javascript:/gi, '') // Remove javascript: protocol
-            .replace(/on\w+=/gi, '') // Remove event handlers
-            .trim();
-    };
-    const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-
-    useEffect(() => {
-        loadPresetsAndTemplates();
-        // Show auth modal if user is not signed in or if auth_redirect param exists
-        const authRedirect = searchParams.get('auth_redirect');
-        if (!user && (authRedirect === 'signup' || authRedirect === 'create')) {
-            setShowAuthModal(true);
-        } else if (!user) {
-            setShowAuthModal(true);
-        }
-    }, [user, searchParams]);
-
-    const loadPresetsAndTemplates = async () => {
-        try {
-            const [templatesData, tagsData] = await Promise.all([
-                api.getOpportunityTemplates(),
-                api.getTagPresets()
-            ]);
-
-            setTemplates(templatesData);
-            setTagPresets(tagsData);
+            const idToken = await getIdToken(auth.currentUser!);
+            const draftData = { ...formData, status: 'draft' };
+            
+            if (draftId) {
+                // Update existing draft
+                await api.updateOpportunity(draftId, draftData, idToken);
+            } else {
+                // Create new draft
+                const result = await api.createOpportunity(draftData, idToken);
+                setDraftId(result.id);
+            }
+            console.log('Draft auto-saved');
         } catch (error) {
-            console.error('Failed to load presets:', error);
+            console.error('Auto-save failed:', error);
         }
-    };
+    }, [user, formData, draftId]);
+
+    // Auto-save on form changes
+    useEffect(() => {
+        if (autoSaveTimeout) {
+            clearTimeout(autoSaveTimeout);
+        }
+        
+        const timeout = setTimeout(() => {
+            autoSave();
+        }, 2000); // Auto-save after 2 seconds of inactivity
+        
+        setAutoSaveTimeout(timeout);
+        
+        return () => clearTimeout(timeout);
+    }, [formData, autoSave]);
+
+    // Load templates and presets
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [templatesData, tagPresetsData] = await Promise.all([
+                    api.getOpportunityTemplates(),
+                    api.getTagPresets()
+                ]);
+                setTemplates(templatesData);
+                setTagPresets(tagPresetsData);
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        };
+        loadData();
+    }, []);
 
     const applyTemplate = (templateKey: string) => {
         const template = templates[templateKey];
         if (template) {
-            setFormData({
-                ...formData,
-                type: template.type as any,
-                tags: [...template.tags],
-                description: template.description,
-                requirements: template.requirements || '',
-                benefits: template.benefits || '',
-            });
+            setFormData(prev => ({
+                ...prev,
+                ...template.fields,
+                type: template.type
+            }));
             setSelectedTemplate(templateKey);
         }
     };
@@ -181,6 +165,8 @@ function OpportunitiesContent() {
             }
 
             setMessage({ type: 'success', text: 'Opportunity created successfully!' });
+            setIsDraft(false);
+            setDraftId(null);
 
             // Reset form
             setFormData({
@@ -218,492 +204,572 @@ function OpportunitiesContent() {
     const addTag = (tag?: string) => {
         const newTag = tag || tagInput.trim();
         if (newTag && !formData.tags?.includes(newTag)) {
-            setFormData({
-                ...formData,
-                tags: [...(formData.tags || []), newTag],
-            });
-            setTagInput('');
+            setFormData(prev => ({
+                ...prev,
+                tags: [...(prev.tags || []), newTag]
+            }));
+        }
+        setTagInput('');
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setFormData(prev => ({
+            ...prev,
+            tags: prev.tags?.filter(tag => tag !== tagToRemove) || []
+        }));
+    };
+
+    const updateSocialMedia = (platform: string, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            social_media: {
+                ...prev.social_media,
+                [platform]: value
+            }
+        }));
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        if (type === 'checkbox') {
+            setFormData(prev => ({
+                ...prev,
+                [name]: (e.target as HTMLInputElement).checked,
+            }));
+        } else {
+            let processedValue = value;
+            // Auto-add https:// to URL fields
+            if (name === 'url' && value) {
+                processedValue = value.startsWith('http') ? value : `https://${value}`;
+            }
+            setFormData(prev => ({
+                ...prev,
+                [name]: processedValue,
+            }));
         }
     };
 
-    const removeTag = (tag: string) => {
-        setFormData({
-            ...formData,
-            tags: formData.tags?.filter(t => t !== tag) || [],
-        });
+    const nextSection = () => {
+        const currentIndex = SECTIONS.findIndex(s => s.id === currentSection);
+        if (currentIndex < SECTIONS.length - 1) {
+            setCurrentSection(SECTIONS[currentIndex + 1].id);
+        }
     };
 
-
-    const updateSocialMedia = (platform: string, value: string) => {
-        setFormData({
-            ...formData,
-            social_media: {
-                ...formData.social_media,
-                [platform]: value || undefined
-            }
-        });
+    const prevSection = () => {
+        const currentIndex = SECTIONS.findIndex(s => s.id === currentSection);
+        if (currentIndex > 0) {
+            setCurrentSection(SECTIONS[currentIndex - 1].id);
+        }
     };
 
-    if (!user) {
-        return (
-            <div className="min-h-screen bg-background">
-                <Header />
-                <AuthModal
-                    isOpen={showAuthModal}
-                    onClose={() => {
-                        setShowAuthModal(false);
-                        // Redirect to home if they close without signing in
-                        router.push('/');
-                    }}
-                    onSuccess={() => {
-                        setShowAuthModal(false);
-                        // Remove auth_redirect param from URL
-                        router.replace('/opportunities');
-                    }}
-                />
-                <div className="pt-32 text-center px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <div className="text-6xl mb-6">✨</div>
-                        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-                            Share Your Opportunity
-                        </h1>
-                        <p className="text-lg text-neutral-600 mb-6 max-w-2xl mx-auto">
-                            Help other students discover amazing opportunities by sharing what you know.
-                            Sign in to get started!
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <div className="flex items-center gap-2 text-neutral-600">
-                                <span className="text-2xl">🚀</span>
-                                <span>Quick & Easy</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-neutral-600">
-                                <span className="text-2xl">🌟</span>
-                                <span>Help Others Succeed</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-neutral-600">
-                                <span className="text-2xl">💯</span>
-                                <span>100% Free</span>
-                            </div>
-                        </div>
-                    </motion.div>
+    const canProceed = () => {
+        switch (currentSection) {
+            case 'basic':
+                return formData.title && formData.description && formData.organization;
+            case 'application':
+                return formData.requirements && formData.benefits;
+            case 'links':
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    const renderBasicInfo = () => (
+        <motion.div
+            key="basic"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+        >
+            {/* Template Selection */}
+            <div className="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-comfort p-6 border-2 border-primary-200">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <SparklesIcon className="w-5 h-5 text-primary-600" />
+                    Quick Start Templates
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {Object.entries(templates).map(([key, template]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => applyTemplate(key)}
+                            className={`p-3 text-left rounded-comfort border-2 transition-all ${
+                                selectedTemplate === key
+                                    ? 'border-primary-500 bg-primary-100'
+                                    : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
+                            }`}
+                        >
+                            <div className="font-medium text-sm text-foreground">{template.name}</div>
+                            <div className="text-xs text-neutral-600 mt-1">{template.description}</div>
+                        </button>
+                    ))}
                 </div>
             </div>
-        );
-    }
+
+            {/* Basic Information */}
+            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Basic Information</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="lg:col-span-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Title *
+                        </label>
+                        <input
+                            type="text"
+                            name="title"
+                            value={formData.title || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            placeholder="Enter opportunity title"
+                            required
+                        />
+                    </div>
+
+                    <div className="lg:col-span-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Description *
+                        </label>
+                        <textarea
+                            name="description"
+                            value={formData.description || ''}
+                            onChange={handleChange}
+                            rows={4}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
+                            placeholder="Describe the opportunity in detail"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Type *
+                        </label>
+                        <select
+                            name="type"
+                            value={formData.type || 'research'}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                        >
+                            <option value="research">Research</option>
+                            <option value="competition">Competition</option>
+                            <option value="youth-program">Youth Program</option>
+                            <option value="community">Community</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Organization *
+                        </label>
+                        <input
+                            type="text"
+                            name="organization"
+                            value={formData.organization || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            placeholder="Organization name"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Location
+                        </label>
+                        <input
+                            type="text"
+                            name="location"
+                            value={formData.location || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            placeholder="City, Country or Online"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Deadline
+                        </label>
+                        <input
+                            type="date"
+                            name="deadline"
+                            value={formData.deadline || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            disabled={formData.has_indefinite_deadline}
+                        />
+                    </div>
+
+                    <div className="lg:col-span-2 flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            name="has_indefinite_deadline"
+                            checked={formData.has_indefinite_deadline || false}
+                            onChange={handleChange}
+                            className="w-4 h-4 text-primary-600 border-2 border-neutral-300 rounded focus:ring-primary-500"
+                        />
+                        <label className="text-sm text-foreground">No specific deadline (ongoing opportunity)</label>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+
+    const renderApplicationForm = () => (
+        <motion.div
+            key="application"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+        >
+            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Application Details</h3>
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Requirements *
+                        </label>
+                        <textarea
+                            name="requirements"
+                            value={formData.requirements || ''}
+                            onChange={handleChange}
+                            rows={4}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
+                            placeholder="What are the requirements for this opportunity?"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Benefits *
+                        </label>
+                        <textarea
+                            name="benefits"
+                            value={formData.benefits || ''}
+                            onChange={handleChange}
+                            rows={4}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
+                            placeholder="What benefits will participants receive?"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Eligibility
+                        </label>
+                        <textarea
+                            name="eligibility"
+                            value={formData.eligibility || ''}
+                            onChange={handleChange}
+                            rows={3}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
+                            placeholder="Who is eligible to apply?"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Cost
+                            </label>
+                            <input
+                                type="text"
+                                name="cost"
+                                value={formData.cost || ''}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                                placeholder="Free, $50, etc."
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Duration
+                            </label>
+                            <input
+                                type="text"
+                                name="duration"
+                                value={formData.duration || ''}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                                placeholder="2 weeks, 6 months, etc."
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Application Process
+                        </label>
+                        <textarea
+                            name="application_process"
+                            value={formData.application_process || ''}
+                            onChange={handleChange}
+                            rows={4}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
+                            placeholder="How do students apply? What documents are needed?"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Contact Email
+                        </label>
+                        <input
+                            type="email"
+                            name="contact_email"
+                            value={formData.contact_email || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            placeholder="contact@organization.com"
+                        />
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+
+    const renderLinks = () => (
+        <motion.div
+            key="links"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+        >
+            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Website & Links</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Official Website
+                        </label>
+                        <input
+                            type="url"
+                            name="url"
+                            value={formData.url || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            placeholder="https://example.com"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Social Media Links</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
+                        <div key={key}>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                {label}
+                            </label>
+                            <input
+                                type="url"
+                                value={(formData.social_media as any)?.[key] || ''}
+                                onChange={(e) => updateSocialMedia(key, e.target.value)}
+                                className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                                placeholder={placeholder}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Tags</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Add Tags
+                        </label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                                className="flex-1 px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                                placeholder="Type a tag and press Enter"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => addTag()}
+                                className="px-4 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 transition-colors"
+                            >
+                                Add
+                            </button>
+                        </div>
+                    </div>
+
+                    {tagPresets.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Popular Tags
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {tagPresets.map((tag) => (
+                                    <button
+                                        key={tag}
+                                        type="button"
+                                        onClick={() => addTag(tag)}
+                                        className="px-3 py-1 bg-neutral-200 text-neutral-700 rounded-soft text-sm hover:bg-primary-100 hover:text-primary-700 transition-colors"
+                                    >
+                                        + {tag}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {formData.tags && formData.tags.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Selected Tags
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {formData.tags.map((tag) => (
+                                    <span
+                                        key={tag}
+                                        className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-soft text-sm"
+                                    >
+                                        {tag}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeTag(tag)}
+                                            className="hover:text-primary-900"
+                                        >
+                                            <XMarkIcon className="w-3 h-3" />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </motion.div>
+    );
+
+    const renderSection = () => {
+        switch (currentSection) {
+            case 'basic':
+                return renderBasicInfo();
+            case 'application':
+                return renderApplicationForm();
+            case 'links':
+                return renderLinks();
+            default:
+                return renderBasicInfo();
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background">
             <Header />
+            <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-4xl mx-auto">
+                    <div className="mb-8">
+                        <h1 className="text-4xl font-bold text-foreground mb-2">Create Opportunity</h1>
+                        <p className="text-foreground-light">Share an educational opportunity with the community</p>
+                    </div>
 
-            <main className="pt-20 sm:pt-24 laptop:pt-28 pb-12 sm:pb-16 laptop:pb-20 px-4 sm:px-6 laptop:px-8">
-                <div className="max-w-5xl laptop:max-w-6xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-8"
-                    >
-                        <h1 className="text-4xl font-bold text-foreground mb-2">Create New Opportunity</h1>
-                        <p className="text-neutral-600">Share amazing opportunities with the community</p>
-                    </motion.div>
-
-                    {/* Templates Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="mb-6"
-                    >
-                        <div className="flex items-center gap-2 mb-3">
-                            <DocumentDuplicateIcon className="w-5 h-5 text-primary-600" />
-                            <h2 className="text-lg font-semibold">Quick Start Templates</h2>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {Object.entries(templates).map(([key, template]) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => applyTemplate(key)}
-                                    className={`p-4 rounded-soft border-2 transition-all ${selectedTemplate === key
-                                        ? 'border-primary-600 bg-primary-50'
-                                        : 'border-neutral-300 hover:border-primary-400 bg-white'
+                    {/* Section Tabs */}
+                    <div className="mb-8">
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {SECTIONS.map((section) => {
+                                const Icon = section.icon;
+                                const isActive = currentSection === section.id;
+                                return (
+                                    <button
+                                        key={section.id}
+                                        onClick={() => setCurrentSection(section.id)}
+                                        className={`flex items-center gap-2 px-4 py-3 rounded-comfort border-2 transition-all ${
+                                            isActive
+                                                ? 'border-primary-500 bg-primary-100 text-primary-700'
+                                                : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
                                         }`}
-                                >
-                                    <div className="text-2xl mb-2">
-                                        {key === 'research' && '🔬'}
-                                        {key === 'competition' && '🏆'}
-                                        {key === 'youth-program' && '🌟'}
-                                        {key === 'community' && '👥'}
-                                    </div>
-                                    <div className="text-sm font-semibold capitalize">{key.replace('-', ' ')}</div>
-                                </button>
-                            ))}
+                                    >
+                                        <Icon className="w-4 h-4" />
+                                        <span className="text-sm font-medium">{section.label}</span>
+                                    </button>
+                                );
+                            })}
                         </div>
-                    </motion.div>
+                    </div>
 
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            {renderSection()}
+                        </AnimatePresence>
+
+                        {/* Navigation */}
+                        <div className="flex justify-between items-center pt-6 border-t-2 border-neutral-200">
+                            <button
+                                type="button"
+                                onClick={prevSection}
+                                disabled={currentSection === 'basic'}
+                                className="flex items-center gap-2 px-4 py-2 text-neutral-600 hover:text-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <ChevronLeftIcon className="w-4 h-4" />
+                                Previous
+                            </button>
+
+                            <div className="flex gap-2">
+                                {currentSection === 'links' ? (
+                                    <button
+                                        type="submit"
+                                        disabled={loading || !canProceed()}
+                                        className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                                Creating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <SparklesIcon className="w-4 h-4" />
+                                                Create Opportunity
+                                            </>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={nextSection}
+                                        disabled={!canProceed()}
+                                        className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Next
+                                        <ChevronRightIcon className="w-4 h-4" />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </form>
+
+                    {/* Messages */}
                     {message && (
                         <motion.div
-                            initial={{ opacity: 0, y: -10 }}
+                            initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className={`mb-6 p-4 rounded-soft ${message.type === 'success'
-                                ? 'bg-secondary-light text-secondary-dark'
-                                : 'bg-red-100 text-red-700'
-                                }`}
+                            className={`mt-6 p-4 rounded-comfort ${
+                                message.type === 'success'
+                                    ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                                    : 'bg-red-100 text-red-700 border-2 border-red-300'
+                            }`}
                         >
                             {message.text}
                         </motion.div>
                     )}
-
-                    <motion.form
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        onSubmit={handleSubmit}
-                        className="card space-y-6"
-                    >
-                        {/* Basic Information */}
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-semibold text-foreground border-b-2 border-neutral-200 pb-2">
-                                Basic Information
-                            </h3>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Title *
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                    placeholder="e.g., Stanford AI Research Program"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Description *
-                                </label>
-                                <textarea
-                                    required
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    rows={5}
-                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                    placeholder="Describe the opportunity in detail..."
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        Type *
-                                    </label>
-                                    <select
-                                        required
-                                        value={formData.type}
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                    >
-                                        <option value="research">Research</option>
-                                        <option value="youth-program">Youth Program</option>
-                                        <option value="community">Community</option>
-                                        <option value="competition">Competition</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        Organization *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.organization}
-                                        onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="e.g., Stanford University"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        Location
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="e.g., Online or Jakarta, Indonesia"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                                        <CalendarIcon className="w-4 h-4" />
-                                        Deadline
-                                    </label>
-                                    <div className="space-y-2">
-                                        <input
-                                            type="date"
-                                            value={formData.deadline}
-                                            onChange={(e) => setFormData({ ...formData, deadline: e.target.value, has_indefinite_deadline: false })}
-                                            disabled={formData.has_indefinite_deadline}
-                                            className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring disabled:opacity-50"
-                                        />
-                                        <label className="flex items-center gap-2 text-sm text-neutral-600">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.has_indefinite_deadline}
-                                                onChange={(e) => setFormData({
-                                                    ...formData,
-                                                    has_indefinite_deadline: e.target.checked,
-                                                    deadline: e.target.checked ? 'indefinite' : ''
-                                                })}
-                                                className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
-                                            />
-                                            <ArrowPathIcon className="w-4 h-4" />
-                                            No deadline / Indefinite
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Tags */}
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-semibold text-foreground border-b-2 border-neutral-200 pb-2">
-                                Tags
-                            </h3>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Tags (will be prefixed with #)
-                                </label>
-                                <div className="flex gap-2 mb-3">
-                                    <input
-                                        type="text"
-                                        value={tagInput}
-                                        onChange={(e) => setTagInput(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                                        className="flex-1 px-4 py-2 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="Add tag (e.g., stem, research, funded)..."
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => addTag()}
-                                        className="btn-secondary"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-
-                                {/* Tag Presets */}
-                                <div className="mb-3">
-                                    <p className="text-xs text-neutral-500 mb-2">Popular tags:</p>
-                                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                                        {tagPresets.slice(0, 30).map((tag) => (
-                                            <button
-                                                key={tag}
-                                                type="button"
-                                                onClick={() => addTag(tag)}
-                                                disabled={formData.tags?.includes(tag)}
-                                                className="text-xs px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                #{tag}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-wrap gap-2">
-                                    {formData.tags?.map((tag) => (
-                                        <span
-                                            key={tag}
-                                            className="px-3 py-1 bg-neutral-200 text-neutral-700 rounded-full text-sm flex items-center gap-2"
-                                        >
-                                            #{tag}
-                                            <button
-                                                type="button"
-                                                onClick={() => removeTag(tag)}
-                                                className="hover:text-neutral-900"
-                                            >
-                                                <XMarkIcon className="w-4 h-4" />
-                                            </button>
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Additional Details */}
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-semibold text-foreground border-b-2 border-neutral-200 pb-2">
-                                Additional Details
-                            </h3>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        Website URL
-                                    </label>
-                                    <input
-                                        type="url"
-                                        value={formData.url}
-                                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="https://example.com"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        Contact Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={formData.contact_email}
-                                        onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="contact@example.com"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        Duration
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.duration}
-                                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="e.g., 6 weeks, 3 months"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        Cost/Fee
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.cost}
-                                        onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                        placeholder="e.g., Free, $100, Rp 500.000"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Requirements
-                                </label>
-                                <textarea
-                                    value={formData.requirements}
-                                    onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                                    rows={4}
-                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                    placeholder="List the requirements (use bullet points)..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Benefits
-                                </label>
-                                <textarea
-                                    value={formData.benefits}
-                                    onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                                    rows={4}
-                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                    placeholder="What participants will gain..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Eligibility Criteria
-                                </label>
-                                <textarea
-                                    value={formData.eligibility}
-                                    onChange={(e) => setFormData({ ...formData, eligibility: e.target.value })}
-                                    rows={3}
-                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                    placeholder="Who can apply..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Application Process
-                                </label>
-                                <textarea
-                                    value={formData.application_process}
-                                    onChange={(e) => setFormData({ ...formData, application_process: e.target.value })}
-                                    rows={4}
-                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-soft focus-ring"
-                                    placeholder="How to apply (step by step)..."
-                                />
-                            </div>
-                        </div>
-
-                        {/* Social Media Links */}
-                        <div className="space-y-4">
-                            <button
-                                type="button"
-                                onClick={() => setShowSocialMedia(!showSocialMedia)}
-                                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
-                            >
-                                <LinkIcon className="w-5 h-5" />
-                                {showSocialMedia ? 'Hide' : 'Add'} Social Media Links
-                                <SparklesIcon className="w-4 h-4" />
-                            </button>
-
-                            {showSocialMedia && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-neutral-50 rounded-soft"
-                                >
-                                    {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
-                                        <div key={key}>
-                                            <label className="block text-sm font-medium text-foreground mb-1">
-                                                {label}
-                                            </label>
-                                            <input
-                                                type="url"
-                                                value={(formData.social_media as any)?.[key] || ''}
-                                                onChange={(e) => updateSocialMedia(key, e.target.value)}
-                                                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-soft focus-ring text-sm"
-                                                placeholder={placeholder}
-                                            />
-                                        </div>
-                                    ))}
-                                </motion.div>
-                            )}
-                        </div>
-
-                        {/* Submit */}
-                        <div className="pt-4 border-t-2 border-neutral-200">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary w-full text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {loading ? 'Creating...' : '✨ Create Opportunity'}
-                            </button>
-                        </div>
-                    </motion.form>
                 </div>
             </main>
         </div>
@@ -726,4 +792,3 @@ export default function OpportunitiesPage() {
         </AuthProvider>
     );
 }
-

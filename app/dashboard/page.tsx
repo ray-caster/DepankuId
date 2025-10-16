@@ -43,6 +43,7 @@ function DashboardContent() {
     const [loadingDrafts, setLoadingDrafts] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities' | 'drafts'>('bookmarks');
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const processDeadlines = useCallback((opportunities: Opportunity[]) => {
         const events: DeadlineEvent[] = opportunities
@@ -113,6 +114,27 @@ function DashboardContent() {
             setLoadingDrafts(false);
         }
     }, [getIdToken, user]);
+
+    const handleDeleteOpportunity = async (id: string, type: 'opportunity' | 'draft') => {
+        if (!user) return;
+        
+        setDeletingId(id);
+        try {
+            const idToken = await getIdToken();
+            await api.deleteOpportunity(id, idToken);
+            
+            if (type === 'opportunity') {
+                setMyOpportunities(prev => prev.filter(opp => opp.id !== id));
+            } else {
+                setMyDrafts(prev => prev.filter(draft => draft.id !== id));
+            }
+        } catch (error) {
+            console.error('Error deleting opportunity:', error);
+            alert('Failed to delete opportunity');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     useEffect(() => {
         if (user && activeView === 'myOpportunities') {
@@ -477,17 +499,30 @@ function DashboardContent() {
                                                     )}
                                                 </div>
 
-                                                {opportunity.url && (
-                                                    <a
-                                                        href={opportunity.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="btn-primary w-full flex items-center justify-center gap-2"
+                                                <div className="flex gap-2">
+                                                    {opportunity.url && (
+                                                        <a
+                                                            href={opportunity.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn-primary flex-1 flex items-center justify-center gap-2"
+                                                        >
+                                                            <LinkIcon className="w-4 h-4" />
+                                                            Visit Website
+                                                        </a>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleDeleteOpportunity(opportunity.id, 'opportunity')}
+                                                        disabled={deletingId === opportunity.id}
+                                                        className="px-3 py-2 bg-red-600 text-white rounded-comfort hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
                                                     >
-                                                        <LinkIcon className="w-4 h-4" />
-                                                        Visit Website
-                                                    </a>
-                                                )}
+                                                        {deletingId === opportunity.id ? (
+                                                            <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <TrashIcon className="w-4 h-4" />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </motion.div>
                                         ))}
                                     </div>
@@ -710,6 +745,17 @@ function DashboardContent() {
                                                             <LinkIcon className="w-4 h-4" />
                                                         </a>
                                                     )}
+                                                    <button
+                                                        onClick={() => handleDeleteOpportunity(opportunity.id, 'draft')}
+                                                        disabled={deletingId === opportunity.id}
+                                                        className="px-3 py-2 bg-red-600 text-white rounded-comfort hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                                                    >
+                                                        {deletingId === opportunity.id ? (
+                                                            <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <TrashIcon className="w-4 h-4" />
+                                                        )}
+                                                    </button>
                                                 </div>
                                             </motion.div>
                                         ))}
