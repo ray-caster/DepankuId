@@ -91,7 +91,7 @@ function OpportunitiesContent() {
             } else {
                 // Create new draft
                 const result = await api.createOpportunity(draftData, idToken);
-                setDraftId(result.id);
+                setDraftId(result.id || null);
             }
             console.log('Draft auto-saved');
         } catch (error) {
@@ -166,8 +166,11 @@ function OpportunitiesContent() {
         if (template) {
             setFormData(prev => ({
                 ...prev,
-                ...template.fields,
-                type: template.type
+                type: template.type as 'research' | 'competition' | 'youth-program' | 'community',
+                tags: template.tags,
+                description: template.description,
+                requirements: template.requirements || '',
+                benefits: template.benefits || ''
             }));
             setSelectedTemplate(templateKey);
         }
@@ -346,7 +349,7 @@ function OpportunitiesContent() {
                                     : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
                             }`}
                         >
-                            <div className="font-medium text-sm text-foreground">{template.name}</div>
+                            <div className="font-medium text-sm text-foreground">{key.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
                             <div className="text-xs text-neutral-600 mt-1">{template.description}</div>
                         </button>
                     ))}
