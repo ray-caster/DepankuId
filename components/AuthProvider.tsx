@@ -69,10 +69,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (user) {
             try {
                 // Force refresh the token to ensure it's valid
-                return await user.getIdToken(true);
+                const token = await user.getIdToken(true);
+                console.log('Token refreshed successfully, length:', token?.length);
+                return token;
             } catch (error) {
                 console.error('Error getting ID token:', error);
                 // If token refresh fails, try to sign out the user
+                console.log('Signing out user due to token refresh failure');
                 await signOut();
                 return null;
             }

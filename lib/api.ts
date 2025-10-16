@@ -446,14 +446,17 @@ class API {
     }
 
     async getBookmarks(idToken: string): Promise<Opportunity[]> {
+        console.log('Making bookmarks API call with token length:', idToken?.length);
         const response = await fetch(`${this.baseURL}/api/bookmarks`, {
             headers: {
                 'Authorization': `Bearer ${idToken}`,
             },
         });
 
+        console.log('Bookmarks API response status:', response.status);
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
+            console.log('Bookmarks API error data:', errorData);
             if (response.status === 401) {
                 throw new Error('Authentication failed. Please sign in again.');
             }
@@ -461,6 +464,7 @@ class API {
         }
 
         const data = await response.json();
+        console.log('Bookmarks API success, data length:', data.data?.length || 0);
         return data.data || [];
     }
 

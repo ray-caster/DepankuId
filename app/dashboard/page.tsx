@@ -46,6 +46,8 @@ function DashboardContent() {
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
+    const [retryCount, setRetryCount] = useState(0);
+    const [myOppsRetryCount, setMyOppsRetryCount] = useState(0);
 
     // Load active view from localStorage on mount
     useEffect(() => {
@@ -80,6 +82,8 @@ function DashboardContent() {
     }, []);
 
     const loadBookmarks = useCallback(async () => {
+        const MAX_RETRIES = 3;
+        
         try {
             if (user) {
                 const idToken = await user.getIdToken(true); // Force refresh
@@ -87,29 +91,43 @@ function DashboardContent() {
                 setBookmarks(data);
                 processDeadlines(data);
                 setLastRefresh(new Date());
+                setRetryCount(0); // Reset retry count on success
             } else {
                 showError('Authentication Required', 'Please sign in to view your bookmarks.');
             }
         } catch (error) {
             console.error('Failed to load bookmarks:', error);
+            
             if (error instanceof Error && error.message.includes('Authentication failed')) {
-                showError('Session Expired', 'Your session has expired. Please sign in again.');
+                if (retryCount < MAX_RETRIES) {
+                    console.log(`Retrying bookmarks load (${retryCount + 1}/${MAX_RETRIES})`);
+                    setRetryCount(prev => prev + 1);
+                    // Retry after a short delay
+                    setTimeout(() => loadBookmarks(), 1000 * (retryCount + 1));
+                    return;
+                } else {
+                    showError('Session Expired', 'Your session has expired. Please sign in again.');
+                    setRetryCount(0);
+                }
             } else {
                 showError('Load Failed', 'Failed to load bookmarks. Please try again.');
             }
         } finally {
             setLoading(false);
         }
-    }, [user, processDeadlines, showError]);
+    }, [user, processDeadlines, showError, retryCount]);
 
     useEffect(() => {
         if (user) {
             loadBookmarks();
         }
-    }, [user, loadBookmarks]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]); // Remove loadBookmarks dependency to prevent loops
 
     const loadMyOpportunities = useCallback(async () => {
+        const MAX_RETRIES = 3;
         setLoadingMyOpps(true);
+        
         try {
             if (user) {
                 const idToken = await user.getIdToken(true); // Force refresh
@@ -117,20 +135,31 @@ function DashboardContent() {
                 const myOpps = await api.getMyOpportunities(idToken);
                 setMyOpportunities(myOpps);
                 setLastRefresh(new Date());
+                setMyOppsRetryCount(0); // Reset retry count on success
             } else {
                 showError('Authentication Required', 'Please sign in to view your opportunities.');
             }
         } catch (error) {
             console.error('Failed to load my opportunities:', error);
+            
             if (error instanceof Error && error.message.includes('Authentication failed')) {
-                showError('Session Expired', 'Your session has expired. Please sign in again.');
+                if (myOppsRetryCount < MAX_RETRIES) {
+                    console.log(`Retrying my opportunities load (${myOppsRetryCount + 1}/${MAX_RETRIES})`);
+                    setMyOppsRetryCount(prev => prev + 1);
+                    // Retry after a short delay
+                    setTimeout(() => loadMyOpportunities(), 1000 * (myOppsRetryCount + 1));
+                    return;
+                } else {
+                    showError('Session Expired', 'Your session has expired. Please sign in again.');
+                    setMyOppsRetryCount(0);
+                }
             } else {
                 showError('Load Failed', 'Failed to load your opportunities. Please try again.');
             }
         } finally {
             setLoadingMyOpps(false);
         }
-    }, [user, showError]);
+    }, [user, showError, myOppsRetryCount]);
 
     const handleDeleteOpportunity = async (id: string) => {
         if (!user) return;
@@ -157,7 +186,8 @@ function DashboardContent() {
         if (user && activeView === 'myOpportunities') {
             loadMyOpportunities();
         }
-    }, [user, activeView, loadMyOpportunities]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, activeView]); // Remove loadMyOpportunities dependency to prevent loops
 
     const handleRemoveBookmark = async (opportunityId: string) => {
         try {
