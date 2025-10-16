@@ -1,29 +1,11 @@
 """Opportunity service - Business logic for opportunities"""
 from firebase_admin import firestore
-from config.settings import db, algolia_client, ALGOLIA_INDEX_NAME
+from config.settings import db
 from datetime import datetime
-import asyncio
-import threading
+from services.algolia_service import algolia_service
 
 class OpportunityService:
     """Service for managing opportunities"""
-    
-    @staticmethod
-    def _run_async(coro):
-        """Safely run async code in sync context"""
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # If we're already in an event loop, create a new thread
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(asyncio.run, coro)
-                    return future.result()
-            else:
-                return loop.run_until_complete(coro)
-        except RuntimeError:
-            # No event loop exists, create a new one
-            return asyncio.run(coro)
     
     @staticmethod
     def get_all_opportunities():
@@ -60,19 +42,14 @@ class OpportunityService:
         firestore_data['createdAt'] = firestore.SERVER_TIMESTAMP
         doc_ref.set(firestore_data)
         
-        # Add to Algolia
-        algolia_data = data.copy()
-        algolia_data['objectID'] = doc_ref.id
-        algolia_data['createdAt'] = datetime.now().isoformat()
-        
-        # Run async Algolia operation safely
-        async def _save_to_algolia():
-            await algolia_client.save_objects(
-                index_name=ALGOLIA_INDEX_NAME,
-                objects=[algolia_data]
-            )
-        
-        OpportunityService._run_async(_save_to_algolia())
+        # Only add to Algolia if published
+        if data.get('status') == 'published':
+            algolia_data = data.copy()
+            algolia_data['objectID'] = doc_ref.id
+            algolia_data['createdAt'] = datetime.now().isoformat()
+            algolia_service.save_objects([algolia_data])
+        else:
+            algolia_data = None
         
         return doc_ref.id, algolia_data
     
@@ -82,18 +59,15 @@ class OpportunityService:
         doc_ref = db.collection('opportunities').document(opportunity_id)
         doc_ref.update(data)
         
-        # Update Algolia
-        algolia_data = data.copy()
-        algolia_data['objectID'] = opportunity_id
-        
-        # Run async Algolia operation safely
-        async def _update_algolia():
-            await algolia_client.save_objects(
-                index_name=ALGOLIA_INDEX_NAME,
-                objects=[algolia_data]
-            )
-        
-        OpportunityService._run_async(_update_algolia())
+        # Handle Algolia based on status
+        if data.get('status') == 'published':
+            # Add/update in Algolia
+            algolia_data = data.copy()
+            algolia_data['objectID'] = opportunity_id
+            algolia_service.save_objects([algolia_data])
+        elif data.get('status') == 'draft':
+            # Remove from Algolia if it was published before
+            algolia_service.delete_objects([opportunity_id])
         
         return True
     
@@ -104,43 +78,27 @@ class OpportunityService:
         db.collection('opportunities').document(opportunity_id).delete()
         
         # Delete from Algolia
-        async def _delete_from_algolia():
-            await algolia_client.delete_objects(
-                index_name=ALGOLIA_INDEX_NAME,
-                object_ids=[opportunity_id]
-            )
-        
-        OpportunityService._run_async(_delete_from_algolia())
+        algolia_service.delete_objects([opportunity_id])
         
         return True
     
     @staticmethod
     def sync_to_algolia():
-        """Sync all Firestore opportunities to Algolia"""
+        """Sync all published Firestore opportunities to Algolia"""
         opportunities_ref = db.collection('opportunities')
-        docs = opportunities_ref.stream()
+        # Only sync published opportunities
+        docs = opportunities_ref.where('status', '==', 'published').stream()
         
         records = []
         for doc in docs:
             data = doc.to_dict()
-            data['objectID'] = doc.id
-            
-            # Convert datetime objects to ISO strings for Algolia
-            if 'createdAt' in data and data['createdAt']:
-                data['createdAt'] = data['createdAt'].isoformat() if hasattr(data['createdAt'], 'isoformat') else str(data['createdAt'])
-            
+            data['id'] = doc.id
             records.append(data)
         
         if records:
-            async def _sync_to_algolia():
-                await algolia_client.save_objects(
-                    index_name=ALGOLIA_INDEX_NAME,
-                    objects=records
-                )
-            
-            OpportunityService._run_async(_sync_to_algolia())
-        
-        return len(records)
+            return algolia_service.sync_all(records)
+        else:
+            return 0
     
     @staticmethod
     def get_user_opportunities(user_id, status=None):

@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify
 from services.opportunity_service import OpportunityService
 from services.moderation_service import ModerationService
+from services.opportunity_publish_service import OpportunityPublishService
 from models.opportunity import OPPORTUNITY_TEMPLATES, TAG_PRESETS
 from utils.decorators import require_auth
 from utils.logging_config import logger

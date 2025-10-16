@@ -184,6 +184,38 @@ function OpportunitiesContent() {
         }
     };
 
+    const handlePublish = async () => {
+        if (!user || !draftId) {
+            setMessage({ type: 'error', text: 'No draft to publish' });
+            return;
+        }
+
+        setLoading(true);
+        setMessage(null);
+
+        try {
+            const idToken = await getIdToken(auth.currentUser!);
+            const result = await api.publishOpportunity(draftId, idToken);
+
+            setMessage({
+                type: 'success',
+                text: 'Opportunity published successfully!'
+            });
+
+            setIsDraft(false);
+            setDraftId(null);
+
+        } catch (error) {
+            console.error('Error publishing opportunity:', error);
+            setMessage({
+                type: 'error',
+                text: 'Failed to publish opportunity'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -197,7 +229,7 @@ function OpportunitiesContent() {
 
         try {
             const idToken = await getIdToken(auth.currentUser!);
-            const submissionData = { ...formData, status: 'published' } as Opportunity;
+            const submissionData = { ...formData, status: 'draft' } as Opportunity;
 
             let result;
             if (isEditMode && editId) {
@@ -216,8 +248,14 @@ function OpportunitiesContent() {
 
             setMessage({
                 type: 'success',
-                text: isEditMode ? 'Opportunity updated successfully!' : 'Opportunity created successfully!'
+                text: isEditMode ? 'Draft updated successfully!' : 'Draft saved successfully!'
             });
+
+            // Set as draft
+            setIsDraft(true);
+            if (result.id) {
+                setDraftId(result.id);
+            }
 
             // Clear auto-save timeout
             if (autoSaveTimeoutRef.current) {
@@ -782,31 +820,8 @@ function OpportunitiesContent() {
                                 {currentSection === 'links' ? (
                                     <>
                                         <button
-                                            type="button"
-                                            onClick={async () => {
-                                                if (!user) return;
-                                                setLoading(true);
-                                                try {
-                                                    const idToken = await getIdToken(auth.currentUser!);
-                                                    const draftData = { ...formData, status: 'draft' } as Opportunity;
-
-                                                    if (isEditMode && editId) {
-                                                        await api.updateOpportunity(editId, draftData, idToken);
-                                                    } else {
-                                                        const result = await api.createOpportunity(draftData, idToken);
-                                                        if (result.id) setDraftId(result.id);
-                                                    }
-
-                                                    setIsDraft(true);
-                                                    setMessage({ type: 'success', text: 'Draft saved successfully!' });
-                                                } catch (error) {
-                                                    console.error('Error saving draft:', error);
-                                                    setMessage({ type: 'error', text: 'Failed to save draft' });
-                                                } finally {
-                                                    setLoading(false);
-                                                }
-                                            }}
-                                            disabled={loading || !formData.title}
+                                            type="submit"
+                                            disabled={loading || !canProceed()}
                                             className="flex items-center gap-2 px-6 py-3 bg-neutral-600 text-white rounded-comfort hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                         >
                                             {loading ? (
@@ -817,27 +832,30 @@ function OpportunitiesContent() {
                                             ) : (
                                                 <>
                                                     <DocumentIcon className="w-4 h-4" />
-                                                    Save as Draft
+                                                    Save Draft
                                                 </>
                                             )}
                                         </button>
-                                        <button
-                                            type="submit"
-                                            disabled={loading || !canProceed()}
-                                            className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            {loading ? (
-                                                <>
-                                                    <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                                                    {isEditMode ? 'Updating...' : 'Creating...'}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <SparklesIcon className="w-4 h-4" />
-                                                    {isEditMode ? 'Update Opportunity' : 'Create Opportunity'}
-                                                </>
-                                            )}
-                                        </button>
+                                        {isDraft && draftId && (
+                                            <button
+                                                type="button"
+                                                onClick={handlePublish}
+                                                disabled={loading}
+                                                className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                {loading ? (
+                                                    <>
+                                                        <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                                        Publishing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <SparklesIcon className="w-4 h-4" />
+                                                        Publish
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
                                     </>
                                 ) : (
                                     <button

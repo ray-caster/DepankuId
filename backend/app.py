@@ -25,6 +25,7 @@ from routes.bookmark_routes import bookmark_bp
 from routes.sync_routes import sync_bp
 from routes.profile_routes import profile_bp
 from routes.ai_routes import ai_bp
+from routes.publish_routes import publish_bp
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -72,6 +73,7 @@ app.register_blueprint(bookmark_bp)
 app.register_blueprint(sync_bp)
 app.register_blueprint(profile_bp)
 app.register_blueprint(ai_bp)
+app.register_blueprint(publish_bp)
 logger.info("All blueprints registered successfully")
 
 # Health check endpoint
