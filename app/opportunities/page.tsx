@@ -83,7 +83,7 @@ function OpportunitiesContent() {
         
         try {
             const idToken = await getIdToken(auth.currentUser!);
-            const draftData = { ...formData, status: 'draft' };
+            const draftData = { ...formData, status: 'draft' } as Opportunity;
             
             if (draftId) {
                 // Update existing draft
