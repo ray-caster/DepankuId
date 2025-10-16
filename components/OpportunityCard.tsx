@@ -22,20 +22,26 @@ interface OpportunityCardProps {
 }
 
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
-    const { user, idToken } = useAuth();
+    const { user, getIdToken } = useAuth();
     const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
     const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
     const handleBookmark = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        if (!user || !idToken) {
+        if (!user) {
             alert('Please sign in to bookmark opportunities');
             return;
         }
 
         setBookmarkLoading(true);
         try {
+            const idToken = await getIdToken();
+            if (!idToken) {
+                alert('Please sign in to bookmark opportunities');
+                return;
+            }
+
             if (isBookmarked) {
                 await api.removeBookmark(opportunity.id || opportunity.objectID || '', idToken);
                 setIsBookmarked(false);
@@ -56,14 +62,17 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
     const handleApply = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        if (!user || !idToken) {
+        if (!user) {
             alert('Please sign in to apply for opportunities');
             return;
         }
 
         try {
-            // Track application
-            await api.trackApplication(opportunity.id || opportunity.objectID || '', idToken);
+            const idToken = await getIdToken();
+            if (idToken) {
+                // Track application
+                await api.trackApplication(opportunity.id || opportunity.objectID || '', idToken);
+            }
 
             // Open the opportunity URL
             if (opportunity.url) {

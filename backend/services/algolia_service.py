@@ -19,9 +19,10 @@ class AlgoliaService:
     def _run_async_safely(self, coro):
         """Safely run async operations in sync context"""
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # If we're already in an event loop, create a new thread with a new event loop
+            # Try to get the current event loop
+            try:
+                loop = asyncio.get_running_loop()
+                # We're in an async context, use ThreadPoolExecutor
                 def run_in_new_loop():
                     new_loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(new_loop)
@@ -33,11 +34,22 @@ class AlgoliaService:
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     future = executor.submit(run_in_new_loop)
                     return future.result(timeout=30)  # 30 second timeout
-            else:
-                return loop.run_until_complete(coro)
-        except RuntimeError:
-            # No event loop exists, create a new one
-            return asyncio.run(coro)
+            except RuntimeError:
+                # No running loop, we can create one
+                return asyncio.run(coro)
+        except Exception as e:
+            logger.error(f"Error running async operation: {str(e)}")
+            # Fallback: try to run synchronously
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return loop.run_until_complete(coro)
+                finally:
+                    loop.close()
+            except Exception as fallback_error:
+                logger.error(f"Fallback async operation also failed: {str(fallback_error)}")
+                return False
     
     async def save_objects_async(self, objects: List[Dict[str, Any]]) -> bool:
         """Save objects to Algolia asynchronously"""
