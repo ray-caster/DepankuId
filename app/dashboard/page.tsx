@@ -86,10 +86,16 @@ function DashboardContent() {
                 setBookmarks(data);
                 processDeadlines(data);
                 setLastRefresh(new Date());
+            } else {
+                showError('Authentication Required', 'Please sign in to view your bookmarks.');
             }
         } catch (error) {
             console.error('Failed to load bookmarks:', error);
-            showError('Load Failed', 'Failed to load bookmarks. Please try again.');
+            if (error instanceof Error && error.message.includes('Authentication failed')) {
+                showError('Session Expired', 'Your session has expired. Please sign in again.');
+            } else {
+                showError('Load Failed', 'Failed to load bookmarks. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -110,10 +116,16 @@ function DashboardContent() {
                 const myOpps = await api.getMyOpportunities(idToken);
                 setMyOpportunities(myOpps);
                 setLastRefresh(new Date());
+            } else {
+                showError('Authentication Required', 'Please sign in to view your opportunities.');
             }
         } catch (error) {
             console.error('Failed to load my opportunities:', error);
-            showError('Load Failed', 'Failed to load your opportunities. Please try again.');
+            if (error instanceof Error && error.message.includes('Authentication failed')) {
+                showError('Session Expired', 'Your session has expired. Please sign in again.');
+            } else {
+                showError('Load Failed', 'Failed to load your opportunities. Please try again.');
+            }
         } finally {
             setLoadingMyOpps(false);
         }

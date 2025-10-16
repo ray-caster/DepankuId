@@ -453,7 +453,11 @@ class API {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch bookmarks');
+            const errorData = await response.json().catch(() => ({}));
+            if (response.status === 401) {
+                throw new Error('Authentication failed. Please sign in again.');
+            }
+            throw new Error(errorData.message || 'Failed to fetch bookmarks');
         }
 
         const data = await response.json();

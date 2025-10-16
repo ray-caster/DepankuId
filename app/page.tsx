@@ -11,15 +11,10 @@ function RootRedirect() {
 
     useEffect(() => {
         if (!loading) {
-            if (user) {
-                // User is logged in, redirect to dashboard
-                router.push('/dashboard');
-            } else {
-                // User is not logged in, redirect to home
-                router.push('/home');
-            }
+            // Always redirect to home page, regardless of login status
+            router.push('/home');
         }
-    }, [user, loading, router]);
+    }, [loading, router]);
 
     // Show loading while determining redirect
     return (
