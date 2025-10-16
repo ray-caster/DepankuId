@@ -7,6 +7,7 @@ import { api, Opportunity } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { useNotifications } from '@/lib/notifications';
 import NotificationContainer from '@/components/NotificationToast';
+import { auth } from '@/lib/firebase';
 import {
     BookmarkIcon,
     CalendarIcon,
@@ -80,8 +81,8 @@ function DashboardContent() {
 
     const loadBookmarks = useCallback(async () => {
         try {
-            const idToken = await getIdToken();
-            if (idToken) {
+            if (user) {
+                const idToken = await user.getIdToken(true); // Force refresh
                 const data = await api.getBookmarks(idToken);
                 setBookmarks(data);
                 processDeadlines(data);
@@ -99,7 +100,7 @@ function DashboardContent() {
         } finally {
             setLoading(false);
         }
-    }, [getIdToken, processDeadlines, showError]);
+    }, [user, processDeadlines, showError]);
 
     useEffect(() => {
         if (user) {
@@ -110,8 +111,8 @@ function DashboardContent() {
     const loadMyOpportunities = useCallback(async () => {
         setLoadingMyOpps(true);
         try {
-            const idToken = await getIdToken();
-            if (idToken && user) {
+            if (user) {
+                const idToken = await user.getIdToken(true); // Force refresh
                 // Get all opportunities created by this user (published, drafts, rejected)
                 const myOpps = await api.getMyOpportunities(idToken);
                 setMyOpportunities(myOpps);
@@ -129,7 +130,7 @@ function DashboardContent() {
         } finally {
             setLoadingMyOpps(false);
         }
-    }, [getIdToken, user, showError]);
+    }, [user, showError]);
 
     const handleDeleteOpportunity = async (id: string) => {
         if (!user) return;
@@ -160,8 +161,8 @@ function DashboardContent() {
 
     const handleRemoveBookmark = async (opportunityId: string) => {
         try {
-            const idToken = await getIdToken();
-            if (idToken) {
+            if (user) {
+                const idToken = await user.getIdToken(true); // Force refresh
                 await api.removeBookmark(opportunityId, idToken);
                 const updatedBookmarks = bookmarks.filter(b => b.id !== opportunityId);
                 setBookmarks(updatedBookmarks);

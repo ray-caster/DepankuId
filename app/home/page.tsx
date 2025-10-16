@@ -95,10 +95,7 @@ function HomeContent() {
         );
     }
 
-    // Don't render home page for logged-in users (they'll be redirected)
-    if (user) {
-        return null;
-    }
+    // Home page is accessible to all users
 
     return (
         <div className="min-h-screen bg-background">
