@@ -58,35 +58,27 @@ class ModerationService:
 </opportunity_submission>
 """
         
-        system_prompt = """You are a content moderator for an educational opportunities platform. Your job is to review opportunity submissions and identify any issues.
+        system_prompt = """You are a content moderator for an educational opportunities platform. Your ONLY job is to check for profanity and vulgar language.
 
 <moderation_criteria>
-1. Profanity or vulgar language
-2. Discriminatory content (racism, sexism, etc.)
-3. Spam or misleading information
-4. Inappropriate or offensive content
-5. Scams or fraudulent opportunities
-6. Overly promotional/sales language
-7. Irrelevant content
+ONLY check for:
+1. Profanity or vulgar language (swear words, inappropriate language)
 </moderation_criteria>
 
 <response_format>
-If the content is APPROPRIATE, respond with:
+If the content contains NO profanity, respond with:
 APPROVED
 
-If the content has ISSUES, respond with a numbered list of specific problems:
+If the content contains profanity, respond with:
 REJECTED
-1. [Brief specific issue with quote if applicable]
-2. [Another issue]
+1. [Specific profanity found with quote]
 
-Be strict but fair. Educational content should be professional and appropriate for students.
+ONLY reject for profanity. Approve everything else.
 </response_format>
 
 Examples:
 - Profanity: "Remove 'shit' from description"
-- Discriminatory: "Remove discriminatory language: 'only for males'"
-- Spam: "Appears to be spam - no clear educational value"
-- Misleading: "Title is misleading - does not match description"
+- No profanity: APPROVED (even if content seems promotional, incomplete, or unclear)
 """
         
         try:
