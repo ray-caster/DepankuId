@@ -144,19 +144,19 @@ export default function CreateOpportunityPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="pt-20 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-4"
+              className="flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-4 text-sm sm:text-base"
             >
-              <ArrowLeftIcon className="w-5 h-5" />
+              <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               Back to Admin
             </button>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Create Opportunity</h1>
-            <p className="text-foreground-light">Add a new opportunity to the platform</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">Create Opportunity</h1>
+            <p className="text-sm sm:text-base text-foreground-light">Add a new opportunity to the platform</p>
           </div>
 
           {error && (
@@ -166,10 +166,10 @@ export default function CreateOpportunityPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Basic Info */}
-            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
-              <h2 className="text-2xl font-bold text-foreground mb-4">Basic Information</h2>
+            <div className="bg-background-light rounded-gentle p-4 sm:p-6 border-2 border-neutral-400">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Basic Information</h2>
 
               <div className="space-y-4">
                 <div>
@@ -182,7 +182,7 @@ export default function CreateOpportunityPage() {
                     value={formData.title}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                   />
                 </div>
 
@@ -196,11 +196,11 @@ export default function CreateOpportunityPage() {
                     onChange={handleChange}
                     required
                     rows={4}
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base resize-none"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Type *
@@ -210,7 +210,7 @@ export default function CreateOpportunityPage() {
                       value={formData.type}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                     >
                       <option value="research">Research</option>
                       <option value="competition">Competition</option>
@@ -229,12 +229,12 @@ export default function CreateOpportunityPage() {
                       value={formData.organization}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Location
@@ -244,7 +244,7 @@ export default function CreateOpportunityPage() {
                       name="location"
                       value={formData.location}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                     />
                   </div>
 
@@ -258,7 +258,7 @@ export default function CreateOpportunityPage() {
                       value={formData.deadline}
                       onChange={handleChange}
                       disabled={formData.has_indefinite_deadline}
-                      className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 disabled:bg-neutral-200"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 disabled:bg-neutral-200 text-sm sm:text-base"
                     />
                   </div>
                 </div>
@@ -285,15 +285,15 @@ export default function CreateOpportunityPage() {
                     name="url"
                     value={formData.url}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                   />
                 </div>
               </div>
             </div>
 
             {/* Tags */}
-            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
-              <h2 className="text-2xl font-bold text-foreground mb-4">Tags</h2>
+            <div className="bg-background-light rounded-gentle p-4 sm:p-6 border-2 border-neutral-400">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Tags</h2>
 
               <div className="space-y-4">
                 <div>
@@ -305,9 +305,9 @@ export default function CreateOpportunityPage() {
                     value={formData.tags.join(', ')}
                     onChange={(e) => handleArrayChange('tags', e.target.value)}
                     placeholder="e.g. stem, research, undergraduate, funded, international"
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                   />
-                  <p className="mt-2 text-sm text-neutral-600">
+                  <p className="mt-2 text-xs sm:text-sm text-neutral-600">
                     Suggested: stem, research, science, technology, engineering, coding, leadership, competition, online, free, scholarship
                   </p>
                 </div>
@@ -315,8 +315,8 @@ export default function CreateOpportunityPage() {
             </div>
 
             {/* Additional Details */}
-            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
-              <h2 className="text-2xl font-bold text-foreground mb-4">Additional Details</h2>
+            <div className="bg-background-light rounded-gentle p-4 sm:p-6 border-2 border-neutral-400">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Additional Details</h2>
 
               <div className="space-y-4">
                 <div>
@@ -328,7 +328,7 @@ export default function CreateOpportunityPage() {
                     value={formData.requirements}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base resize-none"
                   />
                 </div>
 
@@ -341,7 +341,7 @@ export default function CreateOpportunityPage() {
                     value={formData.benefits}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base resize-none"
                   />
                 </div>
 
@@ -354,11 +354,11 @@ export default function CreateOpportunityPage() {
                     value={formData.eligibility}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base resize-none"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Cost
@@ -369,7 +369,7 @@ export default function CreateOpportunityPage() {
                       value={formData.cost}
                       onChange={handleChange}
                       placeholder="e.g. Free, $50, Varies"
-                      className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                     />
                   </div>
 
@@ -383,7 +383,7 @@ export default function CreateOpportunityPage() {
                       value={formData.duration}
                       onChange={handleChange}
                       placeholder="e.g. 6 months, Summer 2024"
-                      className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                     />
                   </div>
                 </div>
@@ -397,7 +397,7 @@ export default function CreateOpportunityPage() {
                     value={formData.application_process}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base resize-none"
                   />
                 </div>
 
@@ -410,25 +410,25 @@ export default function CreateOpportunityPage() {
                     name="contact_email"
                     value={formData.contact_email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort focus:outline-none focus:border-primary-600 text-sm sm:text-base"
                   />
                 </div>
               </div>
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 px-6 py-3 border-2 border-neutral-400 rounded-comfort hover:bg-neutral-200 transition-colors"
+                className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-neutral-400 rounded-comfort hover:bg-neutral-200 transition-colors text-sm sm:text-base"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 transition-colors disabled:opacity-50 text-sm sm:text-base"
               >
                 {isSubmitting ? 'Creating...' : 'Create Opportunity'}
               </button>

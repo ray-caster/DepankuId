@@ -42,6 +42,20 @@ function DashboardContent() {
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
+
+    // Load active view from localStorage on mount
+    useEffect(() => {
+        const savedView = localStorage.getItem('dashboardActiveView') as 'bookmarks' | 'gantt' | 'myOpportunities';
+        if (savedView && ['bookmarks', 'gantt', 'myOpportunities'].includes(savedView)) {
+            setActiveView(savedView);
+        }
+    }, []);
+
+    // Save active view to localStorage when it changes
+    const handleViewChange = (view: 'bookmarks' | 'gantt' | 'myOpportunities') => {
+        setActiveView(view);
+        localStorage.setItem('dashboardActiveView', view);
+    };
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const processDeadlines = useCallback((opportunities: Opportunity[]) => {
@@ -99,7 +113,7 @@ function DashboardContent() {
 
     const handleDeleteOpportunity = async (id: string) => {
         if (!user) return;
-        
+
         setDeletingId(id);
         try {
             const idToken = await getIdToken();
@@ -107,7 +121,7 @@ function DashboardContent() {
                 throw new Error('No authentication token available');
             }
             await api.deleteOpportunity(id, idToken as string);
-            
+
             setMyOpportunities(prev => prev.filter(opp => opp.id !== id));
         } catch (error) {
             console.error('Error deleting opportunity:', error);
@@ -344,7 +358,7 @@ function DashboardContent() {
                     {/* View Tabs */}
                     <div className="flex gap-2 mb-6 border-b-2 border-neutral-200 overflow-x-auto">
                         <button
-                            onClick={() => setActiveView('bookmarks')}
+                            onClick={() => handleViewChange('bookmarks')}
                             className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'bookmarks'
                                 ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
                                 : 'text-neutral-600 hover:text-neutral-900'
@@ -354,7 +368,7 @@ function DashboardContent() {
                             Bookmarks
                         </button>
                         <button
-                            onClick={() => setActiveView('myOpportunities')}
+                            onClick={() => handleViewChange('myOpportunities')}
                             className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap relative ${activeView === 'myOpportunities'
                                 ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
                                 : 'text-neutral-600 hover:text-neutral-900'
@@ -369,7 +383,7 @@ function DashboardContent() {
                             )}
                         </button>
                         <button
-                            onClick={() => setActiveView('gantt')}
+                            onClick={() => handleViewChange('gantt')}
                             className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'gantt'
                                 ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
                                 : 'text-neutral-600 hover:text-neutral-900'
@@ -404,9 +418,9 @@ function DashboardContent() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between mb-4">
                                         <p className="text-neutral-600">
-                                            You have {myOpportunities.length} {myOpportunities.length === 1 ? 'opportunity' : 'opportunities'} 
-                                            ({myOpportunities.filter(opp => opp.status === 'published').length} published, 
-                                            {myOpportunities.filter(opp => opp.status === 'draft').length} drafts, 
+                                            You have {myOpportunities.length} {myOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
+                                            ({myOpportunities.filter(opp => opp.status === 'published').length} published,
+                                            {myOpportunities.filter(opp => opp.status === 'draft').length} drafts,
                                             {myOpportunities.filter(opp => opp.status === 'rejected').length} rejected)
                                         </p>
                                         <Link href="/opportunities" className="btn-secondary">
@@ -420,28 +434,26 @@ function DashboardContent() {
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: idx * 0.05 }}
-                                                className={`card hover:shadow-card-hover transition-shadow ${
-                                                    opportunity.status === 'draft' 
-                                                        ? 'border-l-4 border-orange-500' 
+                                                className={`card hover:shadow-card-hover transition-shadow ${opportunity.status === 'draft'
+                                                        ? 'border-l-4 border-orange-500'
                                                         : opportunity.status === 'published'
-                                                        ? 'border-l-4 border-green-500'
-                                                        : 'border-l-4 border-red-500'
-                                                }`}
+                                                            ? 'border-l-4 border-green-500'
+                                                            : 'border-l-4 border-red-500'
+                                                    }`}
                                             >
                                                 <div className="mb-3">
                                                     <div className="flex items-center justify-between mb-2">
                                                         <h3 className="text-xl font-bold text-foreground">
                                                             {opportunity.title}
                                                         </h3>
-                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                            opportunity.status === 'draft' 
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${opportunity.status === 'draft'
                                                                 ? 'bg-orange-100 text-orange-700'
                                                                 : opportunity.status === 'published'
-                                                                ? 'bg-green-100 text-green-700'
-                                                                : 'bg-red-100 text-red-700'
-                                                        }`}>
-                                                            {opportunity.status === 'draft' ? 'Draft' : 
-                                                             opportunity.status === 'published' ? 'Published' : 'Rejected'}
+                                                                    ? 'bg-green-100 text-green-700'
+                                                                    : 'bg-red-100 text-red-700'
+                                                            }`}>
+                                                            {opportunity.status === 'draft' ? 'Draft' :
+                                                                opportunity.status === 'published' ? 'Published' : 'Rejected'}
                                                         </span>
                                                     </div>
                                                     <div className="flex flex-wrap gap-2 mb-3">

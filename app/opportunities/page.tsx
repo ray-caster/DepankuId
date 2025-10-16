@@ -755,26 +755,33 @@ function OpportunitiesContent() {
     return (
         <div className="min-h-screen bg-background">
             <Header />
-            <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+            <main className="pt-20 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    <div className="mb-8">
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-4xl font-bold text-foreground">
+                    <div className="mb-6 sm:mb-8">
+                        <button
+                            onClick={() => router.push('/dashboard')}
+                            className="flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-4 text-sm sm:text-base"
+                        >
+                            <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                            Back to Dashboard
+                        </button>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
                                 {isEditMode ? 'Edit Opportunity' : 'Create Opportunity'}
                             </h1>
                             {isDraft && (
-                                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full border border-yellow-300">
+                                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full border border-yellow-300 self-start">
                                     Draft
                                 </span>
                             )}
                         </div>
-                        <p className="text-foreground-light">
+                        <p className="text-sm sm:text-base text-foreground-light">
                             {isEditMode ? 'Update your opportunity details' : 'Share an educational opportunity with the community'}
                         </p>
                     </div>
 
                     {/* Section Tabs */}
-                    <div className="mb-8">
+                    <div className="mb-6 sm:mb-8">
                         <div className="flex flex-wrap gap-2 mb-4">
                             {SECTIONS.map((section) => {
                                 const Icon = section.icon;
@@ -783,13 +790,13 @@ function OpportunitiesContent() {
                                     <button
                                         key={section.id}
                                         onClick={() => setCurrentSection(section.id)}
-                                        className={`flex items-center gap-2 px-4 py-3 rounded-comfort border-2 transition-all ${isActive
+                                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-comfort border-2 transition-all text-xs sm:text-sm ${isActive
                                             ? 'border-primary-500 bg-primary-100 text-primary-700'
                                             : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
                                             }`}
                                     >
-                                        <Icon className="w-4 h-4" />
-                                        <span className="text-sm font-medium">{section.label}</span>
+                                        <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                                        <span className="font-medium">{section.label}</span>
                                     </button>
                                 );
                             })}
@@ -803,24 +810,24 @@ function OpportunitiesContent() {
                         </AnimatePresence>
 
                         {/* Navigation */}
-                        <div className="flex justify-between items-center pt-6 border-t-2 border-neutral-200">
+                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 pt-6 border-t-2 border-neutral-200">
                             <button
                                 type="button"
                                 onClick={prevSection}
                                 disabled={currentSection === 'basic'}
-                                className="flex items-center gap-2 px-4 py-2 text-neutral-600 hover:text-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center justify-center gap-2 px-4 py-2.5 text-neutral-600 hover:text-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                             >
                                 <ChevronLeftIcon className="w-4 h-4" />
                                 Previous
                             </button>
 
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 {currentSection === 'links' ? (
                                     <>
                                         <button
                                             type="submit"
                                             disabled={loading || !canProceed()}
-                                            className="flex items-center gap-2 px-6 py-3 bg-neutral-600 text-white rounded-comfort hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-neutral-600 text-white rounded-comfort hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                                         >
                                             {loading ? (
                                                 <>
@@ -839,7 +846,7 @@ function OpportunitiesContent() {
                                                 type="button"
                                                 onClick={handlePublish}
                                                 disabled={loading}
-                                                className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                                             >
                                                 {loading ? (
                                                     <>
@@ -860,7 +867,7 @@ function OpportunitiesContent() {
                                         type="button"
                                         onClick={nextSection}
                                         disabled={!canProceed()}
-                                        className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                                     >
                                         Next
                                         <ChevronRightIcon className="w-4 h-4" />

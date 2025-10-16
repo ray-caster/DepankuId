@@ -76,6 +76,11 @@ app.register_blueprint(ai_bp)
 app.register_blueprint(publish_bp)
 logger.info("All blueprints registered successfully")
 
+# Debug: List all registered routes
+logger.info("Registered routes:")
+for rule in app.url_map.iter_rules():
+    logger.info(f"  {rule.methods} {rule.rule}")
+
 # Health check endpoint
 @app.route('/health', methods=['GET'])
 def health_check():

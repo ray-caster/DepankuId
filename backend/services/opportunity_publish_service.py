@@ -1,6 +1,8 @@
 """Additional opportunity service methods for publishing/unpublishing"""
 from firebase_admin import firestore
 from config.settings import db
+from services.moderation_service import ModerationService
+from utils.logging_config import logger
 try:
     from services.algolia_service import algolia_service
     ALGOLIA_AVAILABLE = True
@@ -14,7 +16,7 @@ class OpportunityPublishService:
     
     @staticmethod
     def publish_opportunity(opportunity_id):
-        """Publish a draft opportunity"""
+        """Publish a draft opportunity with AI moderation"""
         doc_ref = db.collection('opportunities').document(opportunity_id)
         doc = doc_ref.get()
         
@@ -25,8 +27,29 @@ class OpportunityPublishService:
         if data.get('status') == 'published':
             return False, "Opportunity is already published"
         
-        # Update status to published
-        doc_ref.update({'status': 'published'})
+        # Moderate content with AI before publishing
+        logger.info(f"Moderating opportunity {opportunity_id} before publishing")
+        is_approved, issues = ModerationService.moderate_opportunity(data)
+        
+        if not is_approved:
+            # Update as rejected with moderation notes
+            data['status'] = 'rejected'
+            data['moderation_notes'] = ModerationService.get_moderation_summary(issues)
+            doc_ref.update(data)
+            
+            logger.info(f"Opportunity {opportunity_id} rejected by moderation during publish")
+            
+            return False, {
+                "status": "rejected",
+                "message": "Your opportunity needs revision",
+                "issues": issues,
+                "moderation_notes": data['moderation_notes']
+            }
+        
+        # Content approved, publish the opportunity
+        data['status'] = 'published'
+        data['moderation_notes'] = ''  # Clear any previous moderation notes
+        doc_ref.update(data)
         
         # Add to Algolia
         if ALGOLIA_AVAILABLE:
@@ -35,6 +58,7 @@ class OpportunityPublishService:
             algolia_data['status'] = 'published'
             algolia_service.save_objects([algolia_data])
         
+        logger.info(f"Opportunity {opportunity_id} published successfully after moderation")
         return True, "Opportunity published successfully"
     
     @staticmethod
