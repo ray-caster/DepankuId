@@ -1,3 +1,5 @@
+import { ErrorManager, AppError, ERROR_CODES } from './errors';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.depanku.id';
 
 export interface AIMessage {
@@ -82,19 +84,29 @@ class API {
     }
 
     async aiChat(data: AIChatRequest): Promise<AIChatResponse> {
-        const response = await fetch(`${this.baseURL}/api/ai/chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
+        try {
+            const response = await fetch(`${this.baseURL}/api/ai/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
 
-        if (!response.ok) {
-            throw new Error('Failed to get AI response');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const appError = ErrorManager.getErrorFromResponse({ ...response, ...errorData }, 'AI Chat');
+                throw ErrorManager.createError(appError.code, 'AI Chat');
+            }
+
+            return response.json();
+        } catch (error) {
+            if (error instanceof Error && (error as any).appError) {
+                throw error;
+            }
+            const appError = ErrorManager.getErrorFromException(error, 'AI Chat');
+            throw ErrorManager.createError(appError.code, 'AI Chat');
         }
-
-        return response.json();
     }
 
     async startDiscovery(userProfile?: UserPreferences): Promise<AIChatResponse> {
@@ -279,23 +291,43 @@ class API {
         }
     }
 
-    async publishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {
-        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/publish`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${idToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}), // Send empty JSON object instead of no body
-        });
+    async publishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string; issues?: string[]; moderation_notes?: string; status?: string }> {
+        try {
+            const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/publish`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${idToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}), // Send empty JSON object instead of no body
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to publish opportunity');
+            if (!response.ok) {
+                // Handle moderation rejection with detailed feedback
+                if (data.issues && data.status === 'rejected') {
+                    const error = ErrorManager.createError(ERROR_CODES.VAL_001, 'Opportunity Publishing');
+                    (error as any).moderationData = {
+                        issues: data.issues,
+                        moderation_notes: data.moderation_notes,
+                        status: data.status
+                    };
+                    throw error;
+                }
+
+                const appError = ErrorManager.getErrorFromResponse({ ...response, ...data }, 'Opportunity Publishing');
+                throw ErrorManager.createError(appError.code, 'Opportunity Publishing');
+            }
+
+            return data;
+        } catch (error) {
+            if (error instanceof Error && (error as any).appError) {
+                throw error;
+            }
+            const appError = ErrorManager.getErrorFromException(error, 'Opportunity Publishing');
+            throw ErrorManager.createError(appError.code, 'Opportunity Publishing');
         }
-
-        return data;
     }
 
     async unpublishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {

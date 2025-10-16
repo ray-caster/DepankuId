@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from services.opportunity_publish_service import OpportunityPublishService
 from utils.decorators import require_auth
 from utils.logging_config import logger
+from utils.error_responses import create_error_response, create_success_response, handle_exception
 from werkzeug.exceptions import BadRequest
 
 publish_bp = Blueprint('publish', __name__, url_prefix='/api/opportunities')
@@ -88,44 +89,38 @@ def publish_opportunity(opportunity_id, user_id: str, user_email: str):
         
         if success:
             logger.info(f"Opportunity published: {opportunity_id} by {user_email}")
-            return jsonify({
-                "success": True,
-                "message": result
-            }), 200
+            return create_success_response("Opportunity published successfully", {"opportunity_id": opportunity_id})
         else:
             # Handle different types of failure responses
             if isinstance(result, dict):
                 # Moderation rejection with detailed feedback
-                return jsonify({
-                    "success": False,
-                    "status": result.get("status"),
-                    "message": result.get("message"),
-                    "issues": result.get("issues", []),
-                    "moderation_notes": result.get("moderation_notes")
-                }), 400
+                return create_error_response(
+                    "VAL_001", 
+                    "Opportunity Publishing - Moderation Rejection",
+                    {
+                        "status": result.get("status"),
+                        "issues": result.get("issues", []),
+                        "moderation_notes": result.get("moderation_notes")
+                    }
+                )
             else:
-                # Simple error message
-                return jsonify({
-                    "success": False,
-                    "message": result
-                }), 400
+                # Simple error message - map to appropriate error code
+                if "not found" in str(result).lower():
+                    return create_error_response("NF_001", "Opportunity Publishing")
+                elif "already published" in str(result).lower():
+                    return create_error_response("OPP_004", "Opportunity Publishing")
+                else:
+                    return create_error_response("OPP_001", "Opportunity Publishing", {"original_message": str(result)})
     
     except BadRequest as e:
         logger.error(f"Bad request error publishing opportunity: {str(e)}")
-        return jsonify({
-            "success": False,
-            "error": "Bad request - invalid request format",
-            "message": str(e)
-        }), 400
+        return create_error_response("VAL_001", "Opportunity Publishing - Bad Request", {"original_error": str(e)})
     except Exception as e:
         logger.error(f"Error publishing opportunity: {str(e)}")
         logger.error(f"Exception type: {type(e).__name__}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return handle_exception(e, "Opportunity Publishing")
 
 # Handle OPTIONS request for unpublish CORS (without auth)
 @publish_bp.route('/<opportunity_id>/unpublish', methods=['OPTIONS'])

@@ -7,6 +7,8 @@ import { getIdToken } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import AuthModal from '@/components/AuthModal';
 import Header from '@/components/Header';
+import ErrorModal, { ModerationErrorModal, SuccessModal } from '@/components/ErrorModal';
+import { ErrorManager, AppError } from '@/lib/errors';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -70,6 +72,14 @@ function OpportunitiesContent() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [showSocialMedia, setShowSocialMedia] = useState(false);
+
+    // Error modal states
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [currentError, setCurrentError] = useState<AppError | null>(null);
+    const [showModerationModal, setShowModerationModal] = useState(false);
+    const [moderationData, setModerationData] = useState<{ issues: string[]; moderation_notes: string } | null>(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successData, setSuccessData] = useState<{ title: string; message: string } | null>(null);
     const [selectedTemplate, setSelectedTemplate] = useState('');
     const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [isDraft, setIsDraft] = useState(false);
@@ -186,7 +196,9 @@ function OpportunitiesContent() {
 
     const handlePublish = async () => {
         if (!user || !draftId) {
-            setMessage({ type: 'error', text: 'No draft to publish' });
+            const error = ErrorManager.getError('OPP_006', 'Publishing Opportunity');
+            setCurrentError(error);
+            setShowErrorModal(true);
             return;
         }
 
@@ -197,10 +209,12 @@ function OpportunitiesContent() {
             const idToken = await getIdToken(auth.currentUser!);
             const result = await api.publishOpportunity(draftId, idToken);
 
-            setMessage({
-                type: 'success',
-                text: 'Opportunity published successfully!'
+            // Show success modal
+            setSuccessData({
+                title: 'Opportunity Published!',
+                message: 'Your opportunity has been successfully published and is now visible to users.'
             });
+            setShowSuccessModal(true);
 
             setIsDraft(false);
             setDraftId(null);
@@ -233,10 +247,26 @@ function OpportunitiesContent() {
 
         } catch (error) {
             console.error('Error publishing opportunity:', error);
-            setMessage({
-                type: 'error',
-                text: 'Failed to publish opportunity'
-            });
+
+            // Check if it's a moderation error
+            if (error instanceof Error && (error as any).moderationData) {
+                const moderationData = (error as any).moderationData;
+                setModerationData({
+                    issues: moderationData.issues || [],
+                    moderation_notes: moderationData.moderation_notes || ''
+                });
+                setShowModerationModal(true);
+            } else {
+                // Handle other errors
+                let appError: AppError;
+                if (error instanceof Error && (error as any).appError) {
+                    appError = (error as any).appError;
+                } else {
+                    appError = ErrorManager.getErrorFromException(error, 'Publishing Opportunity');
+                }
+                setCurrentError(appError);
+                setShowErrorModal(true);
+            }
         } finally {
             setLoading(false);
         }
@@ -892,6 +922,27 @@ function OpportunitiesContent() {
                     )}
                 </div>
             </main>
+
+            {/* Error Modals */}
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                error={currentError}
+            />
+
+            <ModerationErrorModal
+                isOpen={showModerationModal}
+                onClose={() => setShowModerationModal(false)}
+                issues={moderationData?.issues || []}
+                moderationNotes={moderationData?.moderation_notes || ''}
+            />
+
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                title={successData?.title || 'Success'}
+                message={successData?.message || 'Operation completed successfully'}
+            />
         </div>
     );
 }
