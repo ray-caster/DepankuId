@@ -125,7 +125,7 @@ function DashboardContent() {
             if (!idToken) {
                 throw new Error('No authentication token available');
             }
-            await api.deleteOpportunity(id, idToken);
+            await api.deleteOpportunity(id, idToken as string);
             
             if (type === 'opportunity') {
                 setMyOpportunities(prev => prev.filter(opp => opp.id !== id));
