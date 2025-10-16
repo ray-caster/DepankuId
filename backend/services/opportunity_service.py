@@ -2,7 +2,13 @@
 from firebase_admin import firestore
 from config.settings import db
 from datetime import datetime
-from services.algolia_service import algolia_service
+try:
+    from services.algolia_service import algolia_service
+    ALGOLIA_AVAILABLE = True
+except (ValueError, ImportError) as e:
+    print(f"Warning: Algolia service not available: {e}")
+    ALGOLIA_AVAILABLE = False
+    algolia_service = None
 
 class OpportunityService:
     """Service for managing opportunities"""
@@ -43,7 +49,7 @@ class OpportunityService:
         doc_ref.set(firestore_data)
         
         # Only add to Algolia if published
-        if data.get('status') == 'published':
+        if data.get('status') == 'published' and ALGOLIA_AVAILABLE:
             algolia_data = data.copy()
             algolia_data['objectID'] = doc_ref.id
             algolia_data['createdAt'] = datetime.now().isoformat()
@@ -60,14 +66,15 @@ class OpportunityService:
         doc_ref.update(data)
         
         # Handle Algolia based on status
-        if data.get('status') == 'published':
-            # Add/update in Algolia
-            algolia_data = data.copy()
-            algolia_data['objectID'] = opportunity_id
-            algolia_service.save_objects([algolia_data])
-        elif data.get('status') == 'draft':
-            # Remove from Algolia if it was published before
-            algolia_service.delete_objects([opportunity_id])
+        if ALGOLIA_AVAILABLE:
+            if data.get('status') == 'published':
+                # Add/update in Algolia
+                algolia_data = data.copy()
+                algolia_data['objectID'] = opportunity_id
+                algolia_service.save_objects([algolia_data])
+            elif data.get('status') == 'draft':
+                # Remove from Algolia if it was published before
+                algolia_service.delete_objects([opportunity_id])
         
         return True
     
@@ -78,7 +85,8 @@ class OpportunityService:
         db.collection('opportunities').document(opportunity_id).delete()
         
         # Delete from Algolia
-        algolia_service.delete_objects([opportunity_id])
+        if ALGOLIA_AVAILABLE:
+            algolia_service.delete_objects([opportunity_id])
         
         return True
     
@@ -95,7 +103,7 @@ class OpportunityService:
             data['id'] = doc.id
             records.append(data)
         
-        if records:
+        if records and ALGOLIA_AVAILABLE:
             return algolia_service.sync_all(records)
         else:
             return 0

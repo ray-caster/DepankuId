@@ -10,6 +10,9 @@ class AlgoliaService:
     """Service for managing Algolia search operations"""
     
     def __init__(self):
+        if not ALGOLIA_APP_ID or not ALGOLIA_ADMIN_API_KEY:
+            raise ValueError("Algolia configuration not found. Please set ALGOLIA_APP_ID and ALGOLIA_ADMIN_API_KEY environment variables.")
+        
         self.client = SearchClient(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY)
         self.index_name = ALGOLIA_INDEX_NAME
     

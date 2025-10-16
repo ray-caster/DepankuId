@@ -26,11 +26,18 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 # Algolia Configuration
-algolia_client = SearchClient(
-    os.getenv("ALGOLIA_APP_ID"),
-    os.getenv("ALGOLIA_ADMIN_API_KEY")
-)
+ALGOLIA_APP_ID = os.getenv("ALGOLIA_APP_ID")
+ALGOLIA_ADMIN_API_KEY = os.getenv("ALGOLIA_ADMIN_API_KEY")
 ALGOLIA_INDEX_NAME = 'opportunities'
+
+if ALGOLIA_APP_ID and ALGOLIA_ADMIN_API_KEY:
+    algolia_client = SearchClient(
+        ALGOLIA_APP_ID,
+        ALGOLIA_ADMIN_API_KEY
+    )
+else:
+    print("Warning: Algolia configuration not found in environment variables")
+    algolia_client = None
 
 # Gemini Configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
