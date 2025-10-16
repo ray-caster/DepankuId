@@ -227,6 +227,30 @@ class API {
         return data;
     }
 
+    async updateOpportunity(opportunityId: string, opportunity: Opportunity, idToken: string): Promise<{ success: boolean; status?: string; id?: string; data?: any; message?: string; issues?: string[]; moderation_notes?: string }> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify(opportunity),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok && data.status === 'rejected') {
+            // Return the rejection data
+            return data;
+        }
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to update opportunity');
+        }
+
+        return data;
+    }
+
     async getMyOpportunities(idToken: string): Promise<Opportunity[]> {
         const response = await fetch(`${this.baseURL}/api/opportunities/my-opportunities`, {
             headers: {
