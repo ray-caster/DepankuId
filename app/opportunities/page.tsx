@@ -205,6 +205,32 @@ function OpportunitiesContent() {
             setIsDraft(false);
             setDraftId(null);
 
+            // Reset form after successful publishing
+            setFormData({
+                title: '',
+                description: '',
+                type: 'research',
+                organization: '',
+                location: '',
+                deadline: '',
+                url: '',
+                tags: [],
+                social_media: {},
+                benefits: '',
+                eligibility: '',
+                cost: '',
+                duration: '',
+                application_process: '',
+                contact_email: '',
+                has_indefinite_deadline: false,
+            });
+            setTagInput('');
+            setSelectedTemplate('');
+            setCurrentSection('basic');
+
+            // Trigger Algolia sync
+            await api.syncAlgolia();
+
         } catch (error) {
             console.error('Error publishing opportunity:', error);
             setMessage({
@@ -262,36 +288,6 @@ function OpportunitiesContent() {
                 clearTimeout(autoSaveTimeoutRef.current);
                 autoSaveTimeoutRef.current = null;
             }
-
-            setIsDraft(false);
-            setDraftId(null);
-            setIsEditMode(false);
-            setEditId(null);
-
-            // Reset form
-            setFormData({
-                title: '',
-                description: '',
-                type: 'research',
-                organization: '',
-                location: '',
-                deadline: '',
-                url: '',
-                tags: [],
-                social_media: {},
-                benefits: '',
-                eligibility: '',
-                cost: '',
-                duration: '',
-                application_process: '',
-                contact_email: '',
-                has_indefinite_deadline: false,
-            });
-            setTagInput('');
-            setSelectedTemplate('');
-
-            // Trigger Algolia sync
-            await api.syncAlgolia();
         } catch (error) {
             setMessage({ type: 'error', text: 'Failed to create opportunity' });
             console.error(error);
@@ -698,14 +694,16 @@ function OpportunitiesContent() {
                                 Popular Tags
                             </label>
                             <div className="flex flex-wrap gap-2">
-                                {tagPresets.map((tag) => (
+                                {tagPresets.slice(0, 20).map((tag, index) => (
                                     <button
                                         key={tag}
                                         type="button"
                                         onClick={() => addTag(tag)}
-                                        className="px-3 py-1 bg-neutral-200 text-neutral-700 rounded-soft text-sm hover:bg-primary-100 hover:text-primary-700 transition-colors"
+                                        className={`px-3 py-1 bg-neutral-200 text-neutral-700 rounded-soft text-sm hover:bg-primary-100 hover:text-primary-700 transition-colors ${index >= 8 ? 'hidden sm:block' : ''
+                                            } ${index >= 12 ? 'hidden lg:block' : ''
+                                            }`}
                                     >
-                                        + {tag}
+                                        #{tag}
                                     </button>
                                 ))}
                             </div>
