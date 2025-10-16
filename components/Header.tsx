@@ -23,6 +23,12 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthModal from './AuthModal';
 
+// Helper function to get first name from display name
+const getFirstName = (displayName: string | null | undefined): string => {
+    if (!displayName) return 'User';
+    return displayName.split(' ')[0];
+};
+
 export default function Header() {
     const { user, signOut } = useAuth();
     const pathname = usePathname();
@@ -185,7 +191,7 @@ export default function Header() {
                                             <UserCircleIcon className="w-8 h-8 text-neutral-400" />
                                         )}
                                         <span className="text-sm font-semibold text-foreground max-w-[120px] truncate">
-                                            {user.displayName}
+                                            {getFirstName(user.displayName)}
                                         </span>
                                         <ChevronDownIcon className={`w-4 h-4 text-neutral-600 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
                                     </button>
@@ -201,7 +207,7 @@ export default function Header() {
                                             >
                                                 {/* User Info */}
                                                 <div className="px-4 py-3 border-b-2 border-neutral-200 bg-neutral-50">
-                                                    <p className="text-sm font-semibold text-foreground truncate">{user.displayName}</p>
+                                                    <p className="text-sm font-semibold text-foreground truncate">{getFirstName(user.displayName)}</p>
                                                     <p className="text-xs text-neutral-600 truncate">{user.email}</p>
                                                 </div>
 
@@ -342,7 +348,7 @@ export default function Header() {
                                                 </div>
                                             )}
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-base font-bold text-foreground truncate">{user.displayName}</p>
+                                                <p className="text-base font-bold text-foreground truncate">{getFirstName(user.displayName)}</p>
                                                 <p className="text-sm text-neutral-700 truncate">{user.email}</p>
                                             </div>
                                         </div>
