@@ -72,7 +72,13 @@ export default function CreateOpportunityPage() {
         alert('Opportunity created successfully!');
         router.push('/admin');
       } else {
-        setError(data.message || data.error || 'Failed to create opportunity');
+        // Handle moderation errors with detailed feedback
+        if (data.issues && Array.isArray(data.issues)) {
+          const issuesList = data.issues.map((issue: string, index: number) => `${index + 1}. ${issue}`).join('\n');
+          setError(`Opportunity rejected by moderation:\n\n${issuesList}\n\nPlease address these issues and try again.`);
+        } else {
+          setError(data.message || data.error || 'Failed to create opportunity');
+        }
       }
     } catch (error: any) {
       console.error('Error creating opportunity:', error);
@@ -155,7 +161,7 @@ export default function CreateOpportunityPage() {
 
           {error && (
             <div className="mb-6 p-4 bg-red-100 border-2 border-red-400 rounded-comfort text-red-700">
-              {error}
+              <pre className="whitespace-pre-wrap font-sans">{error}</pre>
             </div>
           )}
 

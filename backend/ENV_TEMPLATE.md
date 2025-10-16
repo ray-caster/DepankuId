@@ -8,9 +8,9 @@ Create a `.env` file in the `backend/` directory with these variables:
 FIREBASE_SERVICE_ACCOUNT_KEY={"type":"service_account","project_id":"..."}
 ```
 
-## OpenRouter (AI)
+## Google Gemini (AI)
 ```env
-OPENROUTER_API_KEY=your_openrouter_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ## Algolia (Search)

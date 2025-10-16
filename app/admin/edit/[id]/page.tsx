@@ -114,7 +114,13 @@ export default function EditOpportunityPage() {
       if (data.success) {
         router.push('/admin');
       } else {
-        setError(data.message || 'Failed to update opportunity');
+        // Handle moderation errors with detailed feedback
+        if (data.issues && Array.isArray(data.issues)) {
+          const issuesList = data.issues.map((issue: string, index: number) => `${index + 1}. ${issue}`).join('\n');
+          setError(`Opportunity rejected by moderation:\n\n${issuesList}\n\nPlease address these issues and try again.`);
+        } else {
+          setError(data.message || 'Failed to update opportunity');
+        }
       }
     } catch (error) {
       console.error('Error updating opportunity:', error);
@@ -229,7 +235,7 @@ export default function EditOpportunityPage() {
 
           {error && (
             <div className="mb-6 p-4 bg-red-100 border-2 border-red-400 rounded-comfort text-red-700">
-              {error}
+              <pre className="whitespace-pre-wrap font-sans">{error}</pre>
             </div>
           )}
 

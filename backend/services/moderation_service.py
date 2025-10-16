@@ -1,7 +1,7 @@
-"""Content moderation service using OpenRouter AI"""
-import requests
+"""Content moderation service using Google Gemini AI"""
+from google import genai
 from typing import Dict, List, Tuple
-from config.settings import OPENROUTER_API_KEY, OPENROUTER_URL
+from config.settings import GEMINI_API_KEY
 from utils.logging_config import logger
 
 
@@ -19,8 +19,8 @@ class ModerationService:
         Returns:
             Tuple of (is_approved, list of issues/suggestions)
         """
-        if not OPENROUTER_API_KEY:
-            logger.warning("OpenRouter API key not configured, skipping moderation")
+        if not GEMINI_API_KEY:
+            logger.warning("Gemini API key not configured, skipping moderation")
             return True, []
         
         # Construct content to moderate
@@ -68,33 +68,23 @@ Examples:
 """
         
         try:
-            response = requests.post(
-                OPENROUTER_URL,
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://depanku.id",
-                    "X-Title": "Depanku Opportunity Moderation"
-                },
-                json={
-                    "model": "anthropic/claude-3.5-sonnet",
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": f"Please review this opportunity submission:\n\n{content_to_check}"}
-                    ],
+            # Initialize Gemini client
+            client = genai.Client(api_key=GEMINI_API_KEY)
+            
+            # Create the full prompt
+            full_prompt = f"{system_prompt}\n\nPlease review this opportunity submission:\n\n{content_to_check}"
+            
+            # Generate content using Gemini 2.5 Flash
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=full_prompt,
+                generation_config={
                     "temperature": 0.3,
-                    "max_tokens": 500
-                },
-                timeout=10
+                    "max_output_tokens": 500
+                }
             )
             
-            if response.status_code != 200:
-                logger.error(f"OpenRouter API error: {response.status_code} - {response.text}")
-                # If API fails, approve by default to not block users
-                return True, []
-            
-            result = response.json()
-            ai_response = result['choices'][0]['message']['content'].strip()
+            ai_response = response.text.strip()
             
             logger.info(f"Moderation response: {ai_response}")
             
@@ -114,7 +104,7 @@ Examples:
                 return True, []
                 
         except Exception as e:
-            logger.error(f"Moderation service error: {str(e)}")
+            logger.error(f"Gemini moderation service error: {str(e)}")
             # On error, approve by default to not block legitimate submissions
             return True, []
     

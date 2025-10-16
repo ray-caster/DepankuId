@@ -17,13 +17,14 @@ backend/
 │   └── opportunity.py    # Opportunity models, templates, presets
 ├── services/             # Business logic layer
 │   ├── __init__.py
-│   ├── ai_service.py     # AI chat logic
+│   ├── ai_service.py     # AI chat logic (Gemini)
 │   ├── auth_service.py   # Authentication operations
+│   ├── moderation_service.py  # Content moderation (Gemini)
 │   ├── opportunity_service.py  # Opportunity CRUD operations
 │   └── user_service.py   # User preferences and bookmarks
 ├── routes/               # API endpoints (controllers)
 │   ├── __init__.py
-│   ├── ai_routes.py
+│   ├── ai_routes.py      # AI chat endpoints
 │   ├── auth_routes.py
 │   ├── bookmark_routes.py
 │   ├── opportunity_routes.py
@@ -62,8 +63,8 @@ Create a `.env` file in the `backend/` directory:
 # Firebase Admin SDK (JSON string)
 FIREBASE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
 
-# OpenRouter API
-OPENROUTER_API_KEY=your_openrouter_api_key
+# Google Gemini API
+GEMINI_API_KEY=your_gemini_api_key
 
 # Algolia
 ALGOLIA_APP_ID=your_algolia_app_id
@@ -102,6 +103,9 @@ The API will be available at `http://localhost:5000`
 
 ### AI & Discovery
 - `POST /api/ai/chat` - AI-guided Socratic discovery chat
+- `POST /api/ai/discovery/start` - Start discovery session
+- `POST /api/ai/suggestions` - Get opportunity suggestions
+- `GET /api/ai/health` - AI service health check
 
 ### Opportunities
 - `GET /api/opportunities` - Get all opportunities
@@ -218,9 +222,10 @@ Manages user preferences, bookmarks, and token verification.
 - **Search Index**: Real-time search with InstantSearch
 - **Sync**: Automatic synchronization from Firestore
 
-### OpenRouter
-- **AI Chat**: Powered by Claude 3.5 Sonnet
+### Google Gemini
+- **AI Chat**: Powered by Gemini 2.5 Flash
 - **Socratic Questions**: Intelligent discovery guidance
+- **Content Moderation**: AI-powered content review
 
 ### Brevo
 - **Transactional Emails**: Email verification and notifications

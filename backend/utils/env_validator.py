@@ -14,7 +14,7 @@ class EnvValidator:
         'FIREBASE_SERVICE_ACCOUNT_KEY',
         'ALGOLIA_APP_ID',
         'ALGOLIA_ADMIN_API_KEY',
-        'OPENROUTER_API_KEY',
+        'GEMINI_API_KEY',
         'BREVO_API_KEY',
     ]
     

@@ -32,9 +32,8 @@ algolia_client = SearchClient(
 )
 ALGOLIA_INDEX_NAME = 'opportunities'
 
-# OpenRouter Configuration
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+# Gemini Configuration
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Brevo Configuration
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")

@@ -9,4 +9,5 @@ gunicorn==22.0.0
 brevo-python>=1.2.0
 asgiref>=3.7.0
 uvicorn[standard]==0.30.6
+google-genai>=0.8.0
 
