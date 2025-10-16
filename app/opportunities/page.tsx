@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     SparklesIcon,
     DocumentDuplicateIcon,
+    DocumentIcon,
     CalendarIcon,
     ArrowPathIcon,
     LinkIcon,
@@ -76,9 +77,10 @@ function OpportunitiesContent() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
 
-    // Auto-save functionality
+    // Auto-save functionality - only for drafts
     const autoSave = useCallback(async () => {
         if (!user || !formData.title || loading) return; // Don't auto-save while submitting
+        if (!isDraft) return; // Only auto-save if it's a draft
 
         try {
             const idToken = await getIdToken(auth.currentUser!);
@@ -99,7 +101,7 @@ function OpportunitiesContent() {
         } catch (error) {
             console.error('Auto-save failed:', error);
         }
-    }, [user, formData, draftId, loading]);
+    }, [user, formData, draftId, loading, isDraft]);
 
     // Handle edit mode
     useEffect(() => {
@@ -127,14 +129,14 @@ function OpportunitiesContent() {
         }
     };
 
-    // Auto-save on form changes
+    // Auto-save on form changes - only for drafts
     useEffect(() => {
         if (autoSaveTimeoutRef.current) {
             clearTimeout(autoSaveTimeoutRef.current);
         }
 
-        // Don't auto-save if loading or if we're in edit mode with a published opportunity
-        if (loading || (isEditMode && editId && !isDraft)) {
+        // Don't auto-save if loading, not a draft, or if we're in edit mode with a published opportunity
+        if (loading || !isDraft || (isEditMode && editId && !isDraft)) {
             return;
         }
 
@@ -720,9 +722,16 @@ function OpportunitiesContent() {
             <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
                     <div className="mb-8">
-                        <h1 className="text-4xl font-bold text-foreground mb-2">
-                            {isEditMode ? 'Edit Opportunity' : 'Create Opportunity'}
-                        </h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-4xl font-bold text-foreground">
+                                {isEditMode ? 'Edit Opportunity' : 'Create Opportunity'}
+                            </h1>
+                            {isDraft && (
+                                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full border border-yellow-300">
+                                    Draft
+                                </span>
+                            )}
+                        </div>
                         <p className="text-foreground-light">
                             {isEditMode ? 'Update your opportunity details' : 'Share an educational opportunity with the community'}
                         </p>
@@ -771,23 +780,65 @@ function OpportunitiesContent() {
 
                             <div className="flex gap-2">
                                 {currentSection === 'links' ? (
-                                    <button
-                                        type="submit"
-                                        disabled={loading || !canProceed()}
-                                        className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                                                {isEditMode ? 'Updating...' : 'Creating...'}
-                                            </>
-                                        ) : (
-                                            <>
-                                                <SparklesIcon className="w-4 h-4" />
-                                                {isEditMode ? 'Update Opportunity' : 'Create Opportunity'}
-                                            </>
-                                        )}
-                                    </button>
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                if (!user) return;
+                                                setLoading(true);
+                                                try {
+                                                    const idToken = await getIdToken(auth.currentUser!);
+                                                    const draftData = { ...formData, status: 'draft' } as Opportunity;
+
+                                                    if (isEditMode && editId) {
+                                                        await api.updateOpportunity(editId, draftData, idToken);
+                                                    } else {
+                                                        const result = await api.createOpportunity(draftData, idToken);
+                                                        if (result.id) setDraftId(result.id);
+                                                    }
+
+                                                    setIsDraft(true);
+                                                    setMessage({ type: 'success', text: 'Draft saved successfully!' });
+                                                } catch (error) {
+                                                    console.error('Error saving draft:', error);
+                                                    setMessage({ type: 'error', text: 'Failed to save draft' });
+                                                } finally {
+                                                    setLoading(false);
+                                                }
+                                            }}
+                                            disabled={loading || !formData.title}
+                                            className="flex items-center gap-2 px-6 py-3 bg-neutral-600 text-white rounded-comfort hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <DocumentIcon className="w-4 h-4" />
+                                                    Save as Draft
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={loading || !canProceed()}
+                                            className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-comfort hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                                    {isEditMode ? 'Updating...' : 'Creating...'}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <SparklesIcon className="w-4 h-4" />
+                                                    {isEditMode ? 'Update Opportunity' : 'Create Opportunity'}
+                                                </>
+                                            )}
+                                        </button>
+                                    </>
                                 ) : (
                                     <button
                                         type="button"
