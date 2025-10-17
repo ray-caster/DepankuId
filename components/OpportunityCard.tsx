@@ -10,11 +10,12 @@ import {
     BookmarkIcon as BookmarkOutlineIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '@/lib/api';
 import { getCategoryBadgeClasses, getCategoryLabel, OpportunityType } from '@/lib/categoryColors';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import ApplicationModal from './ApplicationModal';
 
 interface OpportunityCardProps {
     opportunity: Opportunity;
@@ -25,6 +26,7 @@ interface OpportunityCardProps {
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
     const { user, getIdToken } = useAuth();
     const { isBookmarked, toggleBookmark } = useBookmarks();
+    const [showApplicationModal, setShowApplicationModal] = useState(false);
 
     const handleBookmark = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -40,24 +42,8 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
             return;
         }
 
-        try {
-            const idToken = await getIdToken();
-            if (idToken) {
-                // Track application
-                await api.trackApplication(opportunity.id || opportunity.objectID || '', idToken);
-            }
-
-            // Open the opportunity URL
-            if (opportunity.url) {
-                window.open(opportunity.url, '_blank', 'noopener,noreferrer');
-            }
-        } catch (error) {
-            console.error('Error tracking application:', error);
-            // Still open the URL even if tracking fails
-            if (opportunity.url) {
-                window.open(opportunity.url, '_blank', 'noopener,noreferrer');
-            }
-        }
+        // Show application modal
+        setShowApplicationModal(true);
     };
 
     return (
@@ -167,6 +153,13 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     </div>
                 )}
             </div>
+
+            {/* Application Modal */}
+            <ApplicationModal
+                isOpen={showApplicationModal}
+                onClose={() => setShowApplicationModal(false)}
+                opportunity={opportunity}
+            />
         </motion.div>
     );
 }

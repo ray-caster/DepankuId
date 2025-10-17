@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import ErrorModal, { ModerationErrorModal, SuccessModal } from '@/components/ErrorModal';
 import { ErrorManager, AppError } from '@/lib/errors';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
+import ApplicationFormBuilder, { ApplicationForm } from '@/components/ApplicationFormBuilder';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     SparklesIcon,
@@ -64,6 +65,23 @@ function OpportunitiesContent() {
         application_process: '',
         contact_email: '',
         has_indefinite_deadline: false,
+    });
+
+    const [applicationForm, setApplicationForm] = useState<ApplicationForm>({
+        id: '',
+        title: 'Application Form',
+        description: '',
+        pages: [{
+            id: 'page_1',
+            title: 'Application Information',
+            description: '',
+            questions: []
+        }],
+        settings: {
+            allowMultipleSubmissions: false,
+            collectEmail: true,
+            showProgressBar: true
+        }
     });
 
     const [templates, setTemplates] = useState<Record<string, OpportunityTemplate>>({});
@@ -645,6 +663,19 @@ function OpportunitiesContent() {
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* Application Form Builder */}
+            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Custom Application Form</h3>
+                <p className="text-sm text-neutral-600 mb-6">
+                    Create a custom application form with multiple question types, pages, and validation rules.
+                </p>
+                <ApplicationFormBuilder
+                    form={applicationForm}
+                    onChange={setApplicationForm}
+                    isEditing={true}
+                />
             </div>
         </motion.div>
     );

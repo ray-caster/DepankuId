@@ -20,12 +20,15 @@ import {
     PencilIcon,
     ArrowPathIcon,
     EyeIcon,
-    EyeSlashIcon
+    EyeSlashIcon,
+    DocumentTextIcon,
+    XCircleIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import ApplicationManagement from '@/components/ApplicationManagement';
 
 interface DeadlineEvent {
     id: string;
@@ -43,19 +46,20 @@ function DashboardContent() {
     const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
-    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
+    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications'>('bookmarks');
     const [publishingId, setPublishingId] = useState<string | null>(null);
+    const [viewingApplicationsFor, setViewingApplicationsFor] = useState<string | null>(null);
 
     // Load active view from localStorage on mount
     useEffect(() => {
-        const savedView = localStorage.getItem('dashboardActiveView') as 'bookmarks' | 'gantt' | 'myOpportunities';
-        if (savedView && ['bookmarks', 'gantt', 'myOpportunities'].includes(savedView)) {
+        const savedView = localStorage.getItem('dashboardActiveView') as 'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications';
+        if (savedView && ['bookmarks', 'gantt', 'myOpportunities', 'myApplications'].includes(savedView)) {
             setActiveView(savedView);
         }
     }, []);
 
     // Save active view to localStorage when it changes
-    const handleViewChange = (view: 'bookmarks' | 'gantt' | 'myOpportunities') => {
+    const handleViewChange = (view: 'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications') => {
         setActiveView(view);
         localStorage.setItem('dashboardActiveView', view);
     };
@@ -434,6 +438,16 @@ function DashboardContent() {
                                 )}
                             </button>
                             <button
+                                onClick={() => handleViewChange('myApplications')}
+                                className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'myApplications'
+                                    ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
+                                    : 'text-neutral-600 hover:text-neutral-900'
+                                    }`}
+                            >
+                                <DocumentTextIcon className="w-5 h-5" />
+                                My Applications
+                            </button>
+                            <button
                                 onClick={() => handleViewChange('gantt')}
                                 className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'gantt'
                                     ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
@@ -616,8 +630,8 @@ function DashboardContent() {
                                                                 }}
                                                                 disabled={publishingId === opportunity.id}
                                                                 className={`flex items-center gap-2 px-3 py-2 rounded-comfort transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${opportunity.status === 'published'
-                                                                        ? 'bg-orange-600 text-white hover:bg-orange-700'
-                                                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                                                    ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                                                    : 'bg-green-600 text-white hover:bg-green-700'
                                                                     }`}
                                                             >
                                                                 {publishingId === opportunity.id ? (
@@ -640,6 +654,18 @@ function DashboardContent() {
                                                             >
                                                                 <LinkIcon className="w-4 h-4" />
                                                             </a>
+                                                        )}
+
+                                                        {/* View Applications Button */}
+                                                        {opportunity.id && opportunity.status === 'published' && (
+                                                            <button
+                                                                onClick={() => setViewingApplicationsFor(opportunity.id!)}
+                                                                className="btn-secondary flex items-center justify-center gap-2 px-3"
+                                                                title="View Applications"
+                                                            >
+                                                                <DocumentTextIcon className="w-4 h-4" />
+                                                                Applications
+                                                            </button>
                                                         )}
                                                         <button
                                                             onClick={() => opportunity.id && handleDeleteOpportunity(opportunity.id)}
@@ -703,13 +729,6 @@ function DashboardContent() {
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        onClick={() => opportunity.id && handleRemoveBookmark(opportunity.id)}
-                                                        className="p-2 text-red-500 hover:bg-red-50 rounded-soft transition-colors"
-                                                        title="Remove bookmark"
-                                                    >
-                                                        <TrashIcon className="w-5 h-5" />
-                                                    </button>
                                                 </div>
 
                                                 <p className="text-neutral-700 mb-4 line-clamp-3">
@@ -736,7 +755,7 @@ function DashboardContent() {
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2 mb-4">
-                                                    {opportunity.tags.slice(0, 5).map(tag => (
+                                                    {opportunity.tags.slice(0, 5).map((tag: string) => (
                                                         <span key={tag} className="px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full text-xs flex items-center gap-1">
                                                             <TagIcon className="w-3 h-3" />
                                                             {tag}
@@ -764,6 +783,17 @@ function DashboardContent() {
                                         ))}
                                     </div>
                                 )
+                            ) : activeView === 'myApplications' ? (
+                                <div className="space-y-6">
+                                    <div className="card text-center py-12">
+                                        <DocumentTextIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
+                                        <h3 className="text-xl font-semibold mb-2">My Applications</h3>
+                                        <p className="text-neutral-600 mb-6">Track your application progress and status</p>
+                                        <div className="text-sm text-neutral-500">
+                                            Applications will appear here once you start applying to opportunities
+                                        </div>
+                                    </div>
+                                </div>
                             ) : (
                                 <div className="group relative bg-background-light rounded-gentle p-6 sm:p-8 border-2 border-neutral-400 hover:border-primary-400 transition-all duration-300"
                                     style={{
@@ -780,6 +810,36 @@ function DashboardContent() {
                         </motion.div>
                     </div>
                 </section>
+
+                {/* Application Management Modal */}
+                {viewingApplicationsFor && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden"
+                        >
+                            <div className="flex items-center justify-between p-6 border-b border-neutral-200">
+                                <h2 className="text-xl font-semibold text-foreground">
+                                    Applications for {myOpportunities.find(opp => opp.id === viewingApplicationsFor)?.title}
+                                </h2>
+                                <button
+                                    onClick={() => setViewingApplicationsFor(null)}
+                                    className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                                >
+                                    <XCircleIcon className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-6">
+                                <ApplicationManagement
+                                    opportunityId={viewingApplicationsFor}
+                                    opportunityTitle={myOpportunities.find(opp => opp.id === viewingApplicationsFor)?.title || ''}
+                                />
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </main>
         </div>
     );

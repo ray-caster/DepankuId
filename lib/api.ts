@@ -58,6 +58,61 @@ export interface Opportunity {
     created_by_email?: string;
     status?: 'published' | 'draft' | 'rejected';
     moderation_notes?: string;
+    application_form?: ApplicationForm;
+    applications?: ApplicationSubmission[];
+}
+
+export interface ApplicationForm {
+    id: string;
+    title: string;
+    description?: string;
+    pages: FormPage[];
+    settings: {
+        allowMultipleSubmissions: boolean;
+        collectEmail: boolean;
+        showProgressBar: boolean;
+    };
+}
+
+export interface FormPage {
+    id: string;
+    title: string;
+    description?: string;
+    questions: FormQuestion[];
+}
+
+export interface FormQuestion {
+    id: string;
+    type: 'text' | 'textarea' | 'multiple_choice' | 'checkbox' | 'dropdown' | 'file' | 'video' | 'image';
+    title: string;
+    description?: string;
+    required: boolean;
+    options?: string[];
+    placeholder?: string;
+    maxLength?: number;
+    fileTypes?: string[];
+    maxFileSize?: number;
+}
+
+export interface ApplicationSubmission {
+    id: string;
+    opportunityId: string;
+    applicantId: string;
+    applicantEmail: string;
+    applicantName: string;
+    responses: ApplicationResponse[];
+    status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
+    submittedAt: string;
+    reviewedAt?: string;
+    notes?: string;
+}
+
+export interface ApplicationResponse {
+    questionId: string;
+    questionTitle: string;
+    questionType: string;
+    answer: string | string[] | File[];
+    required: boolean;
 }
 
 export interface OpportunityTemplate {
@@ -486,41 +541,6 @@ class API {
         }
     }
 
-    async publishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {
-        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/publish`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${idToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to publish opportunity');
-        }
-
-        return data;
-    }
-
-    async unpublishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {
-        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/unpublish`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${idToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to unpublish opportunity');
-        }
-
-        return data;
-    }
 
     // Profile API methods
     async getProfile(idToken: string): Promise<any> {
@@ -657,6 +677,54 @@ class API {
 
         const data = await response.json();
         return data.data || [];
+    }
+
+    // Application Management Methods
+    async getOpportunityApplications(opportunityId: string, idToken: string): Promise<ApplicationSubmission[]> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/applications`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch applications');
+        }
+
+        const data = await response.json();
+        return data.data || [];
+    }
+
+    async updateApplicationStatus(applicationId: string, status: 'pending' | 'reviewed' | 'accepted' | 'rejected', notes?: string, idToken?: string): Promise<void> {
+        if (!idToken) return;
+
+        const response = await fetch(`${this.baseURL}/api/applications/${applicationId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ status, notes }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update application status');
+        }
+    }
+
+    async submitApplication(opportunityId: string, responses: ApplicationResponse[], idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/apply`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ responses }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to submit application');
+        }
     }
 }
 
