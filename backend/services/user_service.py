@@ -167,21 +167,28 @@ class UserService:
     @staticmethod
     def track_application(user_id, opportunity_id):
         """Track user application"""
-        user_ref = db.collection('users').document(user_id)
+        from datetime import datetime, timezone
         
-        # Add application to activity
-        activity_item = {
-            'type': 'application',
-            'opportunity_id': opportunity_id,
-            'timestamp': firestore.SERVER_TIMESTAMP
-        }
-        
-        user_ref.update({
-            'activity': firestore.ArrayUnion([activity_item]),
-            'applications': firestore.ArrayUnion([opportunity_id])
-        })
-        
-        return True
+        try:
+            user_ref = db.collection('users').document(user_id)
+            
+            # Add application to activity
+            activity_item = {
+                'type': 'application',
+                'opportunity_id': opportunity_id,
+                'timestamp': datetime.now(timezone.utc)
+            }
+            
+            user_ref.update({
+                'activity': firestore.ArrayUnion([activity_item]),
+                'applications': firestore.ArrayUnion([opportunity_id]),
+                'last_activity': firestore.SERVER_TIMESTAMP
+            })
+            
+            return True
+        except Exception as e:
+            print(f"Error tracking application for user {user_id}: {str(e)}")
+            raise e
     
     @staticmethod
     def get_applications(user_id):
