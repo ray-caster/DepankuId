@@ -747,6 +747,62 @@ class API {
             throw new Error('Failed to submit application');
         }
     }
+
+    // Upload Methods
+    async uploadProfilePicture(file: File, idToken: string): Promise<{ url: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${this.baseURL}/api/upload/profile-picture`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to upload profile picture');
+        }
+
+        const data = await response.json();
+        return { url: data.url };
+    }
+
+    async deleteProfilePicture(idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/upload/profile-picture`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to delete profile picture');
+        }
+    }
+
+    // Authentication Methods
+    async changePassword(currentPassword: string, newPassword: string, idToken: string): Promise<void> {
+        const response = await fetch(`${this.baseURL}/api/auth/change-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+                idToken
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to change password');
+        }
+    }
 }
 
 export const api = new API();

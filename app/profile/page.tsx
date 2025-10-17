@@ -55,7 +55,27 @@ function ProfileContent() {
                 bio: profile.profile?.bio || '',
                 website: profile.profile?.website || '',
                 location: profile.profile?.location || '',
-                joinedDate: profile.created_at ? new Date(profile.created_at.seconds * 1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently',
+                joinedDate: profile.created_at ? (() => {
+                    try {
+                        // Handle different timestamp formats
+                        let timestamp;
+                        if (profile.created_at.seconds) {
+                            timestamp = profile.created_at.seconds * 1000;
+                        } else if (profile.created_at._seconds) {
+                            timestamp = profile.created_at._seconds * 1000;
+                        } else if (typeof profile.created_at === 'string') {
+                            timestamp = new Date(profile.created_at).getTime();
+                        } else if (typeof profile.created_at === 'number') {
+                            timestamp = profile.created_at;
+                        } else {
+                            return 'Recently';
+                        }
+                        return new Date(timestamp).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    } catch (error) {
+                        console.warn('Error parsing joined date:', error);
+                        return 'Recently';
+                    }
+                })() : 'Recently',
                 bookmarksCount: bookmarks.length,
             });
 
@@ -332,7 +352,27 @@ function ProfileContent() {
                                                 {item.type === 'application' ? 'Applied to opportunity' : 'Activity'}
                                             </p>
                                             <p className="text-xs text-neutral-500">
-                                                {item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleString() : 'Recently'}
+                                                {item.timestamp ? (() => {
+                                                    try {
+                                                        // Handle different timestamp formats
+                                                        let timestamp;
+                                                        if (item.timestamp.seconds) {
+                                                            timestamp = item.timestamp.seconds * 1000;
+                                                        } else if (item.timestamp._seconds) {
+                                                            timestamp = item.timestamp._seconds * 1000;
+                                                        } else if (typeof item.timestamp === 'string') {
+                                                            timestamp = new Date(item.timestamp).getTime();
+                                                        } else if (typeof item.timestamp === 'number') {
+                                                            timestamp = item.timestamp;
+                                                        } else {
+                                                            return 'Recently';
+                                                        }
+                                                        return new Date(timestamp).toLocaleString();
+                                                    } catch (error) {
+                                                        console.warn('Error parsing activity timestamp:', error);
+                                                        return 'Recently';
+                                                    }
+                                                })() : 'Recently'}
                                             </p>
                                         </div>
                                     </div>

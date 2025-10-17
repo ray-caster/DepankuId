@@ -132,12 +132,11 @@ function ApplicationContent() {
             const idToken = await getIdToken();
             if (!idToken) return;
 
-            // Track the application
-            await api.trackApplication(opportunityId, idToken);
+            // Submit the application using the new application system
+            await api.submitApplication(opportunityId, responses, idToken);
 
-            // TODO: Save application responses to database
-            // This would require a new API endpoint to save application responses
-            console.log('Application responses:', responses);
+            // Track the application for analytics
+            await api.trackApplication(opportunityId, idToken);
 
             setSubmitSuccess(true);
 

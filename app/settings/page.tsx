@@ -4,12 +4,16 @@ import { useState, useEffect, Suspense } from 'react';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
+import ChangePassword from '@/components/ChangePassword';
 import { motion } from 'framer-motion';
 import {
     UserCircleIcon,
     BellIcon,
     ShieldCheckIcon,
-    Cog6ToothIcon
+    Cog6ToothIcon,
+    KeyIcon,
+    TrashIcon,
+    ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -40,6 +44,8 @@ function SettingsContentInner() {
     });
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showChangePassword, setShowChangePassword] = useState(false);
+    const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
     const tabs = [
         { id: 'profile', label: 'Profile', icon: UserCircleIcon },
@@ -498,9 +504,41 @@ function SettingsContentInner() {
                                         <div>
                                             <h3 className="font-semibold text-foreground mb-3">Change Password</h3>
                                             <p className="text-sm text-neutral-600 mb-4">Update your password to keep your account secure</p>
-                                            <button className="btn-secondary">
+                                            <button
+                                                onClick={() => setShowChangePassword(true)}
+                                                className="btn-secondary flex items-center gap-2"
+                                            >
+                                                <KeyIcon className="w-4 h-4" />
                                                 Change Password
                                             </button>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="font-semibold text-foreground mb-3">Account Information</h3>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center py-2">
+                                                    <span className="text-sm text-neutral-600">Email</span>
+                                                    <span className="text-sm font-medium text-foreground">{user?.email}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center py-2">
+                                                    <span className="text-sm text-neutral-600">Account Created</span>
+                                                    <span className="text-sm font-medium text-foreground">
+                                                        {user?.metadata?.creationTime ?
+                                                            new Date(user.metadata.creationTime).toLocaleDateString() :
+                                                            'Unknown'
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center py-2">
+                                                    <span className="text-sm text-neutral-600">Last Sign In</span>
+                                                    <span className="text-sm font-medium text-foreground">
+                                                        {user?.metadata?.lastSignInTime ?
+                                                            new Date(user.metadata.lastSignInTime).toLocaleDateString() :
+                                                            'Unknown'
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div className="pt-4 border-t border-neutral-200">
@@ -508,7 +546,11 @@ function SettingsContentInner() {
                                             <div className="p-4 bg-red-50 border border-red-200 rounded-soft">
                                                 <h4 className="font-semibold text-red-900 mb-2">Delete Account</h4>
                                                 <p className="text-sm text-red-700 mb-3">Once you delete your account, there is no going back. Please be certain.</p>
-                                                <button className="px-4 py-2 bg-red-600 text-white rounded-soft hover:bg-red-700 transition-colors text-sm font-semibold">
+                                                <button
+                                                    onClick={() => setShowDeleteAccount(true)}
+                                                    className="px-4 py-2 bg-red-600 text-white rounded-soft hover:bg-red-700 transition-colors text-sm font-semibold flex items-center gap-2"
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />
                                                     Delete My Account
                                                 </button>
                                             </div>
@@ -519,6 +561,68 @@ function SettingsContentInner() {
                         </div>
                     </div>
                 </div>
+
+                {/* Change Password Modal */}
+                {showChangePassword && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-lg shadow-xl max-w-md w-full"
+                        >
+                            <ChangePassword
+                                onSuccess={() => {
+                                    setShowChangePassword(false);
+                                    setMessage({ type: 'success', text: 'Password changed successfully!' });
+                                }}
+                                onCancel={() => setShowChangePassword(false)}
+                            />
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* Delete Account Modal */}
+                {showDeleteAccount && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+                        >
+                            <div className="text-center">
+                                <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                                    <ExclamationTriangleIcon className="w-8 h-8 text-red-600" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-foreground mb-2">
+                                    Delete Account
+                                </h3>
+                                <p className="text-sm text-neutral-600 mb-6">
+                                    Are you sure you want to delete your account? This action cannot be undone and will permanently remove all your data.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowDeleteAccount(false)}
+                                        className="flex-1 px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            // TODO: Implement account deletion
+                                            setShowDeleteAccount(false);
+                                            setMessage({ type: 'error', text: 'Account deletion not implemented yet' });
+                                        }}
+                                        className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                                    >
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </main>
         </div>
     );

@@ -6,6 +6,7 @@ import {
     signInWithPopup,
     signOut as firebaseSignOut,
     GoogleAuthProvider,
+    GithubAuthProvider,
     onAuthStateChanged,
     signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
 } from 'firebase/auth';
@@ -17,6 +18,7 @@ interface AuthContextType {
     loading: boolean;
     idToken: string | null;
     signInWithGoogle: () => Promise<void>;
+    signInWithGithub: () => Promise<void>;
     signInWithEmail: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
     signUpWithEmail: (email: string, password: string, name: string) => Promise<{ success: boolean; message: string }>;
     signOut: () => Promise<void>;
@@ -29,6 +31,7 @@ const AuthContext = createContext<AuthContextType>({
     loading: true,
     idToken: null,
     signInWithGoogle: async () => { },
+    signInWithGithub: async () => { },
     signInWithEmail: async () => ({ success: false, message: '' }),
     signUpWithEmail: async () => ({ success: false, message: '' }),
     signOut: async () => { },
@@ -41,12 +44,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [idToken, setIdToken] = useState<string | null>(null);
 
+    // Helper function to create user profile for social sign-ins
+    const createUserProfile = async (user: User) => {
+        try {
+            const token = await user.getIdToken();
+            if (token) {
+                // Check if user profile exists
+                const profile = await api.getProfile(token);
+                if (!profile) {
+                    // Create user profile for social sign-in
+                    await api.updateProfile({
+                        displayName: user.displayName || '',
+                        bio: '',
+                        website: '',
+                        location: '',
+                        photoURL: user.photoURL || ''
+                    }, token);
+                    console.log('User profile created for social sign-in');
+                }
+            }
+        } catch (error) {
+            console.error('Error creating user profile:', error);
+        }
+    };
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user);
             if (user) {
                 const token = await user.getIdToken();
                 setIdToken(token);
+
+                // Create profile for social sign-ins if needed
+                if (user.providerData.some(provider =>
+                    provider.providerId === 'google.com' ||
+                    provider.providerId === 'github.com'
+                )) {
+                    await createUserProfile(user);
+                }
             } else {
                 setIdToken(null);
             }
@@ -78,6 +113,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await signInWithPopup(auth, provider);
         } catch (error) {
             console.error('Error signing in with Google:', error);
+            throw error;
+        }
+    };
+
+    const signInWithGithub = async () => {
+        try {
+            const provider = new GithubAuthProvider();
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            console.error('Error signing in with GitHub:', error);
             throw error;
         }
     };
@@ -131,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, idToken, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut, refreshIdToken, getIdToken }}>
+        <AuthContext.Provider value={{ user, loading, idToken, signInWithGoogle, signInWithGithub, signInWithEmail, signUpWithEmail, signOut, refreshIdToken, getIdToken }}>
             {children}
         </AuthContext.Provider>
     );

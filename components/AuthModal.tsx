@@ -6,6 +6,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { motion } from 'framer-motion';
 import { XMarkIcon, EnvelopeIcon, LockClosedIcon, UserIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useAuth } from './AuthProvider';
+import SocialSignIn from './SocialSignIn';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -181,6 +182,24 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                                                         <p className="text-red-700 text-sm">{error}</p>
                                                     </div>
                                                 )}
+
+                                                {/* Social Sign In */}
+                                                <div className="mb-6">
+                                                    <SocialSignIn
+                                                        onSuccess={onSuccess}
+                                                        onError={setError}
+                                                        disabled={loading}
+                                                    />
+
+                                                    <div className="relative my-6">
+                                                        <div className="absolute inset-0 flex items-center">
+                                                            <div className="w-full border-t border-neutral-300" />
+                                                        </div>
+                                                        <div className="relative flex justify-center text-sm">
+                                                            <span className="px-2 bg-white text-neutral-500">Or continue with email</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
                                                 <form onSubmit={handleSubmit} className="space-y-6">
                                                     {isSignUp && (

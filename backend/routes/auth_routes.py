@@ -193,3 +193,65 @@ def resend_verification():
             "message": "An unexpected error occurred"
         }), 500
 
+@auth_bp.route('/change-password', methods=['POST'])
+@rate_limit(limit=5, window=3600)  # 5 attempts per hour per IP
+def change_password():
+    """Change user password"""
+    try:
+        data = request.json
+        
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "Request body is required"
+            }), 400
+        
+        # Validate required fields
+        required_fields = ['currentPassword', 'newPassword', 'idToken']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    "success": False,
+                    "message": f"Missing required field: {field}"
+                }), 400
+        
+        current_password = data['currentPassword']
+        new_password = data['newPassword']
+        id_token = data['idToken']
+        
+        # Validate password strength
+        if len(new_password) < 8:
+            return jsonify({
+                "success": False,
+                "message": "New password must be at least 8 characters long"
+            }), 400
+        
+        try:
+            success = AuthService.change_password(id_token, current_password, new_password)
+            
+            if success:
+                logger.info("Password changed successfully")
+                return jsonify({
+                    "success": True,
+                    "message": "Password changed successfully"
+                }), 200
+            else:
+                return jsonify({
+                    "success": False,
+                    "message": "Current password is incorrect"
+                }), 400
+                
+        except Exception as e:
+            logger.error(f"Failed to change password: {str(e)}")
+            return jsonify({
+                "success": False,
+                "message": f"Failed to change password: {str(e)}"
+            }), 400
+    
+    except Exception as e:
+        logger.error(f"Unexpected error in change_password: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "An unexpected error occurred"
+        }), 500
+

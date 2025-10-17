@@ -2,8 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useAuth } from './AuthProvider';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { updateProfile } from 'firebase/auth';
+import { api } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CameraIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { CheckIcon as CheckSolidIcon } from '@heroicons/react/24/solid';
@@ -67,33 +66,12 @@ export default function ProfilePictureUpload({
 
         try {
             const file = fileInputRef.current.files[0];
-            const storage = getStorage();
+            const idToken = await user.getIdToken();
 
-            // Create unique filename
-            const timestamp = Date.now();
-            const fileName = `profile-pictures/${user.uid}/${timestamp}_${file.name}`;
-            const storageRef = ref(storage, fileName);
+            // Upload file through backend API
+            const result = await api.uploadProfilePicture(file, idToken);
 
-            // Upload file
-            const snapshot = await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(snapshot.ref);
-
-            // Update Firebase Auth profile
-            await updateProfile(user, {
-                photoURL: downloadURL
-            });
-
-            // Delete old profile picture if it exists and is in our storage
-            if (currentPhotoURL && currentPhotoURL.includes('firebasestorage.googleapis.com')) {
-                try {
-                    const oldRef = ref(storage, currentPhotoURL);
-                    await deleteObject(oldRef);
-                } catch (deleteError) {
-                    console.warn('Could not delete old profile picture:', deleteError);
-                }
-            }
-
-            onPhotoUpdate?.(downloadURL);
+            onPhotoUpdate?.(result.url);
             setPreview(null);
 
             // Reset file input
@@ -103,7 +81,7 @@ export default function ProfilePictureUpload({
 
         } catch (error) {
             console.error('Error uploading profile picture:', error);
-            setError('Failed to upload profile picture. Please try again.');
+            setError(error instanceof Error ? error.message : 'Failed to upload profile picture. Please try again.');
         } finally {
             setUploading(false);
         }
@@ -124,26 +102,15 @@ export default function ProfilePictureUpload({
         setError(null);
 
         try {
-            // Update Firebase Auth profile to remove photo
-            await updateProfile(user, {
-                photoURL: null
-            });
+            const idToken = await user.getIdToken();
 
-            // Delete from storage if it's in our storage
-            if (currentPhotoURL.includes('firebasestorage.googleapis.com')) {
-                try {
-                    const storage = getStorage();
-                    const oldRef = ref(storage, currentPhotoURL);
-                    await deleteObject(oldRef);
-                } catch (deleteError) {
-                    console.warn('Could not delete profile picture from storage:', deleteError);
-                }
-            }
+            // Delete through backend API
+            await api.deleteProfilePicture(idToken);
 
             onPhotoUpdate?.('');
         } catch (error) {
             console.error('Error removing profile picture:', error);
-            setError('Failed to remove profile picture. Please try again.');
+            setError(error instanceof Error ? error.message : 'Failed to remove profile picture. Please try again.');
         } finally {
             setUploading(false);
         }
