@@ -16,7 +16,7 @@ function ApplicationContent() {
     const { user, getIdToken } = useAuth();
     const params = useParams();
     const opportunityId = params.id as string;
-    
+
     const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
     const [applicationForm, setApplicationForm] = useState<ApplicationForm | null>(null);
     const [loading, setLoading] = useState(true);
@@ -28,16 +28,16 @@ function ApplicationContent() {
         try {
             setLoading(true);
             setError(null);
-            
+
             // Load opportunity data
             const opp = await api.getOpportunity(opportunityId);
             if (!opp) {
                 setError('Opportunity not found');
                 return;
             }
-            
+
             setOpportunity(opp);
-            
+
             // Use custom application form if available, otherwise create default
             if (opp.application_form) {
                 setApplicationForm(opp.application_form);
@@ -124,7 +124,7 @@ function ApplicationContent() {
             console.log('Application responses:', responses);
 
             setSubmitSuccess(true);
-            
+
         } catch (error) {
             console.error('Error submitting application:', error);
             setError('Failed to submit application. Please try again.');
@@ -202,14 +202,14 @@ function ApplicationContent() {
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
-                        <Link 
-                            href="/search" 
+                        <Link
+                            href="/search"
                             className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors mb-4"
                         >
                             <ArrowLeftIcon className="w-4 h-4" />
                             Back to Opportunities
                         </Link>
-                        
+
                         <div className="bg-white rounded-lg border border-neutral-200 p-6">
                             <h1 className="text-3xl font-bold text-foreground mb-2">
                                 {opportunity.title}
