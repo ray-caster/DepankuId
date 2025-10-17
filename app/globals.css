@@ -72,14 +72,44 @@
     /* Prevent horizontal scroll on mobile */
     body {
         overflow-x: hidden;
+        /* Prevent zoom on input focus on iOS */
+        -webkit-text-size-adjust: 100%;
+        /* Improve touch scrolling on iOS */
+        -webkit-overflow-scrolling: touch;
     }
 
-    /* Industry standard: Support for dynamic viewport units */
+    /* Prevent mobile browser address bar from affecting layout */
     @supports (height: 100dvh) {
         .min-h-screen {
             min-height: 100dvh;
         }
     }
+
+    /* Fix mobile viewport issues */
+    @media screen and (max-width: 640px) {
+        html {
+            /* Prevent zoom on double tap */
+            touch-action: manipulation;
+        }
+
+        body {
+            /* Prevent text selection on mobile */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Allow text selection in input fields */
+        input,
+        textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+    }
+
 }
 
 @layer components {

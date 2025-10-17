@@ -9,6 +9,8 @@ const inter = Inter({
     subsets: ["latin"],
     variable: '--font-inter',
     display: 'swap',
+    preload: true,
+    fallback: ['system-ui', 'arial'],
 });
 
 export const metadata: Metadata = {
@@ -89,25 +91,16 @@ export default function RootLayout({
     return (
         <html lang="en" className={inter.variable} suppressHydrationWarning>
             <head>
-                {/* SVG Favicon - Sharp and scalable */}
+                {/* Favicon */}
                 <link rel="icon" type="image/svg+xml" href="/icon.svg" />
                 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-
-                {/* Apple Touch Icons - Use PNG for iOS compatibility */}
-                <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png" />
-                <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png" />
-                <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png" />
-                <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png" />
-                <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png" />
-                <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png" />
-                <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png" />
-                <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png" />
-                <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
-
+                
+                {/* Apple Touch Icon */}
+                <link rel="apple-touch-icon" href="/icon.svg" />
+                
                 {/* Microsoft Tiles */}
                 <meta name="msapplication-TileColor" content="#3b82f6" />
-                <meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />
-                <meta name="msapplication-config" content="/browserconfig.xml" />
+                <meta name="msapplication-TileImage" content="/icon.svg" />
 
                 <script
                     dangerouslySetInnerHTML={{
