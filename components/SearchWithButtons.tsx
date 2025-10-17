@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchBox, useHits } from 'react-instantsearch';
+import { useSearchBox, useHits, useInstantSearch } from 'react-instantsearch';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
@@ -10,11 +10,13 @@ import { Opportunity } from '@/lib/api';
 export default function SearchWithButtons() {
     const { query, refine } = useSearchBox();
     const { hits } = useHits<Opportunity>();
+    const { status } = useInstantSearch();
     const router = useRouter();
     const [isFocused, setIsFocused] = useState(false);
 
     const topSuggestions = hits.slice(0, 8);
     const showSuggestions = isFocused && query.length > 0 && topSuggestions.length > 0;
+    const showLoading = isFocused && query.length > 0 && (status === 'loading' || status === 'stalled');
 
     const handleSuggestionClick = (suggestionQuery: string) => {
         refine(suggestionQuery);
@@ -63,6 +65,26 @@ export default function SearchWithButtons() {
 
                 {/* Suggestions Dropdown */}
                 <AnimatePresence>
+                    {showLoading && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute w-full mt-2 bg-white/50 backdrop-blur-xl rounded-soft sm:rounded-gentle md:rounded-comfort border border-neutral-200/60 overflow-hidden z-50"
+                            style={{
+                                boxShadow: `0 12px 32px -4px oklch(0% 0 0 / 0.12),
+                           0 16px 48px -6px oklch(0% 0 0 / 0.08)`,
+                                backdropFilter: 'blur(20px) saturate(180%)',
+                                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                            }}
+                        >
+                            <div className="p-4 text-center">
+                                <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                                <p className="text-sm text-neutral-600">Searching...</p>
+                            </div>
+                        </motion.div>
+                    )}
                     {showSuggestions && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}

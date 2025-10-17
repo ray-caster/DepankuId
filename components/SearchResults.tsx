@@ -1,12 +1,36 @@
 'use client';
 
-import { useHits } from 'react-instantsearch';
+import { useHits, useInstantSearch } from 'react-instantsearch';
 import OpportunityCard from './OpportunityCard';
 import { Opportunity } from '@/lib/api';
 import { motion } from 'framer-motion';
 
 export default function SearchResults() {
     const { hits } = useHits<Opportunity>();
+    const { status } = useInstantSearch();
+
+    // Show loading state while search is in progress
+    if (status === 'loading' || status === 'stalled') {
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-16"
+            >
+                <div className="max-w-md mx-auto">
+                    <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-primary-100 flex items-center justify-center">
+                        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">
+                        Searching opportunities...
+                    </h3>
+                    <p className="text-neutral-600">
+                        Please wait while we find the best matches for you
+                    </p>
+                </div>
+            </motion.div>
+        );
+    }
 
     if (hits.length === 0) {
         return (
