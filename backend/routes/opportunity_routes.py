@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from services.opportunity_service import OpportunityService
 from services.moderation_service import ModerationService
 from services.opportunity_publish_service import OpportunityPublishService
+from services.application_service import ApplicationService
 from models.opportunity import OPPORTUNITY_TEMPLATES, TAG_PRESETS
 from utils.decorators import require_auth
 from utils.logging_config import logger
@@ -224,6 +225,99 @@ def get_my_opportunities(user_id: str, user_email: str):
         }), 200
     except Exception as e:
         logger.error(f"Error fetching user opportunities: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@opportunity_bp.route('/<opportunity_id>/applications', methods=['GET'])
+@require_auth
+def get_opportunity_applications(user_id: str, user_email: str, opportunity_id: str):
+    """Get applications for a specific opportunity"""
+    try:
+        # First verify that the user owns this opportunity
+        opportunity = OpportunityService.get_opportunity(opportunity_id)
+        if not opportunity:
+            return jsonify({
+                "success": False,
+                "error": "Opportunity not found"
+            }), 404
+        
+        if opportunity.get('created_by_uid') != user_id:
+            return jsonify({
+                "success": False,
+                "error": "You don't have permission to view applications for this opportunity"
+            }), 403
+        
+        # Get applications for this opportunity
+        applications = ApplicationService.get_opportunity_applications(opportunity_id)
+        
+        return jsonify({
+            "success": True,
+            "data": applications
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"Error fetching opportunity applications: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@opportunity_bp.route('/<opportunity_id>/apply', methods=['POST'])
+@require_auth
+def submit_application(user_id: str, user_email: str, opportunity_id: str):
+    """Submit an application for an opportunity"""
+    try:
+        data = request.json
+        responses = data.get('responses', [])
+        
+        if not responses:
+            return jsonify({
+                "success": False,
+                "error": "Application responses are required"
+            }), 400
+        
+        # Submit or update application
+        ApplicationService.submit_application(opportunity_id, user_id, user_email, responses)
+        
+        return jsonify({
+            "success": True,
+            "message": "Application submitted successfully"
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"Error submitting application: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@opportunity_bp.route('/<opportunity_id>/application-status', methods=['GET'])
+@require_auth
+def get_application_status(user_id: str, user_email: str, opportunity_id: str):
+    """Check if user has already applied to an opportunity and get application data"""
+    try:
+        # Check if user has applied
+        has_applied = ApplicationService.has_user_applied(opportunity_id, user_id)
+        
+        if has_applied:
+            # Get the application data
+            application = ApplicationService.get_application(opportunity_id, user_id)
+            return jsonify({
+                "success": True,
+                "has_applied": True,
+                "application": application
+            }), 200
+        else:
+            return jsonify({
+                "success": True,
+                "has_applied": False,
+                "application": None
+            }), 200
+    
+    except Exception as e:
+        logger.error(f"Error checking application status: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)

@@ -26,6 +26,7 @@ from routes.sync_routes import sync_bp
 from routes.profile_routes import profile_bp
 from routes.ai_routes import ai_bp
 from routes.publish_routes import publish_bp
+from routes.application_routes import application_bp
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -107,6 +108,7 @@ app.register_blueprint(sync_bp)
 app.register_blueprint(profile_bp)
 app.register_blueprint(ai_bp)
 app.register_blueprint(publish_bp)
+app.register_blueprint(application_bp)
 logger.info("All blueprints registered successfully")
 
 # Debug: List all registered routes

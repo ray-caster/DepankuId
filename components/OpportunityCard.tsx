@@ -10,7 +10,7 @@ import {
     BookmarkIcon as BookmarkOutlineIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '@/lib/api';
 import { getCategoryBadgeClasses, getCategoryLabel, OpportunityType } from '@/lib/categoryColors';
@@ -26,6 +26,36 @@ interface OpportunityCardProps {
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
     const { user, getIdToken } = useAuth();
     const { isBookmarked, toggleBookmark } = useBookmarks();
+    const [hasApplied, setHasApplied] = useState(false);
+    const [checkingApplicationStatus, setCheckingApplicationStatus] = useState(false);
+
+    // Check if user has already applied to this opportunity
+    useEffect(() => {
+        const checkApplicationStatus = async () => {
+            if (!user) {
+                setHasApplied(false);
+                return;
+            }
+
+            const opportunityId = opportunity.id || opportunity.objectID;
+            if (!opportunityId) return;
+
+            setCheckingApplicationStatus(true);
+            try {
+                const idToken = await getIdToken();
+                if (idToken) {
+                    const status = await api.getApplicationStatus(opportunityId, idToken);
+                    setHasApplied(status.has_applied);
+                }
+            } catch (error) {
+                console.error('Error checking application status:', error);
+            } finally {
+                setCheckingApplicationStatus(false);
+            }
+        };
+
+        checkApplicationStatus();
+    }, [user, opportunity.id, opportunity.objectID, getIdToken]);
 
     const handleBookmark = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -142,18 +172,31 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     </div>
                 )}
 
-                {/* Link with better emphasis */}
-                {opportunity.url && (
-                    <div className="mt-auto pt-5 border-t border-neutral-200">
-                        <button
-                            onClick={handleApply}
-                            className="inline-flex items-center gap-2 text-primary-700 hover:text-primary-900 font-semibold transition-all group/link"
-                        >
-                            <span className="group-hover/link:translate-x-0.5 transition-transform">Apply Now</span>
-                            <ArrowTopRightOnSquareIcon className="h-4 w-4 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-                        </button>
-                    </div>
-                )}
+                {/* Apply/Edit Application button */}
+                <div className="mt-auto pt-5 border-t border-neutral-200">
+                    <button
+                        onClick={handleApply}
+                        disabled={checkingApplicationStatus}
+                        className="inline-flex items-center gap-2 text-primary-700 hover:text-primary-900 font-semibold transition-all group/link disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {checkingApplicationStatus ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                                <span>Checking...</span>
+                            </>
+                        ) : hasApplied ? (
+                            <>
+                                <span className="group-hover/link:translate-x-0.5 transition-transform">Edit Application</span>
+                                <ArrowTopRightOnSquareIcon className="h-4 w-4 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                            </>
+                        ) : (
+                            <>
+                                <span className="group-hover/link:translate-x-0.5 transition-transform">Apply Now</span>
+                                <ArrowTopRightOnSquareIcon className="h-4 w-4 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </motion.div>
     );

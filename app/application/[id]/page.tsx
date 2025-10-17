@@ -19,6 +19,7 @@ function ApplicationContent() {
 
     const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
     const [applicationForm, setApplicationForm] = useState<ApplicationForm | null>(null);
+    const [existingApplication, setExistingApplication] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -37,6 +38,21 @@ function ApplicationContent() {
             }
 
             setOpportunity(opp);
+
+            // Check if user has already applied
+            if (user) {
+                try {
+                    const idToken = await getIdToken();
+                    if (idToken) {
+                        const applicationStatus = await api.getApplicationStatus(opportunityId, idToken);
+                        if (applicationStatus.has_applied && applicationStatus.application) {
+                            setExistingApplication(applicationStatus.application);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking application status:', error);
+                }
+            }
 
             // Use custom application form if available, otherwise create default
             if (opp.application_form) {
@@ -212,7 +228,7 @@ function ApplicationContent() {
 
                         <div className="bg-white rounded-lg border border-neutral-200 p-6">
                             <h1 className="text-3xl font-bold text-foreground mb-2">
-                                {opportunity.title}
+                                {existingApplication ? 'Edit Application' : 'Application'} - {opportunity.title}
                             </h1>
                             <p className="text-lg text-neutral-600 mb-4">
                                 {opportunity.organization}
@@ -265,6 +281,7 @@ function ApplicationContent() {
                             form={applicationForm}
                             onSubmit={handleSubmit}
                             isSubmitting={isSubmitting}
+                            existingResponses={existingApplication?.responses || []}
                         />
                     )}
                 </div>

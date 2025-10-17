@@ -680,6 +680,27 @@ class API {
     }
 
     // Application Management Methods
+    async getApplicationStatus(opportunityId: string, idToken: string): Promise<{
+        has_applied: boolean;
+        application?: ApplicationSubmission;
+    }> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/application-status`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to check application status');
+        }
+
+        const data = await response.json();
+        return {
+            has_applied: data.has_applied,
+            application: data.application
+        };
+    }
+
     async getOpportunityApplications(opportunityId: string, idToken: string): Promise<ApplicationSubmission[]> {
         const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/applications`, {
             headers: {

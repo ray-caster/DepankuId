@@ -130,6 +130,24 @@ class AlgoliaService:
             return await self.sync_all_async(opportunities)
         
         return self._run_async_safely(_sync())
+    
+    async def clear_index_async(self) -> bool:
+        """Clear all objects from the Algolia index"""
+        try:
+            # Use the client's clear_objects method directly
+            await self.client.clear_objects(index_name=self.index_name)
+            logger.info(f"Cleared all objects from Algolia index: {self.index_name}")
+            return True
+        except Exception as e:
+            logger.error(f"Error clearing Algolia index: {str(e)}")
+            return False
+    
+    def clear_index(self) -> bool:
+        """Clear all objects from the Algolia index synchronously"""
+        async def _clear():
+            return await self.clear_index_async()
+        
+        return self._run_async_safely(_clear())
 
 # Global instance
 algolia_service = AlgoliaService()

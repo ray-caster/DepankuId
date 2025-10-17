@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronLeftIcon,
@@ -17,6 +17,7 @@ interface ApplicationFormRendererProps {
     onSubmit: (responses: ApplicationResponse[]) => void;
     onCancel?: () => void;
     isSubmitting?: boolean;
+    existingResponses?: ApplicationResponse[];
 }
 
 export interface ApplicationResponse {
@@ -31,7 +32,8 @@ export default function ApplicationFormRenderer({
     form,
     onSubmit,
     onCancel,
-    isSubmitting = false
+    isSubmitting = false,
+    existingResponses = []
 }: ApplicationFormRendererProps) {
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
     const [responses, setResponses] = useState<Record<string, any>>({});
@@ -40,6 +42,17 @@ export default function ApplicationFormRenderer({
     const currentPage = form.pages[currentPageIndex];
     const isLastPage = currentPageIndex === form.pages.length - 1;
     const isFirstPage = currentPageIndex === 0;
+
+    // Initialize responses with existing data if available
+    useEffect(() => {
+        if (existingResponses && existingResponses.length > 0) {
+            const initialResponses: Record<string, any> = {};
+            existingResponses.forEach(response => {
+                initialResponses[response.questionId] = response.answer;
+            });
+            setResponses(initialResponses);
+        }
+    }, [existingResponses]);
 
     const updateResponse = useCallback((questionId: string, answer: any) => {
         setResponses(prev => ({
