@@ -94,10 +94,10 @@ export default function RootLayout({
                 {/* Favicon */}
                 <link rel="icon" type="image/svg+xml" href="/icon.svg" />
                 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-                
+
                 {/* Apple Touch Icon */}
                 <link rel="apple-touch-icon" href="/icon.svg" />
-                
+
                 {/* Microsoft Tiles */}
                 <meta name="msapplication-TileColor" content="#3b82f6" />
                 <meta name="msapplication-TileImage" content="/icon.svg" />

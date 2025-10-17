@@ -7,10 +7,10 @@ bookmark_bp = Blueprint('bookmarks', __name__, url_prefix='/api/bookmarks')
 
 @bookmark_bp.route('', methods=['GET'])
 @require_auth
-def get_bookmarks():
+def get_bookmarks(user_id: str, user_email: str):
     """Get user's bookmarked opportunities"""
     try:
-        opportunities = UserService.get_bookmarks(request.user_id)
+        opportunities = UserService.get_bookmarks(user_id)
         
         return jsonify({
             "success": True,
@@ -26,10 +26,10 @@ def get_bookmarks():
 
 @bookmark_bp.route('/<opportunity_id>', methods=['POST'])
 @require_auth
-def add_bookmark(opportunity_id):
+def add_bookmark(opportunity_id, user_id: str, user_email: str):
     """Add an opportunity to user's bookmarks"""
     try:
-        UserService.add_bookmark(request.user_id, opportunity_id)
+        UserService.add_bookmark(user_id, opportunity_id)
         
         return jsonify({
             "success": True,
@@ -45,10 +45,10 @@ def add_bookmark(opportunity_id):
 
 @bookmark_bp.route('/<opportunity_id>', methods=['DELETE'])
 @require_auth
-def remove_bookmark(opportunity_id):
+def remove_bookmark(opportunity_id, user_id: str, user_email: str):
     """Remove an opportunity from user's bookmarks"""
     try:
-        UserService.remove_bookmark(request.user_id, opportunity_id)
+        UserService.remove_bookmark(user_id, opportunity_id)
         
         return jsonify({
             "success": True,

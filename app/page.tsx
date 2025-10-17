@@ -14,7 +14,7 @@ function RootRedirect() {
         if (!loading) {
             if (user) {
                 // User is logged in, redirect to dashboard
-            router.push('/dashboard');
+                router.push('/dashboard');
             } else {
                 // User is not logged in, redirect to home
                 router.push('/home');
@@ -32,7 +32,7 @@ function RootRedirect() {
             </div>
         </div>
     );
-    }
+}
 
 export default function RootPage() {
     return (
