@@ -9,7 +9,7 @@ ai_bp = Blueprint('ai', __name__, url_prefix='/api/ai')
 
 @ai_bp.route('/chat', methods=['POST'])
 @require_auth
-def ai_chat():
+def ai_chat(user_id: str, user_email: str):
     """
     AI chat endpoint for discovery and assistance
     
@@ -59,7 +59,7 @@ def ai_chat():
 
 @ai_bp.route('/discovery/start', methods=['POST'])
 @require_auth
-def start_discovery():
+def start_discovery(user_id: str, user_email: str):
     """
     Start a new discovery session
     
@@ -97,7 +97,7 @@ def start_discovery():
 
 @ai_bp.route('/suggestions', methods=['POST'])
 @require_auth
-def get_suggestions():
+def get_suggestions(user_id: str, user_email: str):
     """
     Get opportunity suggestions based on user interests
     

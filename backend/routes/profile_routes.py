@@ -7,10 +7,10 @@ profile_bp = Blueprint('profile', __name__, url_prefix='/api/profile')
 
 @profile_bp.route('', methods=['GET'])
 @require_auth
-def get_profile():
+def get_profile(user_id: str, user_email: str):
     """Get user profile"""
     try:
-        profile_data = UserService.get_profile(request.user_id)
+        profile_data = UserService.get_profile(user_id)
         
         return jsonify({
             "success": True,
@@ -25,13 +25,13 @@ def get_profile():
 
 @profile_bp.route('', methods=['PUT'])
 @require_auth
-def update_profile():
+def update_profile(user_id: str, user_email: str):
     """Update user profile"""
     try:
         data = request.json
         profile_data = data.get('profile', {})
         
-        UserService.update_profile(request.user_id, profile_data)
+        UserService.update_profile(user_id, profile_data)
         
         return jsonify({
             "success": True,
@@ -46,10 +46,10 @@ def update_profile():
 
 @profile_bp.route('/settings/notifications', methods=['GET'])
 @require_auth
-def get_notification_settings():
+def get_notification_settings(user_id: str, user_email: str):
     """Get notification settings"""
     try:
-        settings = UserService.get_notification_settings(request.user_id)
+        settings = UserService.get_notification_settings(user_id)
         
         return jsonify({
             "success": True,
@@ -64,13 +64,13 @@ def get_notification_settings():
 
 @profile_bp.route('/settings/notifications', methods=['PUT'])
 @require_auth
-def update_notification_settings():
+def update_notification_settings(user_id: str, user_email: str):
     """Update notification settings"""
     try:
         data = request.json
         settings = data.get('settings', {})
         
-        UserService.update_notification_settings(request.user_id, settings)
+        UserService.update_notification_settings(user_id, settings)
         
         return jsonify({
             "success": True,
@@ -85,10 +85,10 @@ def update_notification_settings():
 
 @profile_bp.route('/settings/privacy', methods=['GET'])
 @require_auth
-def get_privacy_settings():
+def get_privacy_settings(user_id: str, user_email: str):
     """Get privacy settings"""
     try:
-        settings = UserService.get_privacy_settings(request.user_id)
+        settings = UserService.get_privacy_settings(user_id)
         
         return jsonify({
             "success": True,
@@ -103,13 +103,13 @@ def get_privacy_settings():
 
 @profile_bp.route('/settings/privacy', methods=['PUT'])
 @require_auth
-def update_privacy_settings():
+def update_privacy_settings(user_id: str, user_email: str):
     """Update privacy settings"""
     try:
         data = request.json
         settings = data.get('settings', {})
         
-        UserService.update_privacy_settings(request.user_id, settings)
+        UserService.update_privacy_settings(user_id, settings)
         
         return jsonify({
             "success": True,
@@ -124,10 +124,10 @@ def update_privacy_settings():
 
 @profile_bp.route('/activity', methods=['GET'])
 @require_auth
-def get_activity():
+def get_activity(user_id: str, user_email: str):
     """Get user activity"""
     try:
-        activity = UserService.get_activity(request.user_id)
+        activity = UserService.get_activity(user_id)
         
         return jsonify({
             "success": True,
@@ -142,7 +142,7 @@ def get_activity():
 
 @profile_bp.route('/activity/application', methods=['POST'])
 @require_auth
-def track_application():
+def track_application(user_id: str, user_email: str):
     """Track user application"""
     try:
         data = request.json
@@ -154,7 +154,7 @@ def track_application():
                 "error": "Opportunity ID is required"
             }), 400
         
-        UserService.track_application(request.user_id, opportunity_id)
+        UserService.track_application(user_id, opportunity_id)
         
         return jsonify({
             "success": True,
@@ -169,10 +169,10 @@ def track_application():
 
 @profile_bp.route('/applications', methods=['GET'])
 @require_auth
-def get_applications():
+def get_applications(user_id: str, user_email: str):
     """Get user applications"""
     try:
-        applications = UserService.get_applications(request.user_id)
+        applications = UserService.get_applications(user_id)
         
         return jsonify({
             "success": True,

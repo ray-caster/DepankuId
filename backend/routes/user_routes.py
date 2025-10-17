@@ -7,13 +7,13 @@ user_bp = Blueprint('user', __name__, url_prefix='/api/user')
 
 @user_bp.route('/preferences', methods=['POST'])
 @require_auth
-def save_user_preferences():
+def save_user_preferences(user_id: str, user_email: str):
     """Save user preferences and conversation data"""
     try:
         data = request.json
         preferences = data.get('preferences', {})
         
-        UserService.save_preferences(request.user_id, preferences)
+        UserService.save_preferences(user_id, preferences)
         
         return jsonify({
             "success": True,
