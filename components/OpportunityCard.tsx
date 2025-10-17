@@ -10,10 +10,11 @@ import {
     BookmarkIcon as BookmarkOutlineIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-import { useState, memo } from 'react';
+import { memo } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '@/lib/api';
 import { getCategoryBadgeClasses, getCategoryLabel, OpportunityType } from '@/lib/categoryColors';
+import { useBookmarks } from '@/hooks/useBookmarks';
 
 interface OpportunityCardProps {
     opportunity: Opportunity;
@@ -23,40 +24,12 @@ interface OpportunityCardProps {
 
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
     const { user, getIdToken } = useAuth();
-    const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
-    const [bookmarkLoading, setBookmarkLoading] = useState(false);
+    const { isBookmarked, toggleBookmark } = useBookmarks();
 
     const handleBookmark = async (e: React.MouseEvent) => {
         e.stopPropagation();
-
-        if (!user) {
-            alert('Please sign in to bookmark opportunities');
-            return;
-        }
-
-        setBookmarkLoading(true);
-        try {
-            const idToken = await getIdToken();
-            if (!idToken) {
-                alert('Please sign in to bookmark opportunities');
-                return;
-            }
-
-            if (isBookmarked) {
-                await api.removeBookmark(opportunity.id || opportunity.objectID || '', idToken);
-                setIsBookmarked(false);
-                onBookmarkChange?.(false);
-            } else {
-                await api.addBookmark(opportunity.id || opportunity.objectID || '', idToken);
-                setIsBookmarked(true);
-                onBookmarkChange?.(true);
-            }
-        } catch (error) {
-            console.error('Error toggling bookmark:', error);
-            alert('Failed to update bookmark. Please try again.');
-        } finally {
-            setBookmarkLoading(false);
-        }
+        await toggleBookmark(opportunity);
+        onBookmarkChange?.(isBookmarked(opportunity.id || opportunity.objectID || ''));
     };
 
     const handleApply = async (e: React.MouseEvent) => {
@@ -119,11 +92,10 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                         {user && (
                             <button
                                 onClick={handleBookmark}
-                                disabled={bookmarkLoading}
-                                className="p-2 rounded-soft hover:bg-primary-50 transition-colors disabled:opacity-50"
-                                aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                                className="p-2 rounded-soft hover:bg-primary-50 transition-colors"
+                                aria-label={isBookmarked(opportunity.id || opportunity.objectID || '') ? 'Remove bookmark' : 'Add bookmark'}
                             >
-                                {isBookmarked ? (
+                                {isBookmarked(opportunity.id || opportunity.objectID || '') ? (
                                     <BookmarkSolidIcon className="w-6 h-6 text-primary-600" />
                                 ) : (
                                     <BookmarkOutlineIcon className="w-6 h-6 text-neutral-400 hover:text-primary-600" />
@@ -204,7 +176,6 @@ export default memo(OpportunityCard, (prevProps, nextProps) => {
     // Custom comparison function - only re-render if these change
     return (
         prevProps.opportunity.id === nextProps.opportunity.id &&
-        prevProps.isBookmarked === nextProps.isBookmarked &&
         prevProps.opportunity.title === nextProps.opportunity.title &&
         prevProps.opportunity.deadline === nextProps.opportunity.deadline
     );

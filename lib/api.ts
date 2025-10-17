@@ -486,6 +486,42 @@ class API {
         }
     }
 
+    async publishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/publish`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to publish opportunity');
+        }
+
+        return data;
+    }
+
+    async unpublishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/unpublish`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to unpublish opportunity');
+        }
+
+        return data;
+    }
+
     // Profile API methods
     async getProfile(idToken: string): Promise<any> {
         const response = await fetch(`${this.baseURL}/api/profile`, {

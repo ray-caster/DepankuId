@@ -18,11 +18,14 @@ import {
     SparklesIcon,
     ExclamationTriangleIcon,
     PencilIcon,
-    ArrowPathIcon
+    ArrowPathIcon,
+    EyeIcon,
+    EyeSlashIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useBookmarks } from '@/hooks/useBookmarks';
 
 interface DeadlineEvent {
     id: string;
@@ -36,12 +39,12 @@ interface DeadlineEvent {
 function DashboardContent() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
-    const [bookmarks, setBookmarks] = useState<Opportunity[]>([]);
+    const { bookmarks, loading: bookmarksLoading, refreshBookmarks } = useBookmarks();
     const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
-    const [loading, setLoading] = useState(true);
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
+    const [publishingId, setPublishingId] = useState<string | null>(null);
 
     // Load active view from localStorage on mount
     useEffect(() => {
@@ -75,27 +78,12 @@ function DashboardContent() {
         setDeadlineEvents(events);
     }, []);
 
-    const loadBookmarks = useCallback(async () => {
-        try {
-            const idToken = await getIdToken();
-            if (idToken) {
-                const data = await api.getBookmarks(idToken);
-                setBookmarks(data);
-                processDeadlines(data);
-                setLastRefresh(new Date());
-            }
-        } catch (error) {
-            console.error('Failed to load bookmarks:', error);
-        } finally {
-            setLoading(false);
-        }
-    }, [getIdToken, processDeadlines]);
-
+    // Update deadline events when bookmarks change
     useEffect(() => {
-        if (user) {
-            loadBookmarks();
+        if (bookmarks.length > 0) {
+            processDeadlines(bookmarks);
         }
-    }, [user, loadBookmarks]);
+    }, [bookmarks, processDeadlines]);
 
     const loadMyOpportunities = useCallback(async () => {
         setLoadingMyOpps(true);
@@ -140,28 +128,47 @@ function DashboardContent() {
         }
     }, [user, activeView, loadMyOpportunities]);
 
-    const handleRemoveBookmark = async (opportunityId: string) => {
+    const handlePublishOpportunity = async (opportunityId: string) => {
+        setPublishingId(opportunityId);
         try {
             const idToken = await getIdToken();
             if (idToken) {
-                await api.removeBookmark(opportunityId, idToken);
-                const updatedBookmarks = bookmarks.filter(b => b.id !== opportunityId);
-                setBookmarks(updatedBookmarks);
-                processDeadlines(updatedBookmarks);
-                setLastRefresh(new Date());
+                await api.publishOpportunity(opportunityId, idToken);
+                // Refresh my opportunities to show updated status
+                await loadMyOpportunities();
             }
         } catch (error) {
-            console.error('Failed to remove bookmark:', error);
+            console.error('Failed to publish opportunity:', error);
+            alert('Failed to publish opportunity. Please try again.');
+        } finally {
+            setPublishingId(null);
+        }
+    };
+
+    const handleUnpublishOpportunity = async (opportunityId: string) => {
+        setPublishingId(opportunityId);
+        try {
+            const idToken = await getIdToken();
+            if (idToken) {
+                await api.unpublishOpportunity(opportunityId, idToken);
+                // Refresh my opportunities to show updated status
+                await loadMyOpportunities();
+            }
+        } catch (error) {
+            console.error('Failed to unpublish opportunity:', error);
+            alert('Failed to unpublish opportunity. Please try again.');
+        } finally {
+            setPublishingId(null);
         }
     };
 
     const refreshData = useCallback(async () => {
         if (activeView === 'bookmarks') {
-            await loadBookmarks();
+            await refreshBookmarks();
         } else if (activeView === 'myOpportunities') {
             await loadMyOpportunities();
         }
-    }, [activeView, loadBookmarks, loadMyOpportunities]);
+    }, [activeView, refreshBookmarks, loadMyOpportunities]);
 
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -586,16 +593,44 @@ function DashboardContent() {
                                                         )}
                                                     </div>
 
-                                                    <div className="flex gap-2">
+                                                    <div className="flex flex-wrap gap-2">
                                                         {opportunity.id && (
                                                             <Link
                                                                 href={`/opportunities?edit=${opportunity.id}`}
-                                                                className="btn-primary flex-1 flex items-center justify-center gap-2"
+                                                                className="btn-primary flex-1 flex items-center justify-center gap-2 min-w-0"
                                                             >
                                                                 <PencilIcon className="w-4 h-4" />
                                                                 Edit
                                                             </Link>
                                                         )}
+
+                                                        {/* Publish/Unpublish Button */}
+                                                        {opportunity.id && opportunity.status !== 'rejected' && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (opportunity.status === 'published') {
+                                                                        handleUnpublishOpportunity(opportunity.id!);
+                                                                    } else {
+                                                                        handlePublishOpportunity(opportunity.id!);
+                                                                    }
+                                                                }}
+                                                                disabled={publishingId === opportunity.id}
+                                                                className={`flex items-center gap-2 px-3 py-2 rounded-comfort transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${opportunity.status === 'published'
+                                                                        ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                                                    }`}
+                                                            >
+                                                                {publishingId === opportunity.id ? (
+                                                                    <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                                                ) : opportunity.status === 'published' ? (
+                                                                    <EyeSlashIcon className="w-4 h-4" />
+                                                                ) : (
+                                                                    <EyeIcon className="w-4 h-4" />
+                                                                )}
+                                                                {opportunity.status === 'published' ? 'Unpublish' : 'Publish'}
+                                                            </button>
+                                                        )}
+
                                                         {opportunity.url && (
                                                             <a
                                                                 href={opportunity.url}
@@ -624,7 +659,7 @@ function DashboardContent() {
                                     </div>
                                 )
                             ) : activeView === 'bookmarks' ? (
-                                loading ? (
+                                bookmarksLoading ? (
                                     <div className="text-center py-12">
                                         <div className="inline-block w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
                                     </div>
