@@ -10,12 +10,12 @@ import {
     BookmarkIcon as BookmarkOutlineIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '@/lib/api';
 import { getCategoryBadgeClasses, getCategoryLabel, OpportunityType } from '@/lib/categoryColors';
 import { useBookmarks } from '@/hooks/useBookmarks';
-import ApplicationModal from './ApplicationModal';
+import Link from 'next/link';
 
 interface OpportunityCardProps {
     opportunity: Opportunity;
@@ -26,7 +26,6 @@ interface OpportunityCardProps {
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
     const { user, getIdToken } = useAuth();
     const { isBookmarked, toggleBookmark } = useBookmarks();
-    const [showApplicationModal, setShowApplicationModal] = useState(false);
 
     const handleBookmark = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -42,8 +41,11 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
             return;
         }
 
-        // Show application modal
-        setShowApplicationModal(true);
+        // Redirect to application page
+        const opportunityId = opportunity.id || opportunity.objectID;
+        if (opportunityId) {
+            window.location.href = `/application/${opportunityId}`;
+        }
     };
 
     return (
@@ -153,13 +155,6 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     </div>
                 )}
             </div>
-
-            {/* Application Modal */}
-            <ApplicationModal
-                isOpen={showApplicationModal}
-                onClose={() => setShowApplicationModal(false)}
-                opportunity={opportunity}
-            />
         </motion.div>
     );
 }

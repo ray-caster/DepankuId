@@ -107,7 +107,8 @@ export default function ApplicationFormRenderer({
         }
     }, [updateResponse]);
 
-    const progress = ((currentPageIndex + 1) / form.pages.length) * 100;
+    // Calculate progress based on page completion
+    const progress = form.pages.length > 1 ? ((currentPageIndex + 1) / form.pages.length) * 100 : 100;
 
     return (
         <div className="max-w-2xl mx-auto p-6">
