@@ -5,6 +5,14 @@ from config.settings import db
 from models.application import ApplicationModel
 from utils.logging_config import logger
 
+def _format_datetime(dt):
+    """Helper function to format datetime objects to ISO string"""
+    if not dt:
+        return ''
+    if hasattr(dt, 'isoformat'):
+        return dt.isoformat()
+    return str(dt)
+
 class ApplicationService:
     """Service for application operations"""
     
@@ -57,8 +65,8 @@ class ApplicationService:
                     'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
                     'responses': application_data.get('responses', []),
                     'status': application_data.get('status', 'pending'),
-                    'submittedAt': application_data.get('submitted_at', application_data.get('created_at', '')).isoformat() if hasattr(application_data.get('submitted_at', application_data.get('created_at', '')), 'isoformat') else str(application_data.get('submitted_at', application_data.get('created_at', ''))),
-                    'reviewedAt': application_data.get('reviewed_at', '').isoformat() if application_data.get('reviewed_at') and hasattr(application_data.get('reviewed_at'), 'isoformat') else str(application_data.get('reviewed_at', '')) if application_data.get('reviewed_at') else None,
+                    'submittedAt': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
+                    'reviewedAt': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
                     'notes': application_data.get('notes', '')
                 }
                 return transformed_data
@@ -88,8 +96,8 @@ class ApplicationService:
                     'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
                     'responses': application_data.get('responses', []),
                     'status': application_data.get('status', 'pending'),
-                    'submittedAt': application_data.get('submitted_at', application_data.get('created_at', '')).isoformat() if hasattr(application_data.get('submitted_at', application_data.get('created_at', '')), 'isoformat') else str(application_data.get('submitted_at', application_data.get('created_at', ''))),
-                    'reviewedAt': application_data.get('reviewed_at', '').isoformat() if application_data.get('reviewed_at') and hasattr(application_data.get('reviewed_at'), 'isoformat') else str(application_data.get('reviewed_at', '')) if application_data.get('reviewed_at') else None,
+                    'submittedAt': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
+                    'reviewedAt': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
                     'notes': application_data.get('notes', '')
                 }
                 applications.append(transformed_data)
@@ -123,8 +131,8 @@ class ApplicationService:
                     'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
                     'responses': application_data.get('responses', []),
                     'status': application_data.get('status', 'pending'),
-                    'submittedAt': application_data.get('submitted_at', application_data.get('created_at', '')).isoformat() if hasattr(application_data.get('submitted_at', application_data.get('created_at', '')), 'isoformat') else str(application_data.get('submitted_at', application_data.get('created_at', ''))),
-                    'reviewedAt': application_data.get('reviewed_at', '').isoformat() if application_data.get('reviewed_at') and hasattr(application_data.get('reviewed_at'), 'isoformat') else str(application_data.get('reviewed_at', '')) if application_data.get('reviewed_at') else None,
+                    'submittedAt': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
+                    'reviewedAt': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
                     'notes': application_data.get('notes', '')
                 }
                 applications.append(transformed_data)

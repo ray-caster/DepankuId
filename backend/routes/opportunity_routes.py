@@ -253,7 +253,7 @@ def get_opportunity_applications(user_id: str, user_email: str, opportunity_id: 
     """Get applications for a specific opportunity"""
     try:
         # First verify that the user owns this opportunity
-        opportunity = OpportunityService.get_opportunity(opportunity_id)
+        opportunity = OpportunityService.get_opportunity_by_id(opportunity_id)
         if not opportunity:
             return jsonify({
                 "success": False,
