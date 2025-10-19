@@ -1,6 +1,7 @@
 """Profile routes"""
 from flask import Blueprint, request, jsonify
 from services.user_service import UserService
+from services.opportunity_service import OpportunityService
 from utils.decorators import require_auth
 
 profile_bp = Blueprint('profile', __name__, url_prefix='/api/profile')
@@ -172,11 +173,30 @@ def track_application(user_id: str, user_email: str):
 def get_applications(user_id: str, user_email: str):
     """Get user applications"""
     try:
-        applications = UserService.get_applications(user_id)
+        from services.application_service import ApplicationService
+        applications = ApplicationService.get_user_applications(user_id)
+        
+        # Enrich applications with opportunity details
+        enriched_applications = []
+        for app in applications:
+            # Get opportunity details
+            opportunity = OpportunityService.get_opportunity(app.get('opportunity_id'))
+            if opportunity:
+                app['opportunity_title'] = opportunity.get('title', 'Unknown Opportunity')
+                app['opportunity_organization'] = opportunity.get('organization', 'Unknown Organization')
+                app['opportunity_type'] = opportunity.get('type', 'unknown')
+                app['opportunity_location'] = opportunity.get('location')
+                app['opportunity_deadline'] = opportunity.get('deadline')
+            else:
+                app['opportunity_title'] = 'Opportunity Not Found'
+                app['opportunity_organization'] = 'Unknown'
+                app['opportunity_type'] = 'unknown'
+            
+            enriched_applications.append(app)
         
         return jsonify({
             "success": True,
-            "data": applications
+            "data": enriched_applications
         }), 200
     
     except Exception as e:

@@ -838,7 +838,27 @@ function DashboardContent() {
                                                                 {application.opportunity_title || 'Application'}
                                                             </h3>
                                                             <p className="text-sm text-neutral-600">
-                                                                Applied on {new Date(application.submitted_at).toLocaleDateString()}
+                                                                Applied on {(() => {
+                                                                    try {
+                                                                        // Handle different timestamp formats
+                                                                        let timestamp;
+                                                                        if (application.submitted_at?.seconds) {
+                                                                            timestamp = application.submitted_at.seconds * 1000;
+                                                                        } else if (application.submitted_at?._seconds) {
+                                                                            timestamp = application.submitted_at._seconds * 1000;
+                                                                        } else if (typeof application.submitted_at === 'string') {
+                                                                            timestamp = new Date(application.submitted_at).getTime();
+                                                                        } else if (typeof application.submitted_at === 'number') {
+                                                                            timestamp = application.submitted_at;
+                                                                        } else {
+                                                                            return 'Recently';
+                                                                        }
+                                                                        return new Date(timestamp).toLocaleDateString();
+                                                                    } catch (error) {
+                                                                        console.warn('Error parsing application date:', error);
+                                                                        return 'Recently';
+                                                                    }
+                                                                })()}
                                                             </p>
                                                         </div>
                                                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${application.status === 'accepted' ? 'bg-green-100 text-green-800' :

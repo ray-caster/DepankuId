@@ -15,7 +15,10 @@ import Link from 'next/link';
 function ApplicationContent() {
     const { user, getIdToken } = useAuth();
     const params = useParams();
-    const opportunityId = params.id as string;
+    const applicationId = params.id as string;
+
+    // Extract opportunity ID from application ID (format: opportunityId_userId)
+    const opportunityId = applicationId.includes('_') ? applicationId.split('_')[0] : applicationId;
 
     const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
     const [applicationForm, setApplicationForm] = useState<ApplicationForm | null>(null);
