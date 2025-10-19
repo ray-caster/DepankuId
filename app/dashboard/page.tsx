@@ -22,7 +22,8 @@ import {
     EyeIcon,
     EyeSlashIcon,
     DocumentTextIcon,
-    XCircleIcon
+    XCircleIcon,
+    MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
@@ -841,9 +842,9 @@ function DashboardContent() {
                                                             </p>
                                                         </div>
                                                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${application.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                                                                application.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                                                    application.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
-                                                                        'bg-yellow-100 text-yellow-800'
+                                                            application.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                                                application.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
+                                                                    'bg-yellow-100 text-yellow-800'
                                                             }`}>
                                                             {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                                                         </span>

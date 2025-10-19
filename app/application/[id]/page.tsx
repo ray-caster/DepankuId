@@ -116,7 +116,7 @@ function ApplicationContent() {
         } finally {
             setLoading(false);
         }
-    }, [opportunityId]);
+    }, [opportunityId, user, getIdToken]);
 
     useEffect(() => {
         if (opportunityId) {
