@@ -11,11 +11,9 @@ import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useApplications } from '@/contexts/ApplicationContext';
 
 function ApplicationContent() {
     const { user, getIdToken } = useAuth();
-    const { addApplication } = useApplications();
     const params = useParams();
     const applicationId = params.id as string;
 
@@ -147,25 +145,6 @@ function ApplicationContent() {
 
             // Track the application for analytics
             await api.trackApplication(opportunityId, idToken);
-
-            // Add application to context for immediate UI update
-            const newApplication = {
-                id: `${opportunityId}_${user.uid}`,
-                opportunityId: opportunityId,
-                applicantId: user.uid,
-                applicantEmail: user.email || '',
-                applicantName: user.email?.split('@')[0] || 'User',
-                responses: responses,
-                status: 'pending' as const,
-                submittedAt: new Date().toISOString(),
-                title: opportunity?.title || 'Unknown Opportunity',
-                organization: opportunity?.organization || 'Unknown Organization',
-                type: opportunity?.type || 'unknown',
-                location: opportunity?.location || '',
-                deadline: opportunity?.deadline || '',
-                url: opportunity?.url || ''
-            };
-            addApplication(newApplication);
 
             setSubmitSuccess(true);
 

@@ -59,14 +59,14 @@ class ApplicationService:
                 # Transform data to match frontend expectations
                 transformed_data = {
                     'id': application_data.get('id', doc.id),
-                    'opportunityId': application_data.get('opportunity_id', ''),
+                    'opportunity_id': application_data.get('opportunity_id', ''),
                     'applicantId': application_data.get('user_id', ''),
                     'applicantEmail': application_data.get('user_email', ''),
                     'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
                     'responses': application_data.get('responses', []),
                     'status': application_data.get('status', 'pending'),
-                    'submittedAt': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
-                    'reviewedAt': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
+                    'submitted_at': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
+                    'reviewed_at': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
                     'notes': application_data.get('notes', '')
                 }
                 return transformed_data
@@ -90,14 +90,14 @@ class ApplicationService:
                 # Transform data to match frontend expectations
                 transformed_data = {
                     'id': application_data.get('id', doc.id),
-                    'opportunityId': application_data.get('opportunity_id', ''),
+                    'opportunity_id': application_data.get('opportunity_id', ''),
                     'applicantId': application_data.get('user_id', ''),
                     'applicantEmail': application_data.get('user_email', ''),
                     'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
                     'responses': application_data.get('responses', []),
                     'status': application_data.get('status', 'pending'),
-                    'submittedAt': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
-                    'reviewedAt': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
+                    'submitted_at': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
+                    'reviewed_at': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
                     'notes': application_data.get('notes', '')
                 }
                 applications.append(transformed_data)
@@ -125,14 +125,14 @@ class ApplicationService:
                 # Transform data to match frontend expectations
                 transformed_data = {
                     'id': application_data.get('id', doc.id),
-                    'opportunityId': application_data.get('opportunity_id', ''),
+                    'opportunity_id': application_data.get('opportunity_id', ''),
                     'applicantId': application_data.get('user_id', ''),
                     'applicantEmail': application_data.get('user_email', ''),
                     'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
                     'responses': application_data.get('responses', []),
                     'status': application_data.get('status', 'pending'),
-                    'submittedAt': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
-                    'reviewedAt': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
+                    'submitted_at': _format_datetime(application_data.get('submitted_at', application_data.get('created_at'))),
+                    'reviewed_at': _format_datetime(application_data.get('reviewed_at')) if application_data.get('reviewed_at') else None,
                     'notes': application_data.get('notes', '')
                 }
                 applications.append(transformed_data)

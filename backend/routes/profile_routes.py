@@ -180,16 +180,16 @@ def get_applications(user_id: str, user_email: str):
         enriched_applications = []
         for app in applications:
             # Get opportunity details
-            opportunity = OpportunityService.get_opportunity_by_id(app.get('opportunityId'))
+            opportunity = OpportunityService.get_opportunity(app.get('opportunityId'))
             if opportunity:
-                app['title'] = opportunity.get('title', 'Unknown Opportunity')
+                app['opportunity_title'] = opportunity.get('title', 'Unknown Opportunity')
                 app['organization'] = opportunity.get('organization', 'Unknown Organization')
                 app['type'] = opportunity.get('type', 'unknown')
                 app['location'] = opportunity.get('location')
                 app['deadline'] = opportunity.get('deadline')
                 app['url'] = opportunity.get('url')
             else:
-                app['title'] = 'Opportunity Not Found'
+                app['opportunity_title'] = 'Opportunity Not Found'
                 app['organization'] = 'Unknown'
                 app['type'] = 'unknown'
                 app['location'] = ''
