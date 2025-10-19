@@ -30,6 +30,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import ApplicationManagement from '@/components/ApplicationManagement';
+import { useApplications } from '@/contexts/ApplicationContext';
+import { useMyOpportunities } from '@/contexts/OpportunityContext';
 
 interface DeadlineEvent {
     id: string;
@@ -44,10 +46,8 @@ function DashboardContent() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
     const { bookmarks, loading: bookmarksLoading, refreshBookmarks } = useBookmarks();
-    const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
-    const [loadingMyOpps, setLoadingMyOpps] = useState(false);
-    const [myApplications, setMyApplications] = useState<any[]>([]);
-    const [loadingMyApps, setLoadingMyApps] = useState(false);
+    const { applications: myApplications, loading: loadingMyApps, refreshApplications } = useApplications();
+    const { myOpportunities, loading: loadingMyOpps, refreshOpportunities, removeOpportunity: removeOpportunityFromContext } = useMyOpportunities();
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications'>('bookmarks');
     const [publishingId, setPublishingId] = useState<string | null>(null);
@@ -92,37 +92,15 @@ function DashboardContent() {
         }
     }, [bookmarks, processDeadlines]);
 
+    // Use context methods instead of local state
     const loadMyOpportunities = useCallback(async () => {
-        setLoadingMyOpps(true);
-        try {
-            const idToken = await getIdToken();
-            if (idToken && user) {
-                // Get all opportunities created by this user (published, drafts, rejected)
-                const myOpps = await api.getMyOpportunities(idToken);
-                setMyOpportunities(myOpps);
-                setLastRefresh(new Date());
-            }
-        } catch (error) {
-            console.error('Failed to load my opportunities:', error);
-        } finally {
-            setLoadingMyOpps(false);
-        }
-    }, [getIdToken, user]);
+        await refreshOpportunities();
+        setLastRefresh(new Date());
+    }, [refreshOpportunities]);
 
     const loadMyApplications = useCallback(async () => {
-        setLoadingMyApps(true);
-        try {
-            const idToken = await getIdToken();
-            if (idToken && user) {
-                const applications = await api.getMyApplications(idToken);
-                setMyApplications(applications);
-            }
-        } catch (error) {
-            console.error('Error loading my applications:', error);
-        } finally {
-            setLoadingMyApps(false);
-        }
-    }, [getIdToken, user]);
+        await refreshApplications();
+    }, [refreshApplications]);
 
     const handleDeleteOpportunity = async (id: string) => {
         if (!user) return;
@@ -135,7 +113,7 @@ function DashboardContent() {
             }
             await api.deleteOpportunity(id, idToken as string);
 
-            setMyOpportunities(prev => prev.filter(opp => opp.id !== id));
+            removeOpportunityFromContext(id);
         } catch (error) {
             console.error('Error deleting opportunity:', error);
             alert('Failed to delete opportunity');
@@ -835,21 +813,17 @@ function DashboardContent() {
                                                     <div className="flex items-start justify-between mb-4">
                                                         <div>
                                                             <h3 className="text-lg font-semibold text-foreground mb-1">
-                                                                {application.opportunity_title || 'Application'}
+                                                                {application.title || 'Application'}
                                                             </h3>
                                                             <p className="text-sm text-neutral-600">
                                                                 Applied on {(() => {
                                                                     try {
                                                                         // Handle different timestamp formats
                                                                         let timestamp;
-                                                                        if (application.submitted_at?.seconds) {
-                                                                            timestamp = application.submitted_at.seconds * 1000;
-                                                                        } else if (application.submitted_at?._seconds) {
-                                                                            timestamp = application.submitted_at._seconds * 1000;
-                                                                        } else if (typeof application.submitted_at === 'string') {
-                                                                            timestamp = new Date(application.submitted_at).getTime();
-                                                                        } else if (typeof application.submitted_at === 'number') {
-                                                                            timestamp = application.submitted_at;
+                                                                        if (typeof application.submittedAt === 'string') {
+                                                                            timestamp = new Date(application.submittedAt).getTime();
+                                                                        } else if (typeof application.submittedAt === 'number') {
+                                                                            timestamp = application.submittedAt;
                                                                         } else {
                                                                             return 'Recently';
                                                                         }
@@ -900,7 +874,7 @@ function DashboardContent() {
                                                             Application ID: {application.id}
                                                         </div>
                                                         <Link
-                                                            href={`/application/${application.opportunity_id}`}
+                                                            href={`/application/${application.opportunityId}`}
                                                             className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                                                         >
                                                             View Details →

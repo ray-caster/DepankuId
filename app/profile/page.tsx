@@ -21,10 +21,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { calculateProfileCompletion, getCompletionMessage, getCompletionColor } from '@/lib/profileCompletion';
+import { useApplications } from '@/contexts/ApplicationContext';
 
 function ProfileContent() {
     const { user, loading, getIdToken } = useAuth();
     const router = useRouter();
+    const { applications, loading: applicationsLoading } = useApplications();
     const [profileData, setProfileData] = useState({
         bio: '',
         website: '',
@@ -32,7 +34,6 @@ function ProfileContent() {
         joinedDate: '',
         bookmarksCount: 0,
     });
-    const [applications, setApplications] = useState<any[]>([]);
     const [activity, setActivity] = useState<any[]>([]);
     const [loadingData, setLoadingData] = useState(true);
     const [profileCompletion, setProfileCompletion] = useState<any>(null);
@@ -48,7 +49,6 @@ function ProfileContent() {
             // Load profile data
             const profile = await api.getProfile(idToken);
             const bookmarks = await api.getBookmarks(idToken);
-            const userApplications = await api.getApplications(idToken);
             const userActivity = await api.getActivity(idToken);
 
             setProfileData({
@@ -79,7 +79,6 @@ function ProfileContent() {
                 bookmarksCount: bookmarks.length,
             });
 
-            setApplications(userApplications);
             setActivity(userActivity);
 
             // Calculate profile completion
