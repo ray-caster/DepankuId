@@ -23,11 +23,9 @@ from utils.logging_config import logger
 
 try:
     from services.algolia_service import AlgoliaService
-    from services.opportunity_service import OpportunityService
-    from services.application_service import ApplicationService
     ALGOLIA_AVAILABLE = True
 except (ValueError, ImportError) as e:
-    print(f"Warning: Some services not available: {e}")
+    print(f"Warning: Algolia service not available: {e}")
     ALGOLIA_AVAILABLE = False
 
 def delete_all_opportunities():
@@ -35,10 +33,37 @@ def delete_all_opportunities():
     print("🔥 Deleting all opportunities from Firestore...")
     
     try:
-        # Use the existing service method
-        deleted_count = OpportunityService.delete_all_opportunities()
-        print(f"✅ Deleted {deleted_count} opportunities from Firestore")
+        # Get all opportunities
+        opportunities_ref = db.collection('opportunities')
+        docs = list(opportunities_ref.stream())
+        
+        if not docs:
+            print("✅ No opportunities found to delete")
+            return True
+        
+        # Delete in batches
+        batch = db.batch()
+        batch_count = 0
+        max_batch_size = 500
+        
+        for doc in docs:
+            batch.delete(doc.reference)
+            batch_count += 1
+            
+            if batch_count >= max_batch_size:
+                batch.commit()
+                print(f"   Deleted batch of {batch_count} opportunities")
+                batch = db.batch()
+                batch_count = 0
+        
+        # Commit remaining
+        if batch_count > 0:
+            batch.commit()
+            print(f"   Deleted final batch of {batch_count} opportunities")
+        
+        print(f"✅ Deleted {len(docs)} opportunities from Firestore")
         return True
+        
     except Exception as e:
         print(f"❌ Error deleting opportunities: {e}")
         return False
