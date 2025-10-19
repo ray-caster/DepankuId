@@ -250,7 +250,15 @@ function OpportunitiesContent() {
             const idToken = await getIdToken(auth.currentUser!);
 
             // First, update the draft with the current application form
-            const updateData = { ...formData, application_form: applicationForm };
+            const updateData: Opportunity = {
+                title: formData.title || '',
+                description: formData.description || '',
+                type: formData.type || 'research',
+                organization: formData.organization || '',
+                tags: formData.tags || [],
+                ...formData,
+                application_form: applicationForm
+            };
             await api.updateOpportunity(draftId, updateData, idToken);
 
             // Then publish the opportunity
@@ -348,7 +356,16 @@ function OpportunitiesContent() {
 
         try {
             const idToken = await getIdToken(auth.currentUser!);
-            const submissionData = { ...formData, application_form: applicationForm, status: 'draft' } as Opportunity;
+            const submissionData: Opportunity = {
+                title: formData.title || '',
+                description: formData.description || '',
+                type: formData.type || 'research',
+                organization: formData.organization || '',
+                tags: formData.tags || [],
+                ...formData,
+                application_form: applicationForm,
+                status: 'draft'
+            };
 
             let result;
             if (isEditMode && editId) {
