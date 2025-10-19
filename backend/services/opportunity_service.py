@@ -74,6 +74,7 @@ class OpportunityService:
             try:
                 algolia_data = data.copy()
                 algolia_data['objectID'] = doc_ref.id
+                algolia_data['id'] = doc_ref.id  # Ensure id field matches Firestore document ID
                 algolia_data['createdAt'] = datetime.now().isoformat()
                 success = algolia_service.save_objects([algolia_data])
                 if success:

@@ -8,6 +8,7 @@ import {
     PencilIcon,
     EyeIcon,
     DocumentTextIcon,
+    TemplateIcon,
     PhotoIcon,
     VideoCameraIcon,
     CheckIcon,
@@ -16,6 +17,7 @@ import {
     ArrowDownIcon,
     DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
+import ApplicationFormTemplates from './ApplicationFormTemplates';
 
 export interface FormQuestion {
     id: string;
@@ -75,8 +77,14 @@ export default function ApplicationFormBuilder({
     onPreview,
     isEditing = false
 }: ApplicationFormBuilderProps) {
+    const [showTemplates, setShowTemplates] = useState(false);
     const [activePageId, setActivePageId] = useState(form.pages[0]?.id || '');
     const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
+
+    const handleTemplateSelect = useCallback((template: ApplicationForm) => {
+        onChange(template);
+        setShowTemplates(false);
+    }, [onChange]);
 
     const addPage = useCallback(() => {
         const newPage: FormPage = {
@@ -192,6 +200,13 @@ export default function ApplicationFormBuilder({
                         {isEditing ? 'Edit Application Form' : 'Create Application Form'}
                     </h1>
                     <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowTemplates(true)}
+                            className="btn-secondary flex items-center gap-2"
+                        >
+                            <TemplateIcon className="w-4 h-4" />
+                            Templates
+                        </button>
                         {onPreview && (
                             <button
                                 onClick={() => onPreview(form)}
@@ -357,6 +372,39 @@ export default function ApplicationFormBuilder({
                     )}
                 </div>
             </div>
+
+            {/* Templates Modal */}
+            <AnimatePresence>
+                {showTemplates && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                        onClick={() => setShowTemplates(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-2xl font-bold text-foreground">Application Form Templates</h2>
+                                <button
+                                    onClick={() => setShowTemplates(false)}
+                                    className="text-neutral-500 hover:text-neutral-700"
+                                >
+                                    <XMarkIcon className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <ApplicationFormTemplates onSelectTemplate={handleTemplateSelect} />
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
@@ -550,7 +598,20 @@ function QuestionEditor({
                                     disabled
                                     className="w-4 h-4"
                                 />
-                                <span className="text-sm text-neutral-700">{option}</span>
+                                <input
+                                    type="text"
+                                    value={option}
+                                    onChange={(e) => updateOption(index, e.target.value)}
+                                    className="flex-1 px-2 py-1 text-sm border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                    placeholder="Option text"
+                                />
+                                <button
+                                    onClick={() => removeOption(index)}
+                                    className="text-red-500 hover:text-red-700 text-sm"
+                                    disabled={(question.options?.length || 0) <= 1}
+                                >
+                                    ×
+                                </button>
                             </div>
                         ))}
                         <button
@@ -563,17 +624,46 @@ function QuestionEditor({
                 )}
 
                 {question.type === 'dropdown' && (
-                    <select
-                        disabled
-                        className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                        <option>Select an option</option>
-                        {question.options?.map((option, index) => (
-                            <option key={index} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="space-y-2">
+                        <select
+                            disabled
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                            <option>Select an option</option>
+                            {question.options?.map((option, index) => (
+                                <option key={index} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="space-y-2">
+                            {question.options?.map((option, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                    <span className="text-sm text-neutral-500 w-8">{index + 1}.</span>
+                                    <input
+                                        type="text"
+                                        value={option}
+                                        onChange={(e) => updateOption(index, e.target.value)}
+                                        className="flex-1 px-2 py-1 text-sm border border-neutral-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        placeholder="Option text"
+                                    />
+                                    <button
+                                        onClick={() => removeOption(index)}
+                                        className="text-red-500 hover:text-red-700 text-sm"
+                                        disabled={(question.options?.length || 0) <= 1}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            onClick={addOption}
+                            className="text-sm text-primary-600 hover:text-primary-700"
+                        >
+                            + Add option
+                        </button>
+                    </div>
                 )}
 
                 {(question.type === 'file' || question.type === 'image' || question.type === 'video') && (

@@ -259,13 +259,19 @@ class API {
     }
 
     async getOpportunity(id: string): Promise<Opportunity | null> {
+        console.log('API: Getting opportunity with ID:', id);
         const response = await fetch(`${this.baseURL}/api/opportunities/${id}`);
 
+        console.log('API: Response status:', response.status);
+        console.log('API: Response URL:', response.url);
+
         if (!response.ok) {
+            console.error('API: Failed to get opportunity:', response.status, response.statusText);
             return null;
         }
 
         const data = await response.json();
+        console.log('API: Response data:', data);
         return data.data || null;
     }
 

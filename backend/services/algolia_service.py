@@ -99,6 +99,7 @@ class AlgoliaService:
             for opp in opportunities:
                 algolia_obj = opp.copy()
                 algolia_obj['objectID'] = opp.get('id', opp.get('objectID'))
+                algolia_obj['id'] = opp.get('id', opp.get('objectID'))  # Ensure id field matches objectID
                 
                 # Convert datetime objects to ISO strings
                 if 'createdAt' in algolia_obj and algolia_obj['createdAt']:

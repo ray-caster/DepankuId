@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Header from '@/components/Header';
+import ApplicationFormBuilder from '@/components/ApplicationFormBuilder';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function EditOpportunityPage() {
@@ -33,6 +34,23 @@ export default function EditOpportunityPage() {
     application_process: '',
     contact_email: '',
     has_indefinite_deadline: false,
+  });
+
+  const [applicationForm, setApplicationForm] = useState({
+    id: '',
+    title: 'Application Form',
+    description: '',
+    pages: [{
+      id: 'page_1',
+      title: 'Application Information',
+      description: '',
+      questions: []
+    }],
+    settings: {
+      allowMultipleSubmissions: false,
+      collectEmail: true,
+      showProgressBar: true
+    }
   });
 
   // Check if user is admin
@@ -78,6 +96,11 @@ export default function EditOpportunityPage() {
           contact_email: opp.contact_email || '',
           has_indefinite_deadline: opp.has_indefinite_deadline || false,
         });
+
+        // Load application form if it exists
+        if (opp.application_form) {
+          setApplicationForm(opp.application_form);
+        }
       } else {
         setError('Opportunity not found');
       }
@@ -106,7 +129,10 @@ export default function EditOpportunityPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          application_form: applicationForm
+        }),
       });
 
       const data = await response.json();
@@ -488,6 +514,19 @@ export default function EditOpportunityPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Application Form Builder */}
+            <div className="bg-background-light rounded-gentle p-4 sm:p-6 border-2 border-neutral-400">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Application Form</h2>
+              <p className="text-sm text-neutral-600 mb-4">
+                Create a custom application form for this opportunity. Users will fill out this form when they apply.
+              </p>
+
+              <ApplicationFormBuilder
+                form={applicationForm}
+                onChange={setApplicationForm}
+              />
             </div>
 
             {/* Submit Buttons */}

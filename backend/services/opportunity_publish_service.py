@@ -56,6 +56,7 @@ class OpportunityPublishService:
             try:
                 algolia_data = data.copy()
                 algolia_data['objectID'] = opportunity_id
+                algolia_data['id'] = opportunity_id  # Ensure id field matches Firestore document ID
                 algolia_data['status'] = 'published'
                 success = algolia_service.save_objects([algolia_data])
                 if success:

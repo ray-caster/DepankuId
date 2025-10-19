@@ -146,9 +146,9 @@ class UserService:
     def remove_bookmark(user_id, opportunity_id):
         """Remove an opportunity from user's bookmarks"""
         user_ref = db.collection('users').document(user_id)
-        user_ref.update({
+        user_ref.set({
             'bookmarks': firestore.ArrayRemove([opportunity_id])
-        })
+        }, merge=True)
         
         return True
     
@@ -179,11 +179,12 @@ class UserService:
                 'timestamp': datetime.now(timezone.utc)
             }
             
-            user_ref.update({
+            # Use set with merge=True to create document if it doesn't exist
+            user_ref.set({
                 'activity': firestore.ArrayUnion([activity_item]),
                 'applications': firestore.ArrayUnion([opportunity_id]),
                 'last_activity': firestore.SERVER_TIMESTAMP
-            })
+            }, merge=True)
             
             return True
         except Exception as e:

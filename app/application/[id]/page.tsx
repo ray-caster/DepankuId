@@ -33,9 +33,14 @@ function ApplicationContent() {
             setLoading(true);
             setError(null);
 
+            console.log('Loading opportunity with ID:', opportunityId);
+
             // Load opportunity data
             const opp = await api.getOpportunity(opportunityId);
+            console.log('Opportunity data received:', opp);
+
             if (!opp) {
+                console.error('Opportunity not found for ID:', opportunityId);
                 setError('Opportunity not found');
                 return;
             }
