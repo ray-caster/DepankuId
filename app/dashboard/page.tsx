@@ -45,6 +45,8 @@ function DashboardContent() {
     const { bookmarks, loading: bookmarksLoading, refreshBookmarks } = useBookmarks();
     const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
+    const [myApplications, setMyApplications] = useState<any[]>([]);
+    const [loadingMyApps, setLoadingMyApps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
     const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications'>('bookmarks');
     const [publishingId, setPublishingId] = useState<string | null>(null);
@@ -106,6 +108,21 @@ function DashboardContent() {
         }
     }, [getIdToken, user]);
 
+    const loadMyApplications = useCallback(async () => {
+        setLoadingMyApps(true);
+        try {
+            const idToken = await getIdToken();
+            if (idToken && user) {
+                const applications = await api.getMyApplications(idToken);
+                setMyApplications(applications);
+            }
+        } catch (error) {
+            console.error('Error loading my applications:', error);
+        } finally {
+            setLoadingMyApps(false);
+        }
+    }, [getIdToken, user]);
+
     const handleDeleteOpportunity = async (id: string) => {
         if (!user) return;
 
@@ -130,7 +147,10 @@ function DashboardContent() {
         if (user && activeView === 'myOpportunities') {
             loadMyOpportunities();
         }
-    }, [user, activeView, loadMyOpportunities]);
+        if (user && activeView === 'myApplications') {
+            loadMyApplications();
+        }
+    }, [user, activeView, loadMyOpportunities, loadMyApplications]);
 
     const handlePublishOpportunity = async (opportunityId: string) => {
         setPublishingId(opportunityId);
@@ -785,14 +805,103 @@ function DashboardContent() {
                                 )
                             ) : activeView === 'myApplications' ? (
                                 <div className="space-y-6">
-                                    <div className="card text-center py-12">
-                                        <DocumentTextIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
-                                        <h3 className="text-xl font-semibold mb-2">My Applications</h3>
-                                        <p className="text-neutral-600 mb-6">Track your application progress and status</p>
-                                        <div className="text-sm text-neutral-500">
-                                            Applications will appear here once you start applying to opportunities
-                                        </div>
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-2xl font-bold text-foreground">My Applications</h2>
+                                        <button
+                                            onClick={loadMyApplications}
+                                            disabled={loadingMyApps}
+                                            className="btn-secondary flex items-center gap-2"
+                                        >
+                                            <ArrowPathIcon className={`w-4 h-4 ${loadingMyApps ? 'animate-spin' : ''}`} />
+                                            Refresh
+                                        </button>
                                     </div>
+
+                                    {loadingMyApps ? (
+                                        <div className="card text-center py-12">
+                                            <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                            <p className="text-neutral-600">Loading applications...</p>
+                                        </div>
+                                    ) : myApplications.length > 0 ? (
+                                        <div className="grid gap-4">
+                                            {myApplications.map((application) => (
+                                                <motion.div
+                                                    key={application.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="card p-6"
+                                                >
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-foreground mb-1">
+                                                                {application.opportunity_title || 'Application'}
+                                                            </h3>
+                                                            <p className="text-sm text-neutral-600">
+                                                                Applied on {new Date(application.submitted_at).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${application.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                                                                application.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                                                    application.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
+                                                                        'bg-yellow-100 text-yellow-800'
+                                                            }`}>
+                                                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                                                        </span>
+                                                    </div>
+
+                                                    {application.responses && application.responses.length > 0 && (
+                                                        <div className="space-y-3">
+                                                            <h4 className="font-medium text-foreground">Your Responses:</h4>
+                                                            {application.responses.map((response: any, index: number) => (
+                                                                <div key={index} className="bg-neutral-50 rounded-lg p-3">
+                                                                    <p className="text-sm font-medium text-neutral-700 mb-1">
+                                                                        {response.questionTitle}
+                                                                    </p>
+                                                                    <p className="text-sm text-neutral-600">
+                                                                        {typeof response.answer === 'string' ? response.answer :
+                                                                            Array.isArray(response.answer) ? response.answer.join(', ') :
+                                                                                'File uploaded'}
+                                                                    </p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {application.notes && (
+                                                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                                                            <p className="text-sm font-medium text-blue-900 mb-1">Notes from reviewer:</p>
+                                                            <p className="text-sm text-blue-800">{application.notes}</p>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-200">
+                                                        <div className="text-xs text-neutral-500">
+                                                            Application ID: {application.id}
+                                                        </div>
+                                                        <Link
+                                                            href={`/application/${application.opportunity_id}`}
+                                                            className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                                                        >
+                                                            View Details →
+                                                        </Link>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="card text-center py-12">
+                                            <DocumentTextIcon className="w-16 h-16 mx-auto text-neutral-300 mb-4" />
+                                            <h3 className="text-xl font-semibold mb-2">No Applications Yet</h3>
+                                            <p className="text-neutral-600 mb-6">Start applying to opportunities to see them here</p>
+                                            <Link
+                                                href="/search"
+                                                className="btn-primary inline-flex items-center gap-2"
+                                            >
+                                                <MagnifyingGlassIcon className="w-4 h-4" />
+                                                Browse Opportunities
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="group relative bg-background-light rounded-gentle p-6 sm:p-8 border-2 border-neutral-400 hover:border-primary-400 transition-all duration-300"

@@ -63,12 +63,12 @@ export default function Header() {
     }, [showMobileMenu]);
 
     const navItems = user ? [
-        { href: '/', label: 'Home', icon: HomeIcon },
+        { href: '/home', label: 'Home', icon: HomeIcon },
         { href: '/search', label: 'Browse', icon: MagnifyingGlassIcon },
         { href: '/features', label: 'Features', icon: CogIcon },
         { href: '/about', label: 'About Us', icon: InformationCircleIcon },
     ] : [
-        { href: '/', label: 'Home', icon: HomeIcon },
+        { href: '/home', label: 'Home', icon: HomeIcon },
         { href: '/search', label: 'Browse', icon: MagnifyingGlassIcon },
         { href: '/features', label: 'Features', icon: CogIcon },
         { href: '/about', label: 'About Us', icon: InformationCircleIcon },
@@ -107,7 +107,7 @@ export default function Header() {
                         {/* Logo */}
                         <div className="flex-shrink-0 z-10 relative">
                             <Link
-                                href="/"
+                                href="/home"
                                 className="flex items-center gap-3 text-xl md:text-2xl font-bold text-primary-800 hover:text-primary-950 transition-all"
                             >
                                 <Image

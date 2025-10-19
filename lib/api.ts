@@ -803,6 +803,22 @@ class API {
             throw new Error(errorData.message || 'Failed to change password');
         }
     }
+
+    // User Applications
+    async getMyApplications(idToken: string): Promise<ApplicationSubmission[]> {
+        const response = await fetch(`${this.baseURL}/api/profile/applications`, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch applications');
+        }
+
+        const data = await response.json();
+        return data.data || [];
+    }
 }
 
 export const api = new API();

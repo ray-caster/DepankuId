@@ -40,6 +40,26 @@ class OpportunityService:
         return None
     
     @staticmethod
+    def find_draft_by_title(user_id, title):
+        """Find existing draft by user ID and title"""
+        if not title or not title.strip():
+            return None
+            
+        opportunities_ref = db.collection('opportunities')
+        docs = opportunities_ref.where('created_by_uid', '==', user_id)\
+                               .where('status', '==', 'draft')\
+                               .where('title', '==', title.strip())\
+                               .limit(1)\
+                               .stream()
+        
+        for doc in docs:
+            data = doc.to_dict()
+            data['id'] = doc.id
+            return data
+        
+        return None
+    
+    @staticmethod
     def create_opportunity(data):
         """Create a new opportunity"""
         # Add to Firestore

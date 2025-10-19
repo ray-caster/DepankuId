@@ -41,18 +41,35 @@ def create_opportunity(user_id: str, user_email: str):
         is_draft = data.get('status') == 'draft'
         
         if is_draft:
-            # Save as draft without moderation
-            data['status'] = 'draft'
-            doc_id, _ = OpportunityService.create_opportunity(data)
+            # Check for existing draft with same title by same user
+            existing_draft = OpportunityService.find_draft_by_title(user_id, data.get('title', ''))
             
-            logger.info(f"Opportunity saved as draft: {doc_id} by {user_email}")
-            
-            return jsonify({
-                "success": True,
-                "status": "draft",
-                "id": doc_id,
-                "message": "Opportunity saved as draft"
-            }), 201
+            if existing_draft:
+                # Update existing draft instead of creating new one
+                data['status'] = 'draft'
+                OpportunityService.update_opportunity(existing_draft['id'], data)
+                
+                logger.info(f"Existing draft updated: {existing_draft['id']} by {user_email}")
+                
+                return jsonify({
+                    "success": True,
+                    "status": "draft",
+                    "id": existing_draft['id'],
+                    "message": "Draft updated successfully"
+                }), 200
+            else:
+                # Create new draft
+                data['status'] = 'draft'
+                doc_id, _ = OpportunityService.create_opportunity(data)
+                
+                logger.info(f"New draft created: {doc_id} by {user_email}")
+                
+                return jsonify({
+                    "success": True,
+                    "status": "draft",
+                    "id": doc_id,
+                    "message": "Draft saved successfully"
+                }), 201
         else:
             # Moderate content with AI for published submissions
             is_approved, issues = ModerationService.moderate_opportunity(data)

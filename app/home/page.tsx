@@ -7,8 +7,9 @@ import SearchWithButtons from '@/components/SearchWithButtons';
 import SearchSection from '@/components/SearchSection';
 import Header from '@/components/Header';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
-import { SparklesIcon, MagnifyingGlassIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, MagnifyingGlassIcon, AcademicCapIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import Link from 'next/link';
 
 function HomeContent() {
     const [openFAQ, setOpenFAQ] = useState<number | null>(null);
@@ -95,9 +96,76 @@ function HomeContent() {
         );
     }
 
-    // Don't render home page for logged-in users (they'll be redirected)
+    // Show home page for all users, but with different content for logged-in users
     if (user) {
-        return null;
+        return (
+            <div className="min-h-screen bg-background">
+                <Header />
+
+                <main className="pt-16 md:pt-20">
+                    <InstantSearchNext
+                        searchClient={searchClient}
+                        indexName={ALGOLIA_INDEX_NAME}
+                        future={{
+                            preserveSharedStateOnUnmount: true
+                        }}
+                    >
+                        <Configure hitsPerPage={5} />
+
+                        {/* Hero Section for Logged-in Users */}
+                        <section className="flex items-center justify-center px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] bg-secondary-50">
+                            <div className="w-full max-w-7xl mx-auto text-center flex flex-col justify-center py-12 sm:py-16">
+                                <h1 className="text-[clamp(2rem,7vw,4rem)] sm:text-[clamp(2.5rem,6vw,4.5rem)] lg:text-[clamp(3rem,5.5vw,5rem)] font-bold text-foreground tracking-tight leading-[1.15] mb-4 sm:mb-5">
+                                    <div className="mb-2">Welcome back,{' '}
+                                        <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
+                                            {user.displayName?.split(' ')[0] || 'Explorer'}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        Ready to discover your next{' '}
+                                        <span className="bg-gradient-to-r from-accent-600 to-primary-600 bg-clip-text text-transparent">
+                                            opportunity?
+                                        </span>
+                                    </div>
+                                </h1>
+
+                                <p className="text-base sm:text-lg lg:text-xl text-foreground-light max-w-3xl mx-auto leading-relaxed mb-4 sm:mb-6 px-4">
+                                    Continue exploring 500+ verified research programs, competitions, and youth opportunities.
+                                </p>
+
+                                {/* Search Bar */}
+                                <div className="mb-4 sm:mb-6">
+                                    <SearchWithButtons />
+                                </div>
+
+                                {/* Quick Actions */}
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <Link
+                                        href="/dashboard"
+                                        className="inline-flex items-center justify-center gap-2 bg-primary-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
+                                    >
+                                        <ChartBarIcon className="w-5 h-5" />
+                                        Go to Dashboard
+                                    </Link>
+                                    <Link
+                                        href="/search"
+                                        className="inline-flex items-center justify-center gap-2 bg-white text-primary-600 font-semibold px-6 py-3 rounded-lg border-2 border-primary-600 hover:bg-primary-50 transition-colors"
+                                    >
+                                        <MagnifyingGlassIcon className="w-5 h-5" />
+                                        Browse All Opportunities
+                                    </Link>
+                                </div>
+
+                                {/* Popular Tags & Browse Button */}
+                                <div className="mt-8">
+                                    <SearchSection />
+                                </div>
+                            </div>
+                        </section>
+                    </InstantSearchNext>
+                </main>
+            </div>
+        );
     }
 
     return (

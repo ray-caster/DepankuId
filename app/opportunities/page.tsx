@@ -120,11 +120,11 @@ function OpportunitiesContent() {
                 await api.updateOpportunity(draftId, draftData, idToken);
                 console.log('Draft updated:', draftId);
             } else {
-                // Create new draft only if we don't have one
+                // Create new draft - backend will handle duplicate prevention
                 const result = await api.createOpportunity(draftData, idToken);
                 if (result.id) {
                     setDraftId(result.id);
-                    console.log('New draft created:', result.id);
+                    console.log('Draft created/updated:', result.id);
                 }
             }
         } catch (error) {
@@ -201,6 +201,25 @@ function OpportunitiesContent() {
         };
         loadData();
     }, []);
+
+    // Check for existing drafts when user changes
+    useEffect(() => {
+        const checkExistingDrafts = async () => {
+            if (!user || !formData.title) return;
+
+            try {
+                const idToken = await getIdToken(auth.currentUser!);
+                // The backend will now handle finding existing drafts
+                // We'll let the auto-save mechanism handle this
+            } catch (error) {
+                console.error('Failed to check existing drafts:', error);
+            }
+        };
+
+        if (user && formData.title) {
+            checkExistingDrafts();
+        }
+    }, [user, formData.title]);
 
     const applyTemplate = (templateKey: string) => {
         const template = templates[templateKey];
