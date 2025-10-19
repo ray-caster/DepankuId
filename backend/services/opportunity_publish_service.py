@@ -53,10 +53,19 @@ class OpportunityPublishService:
         
         # Add to Algolia
         if ALGOLIA_AVAILABLE:
-            algolia_data = data.copy()
-            algolia_data['objectID'] = opportunity_id
-            algolia_data['status'] = 'published'
-            algolia_service.save_objects([algolia_data])
+            try:
+                algolia_data = data.copy()
+                algolia_data['objectID'] = opportunity_id
+                algolia_data['status'] = 'published'
+                success = algolia_service.save_objects([algolia_data])
+                if success:
+                    logger.info(f"Successfully synced opportunity {opportunity_id} to Algolia")
+                else:
+                    logger.warning(f"Failed to sync opportunity {opportunity_id} to Algolia")
+            except Exception as e:
+                logger.error(f"Error syncing opportunity {opportunity_id} to Algolia: {str(e)}")
+        else:
+            logger.warning("Algolia service not available - opportunity published but not synced to search")
         
         logger.info(f"Opportunity {opportunity_id} published successfully after moderation")
         return True, "Opportunity published successfully"
@@ -79,6 +88,15 @@ class OpportunityPublishService:
         
         # Remove from Algolia
         if ALGOLIA_AVAILABLE:
-            algolia_service.delete_objects([opportunity_id])
+            try:
+                success = algolia_service.delete_objects([opportunity_id])
+                if success:
+                    logger.info(f"Successfully removed opportunity {opportunity_id} from Algolia")
+                else:
+                    logger.warning(f"Failed to remove opportunity {opportunity_id} from Algolia")
+            except Exception as e:
+                logger.error(f"Error removing opportunity {opportunity_id} from Algolia: {str(e)}")
+        else:
+            logger.warning("Algolia service not available - opportunity unpublished but not removed from search")
         
         return True, "Opportunity unpublished successfully"

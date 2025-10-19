@@ -248,6 +248,12 @@ function OpportunitiesContent() {
 
         try {
             const idToken = await getIdToken(auth.currentUser!);
+
+            // First, update the draft with the current application form
+            const updateData = { ...formData, application_form: applicationForm };
+            await api.updateOpportunity(draftId, updateData, idToken);
+
+            // Then publish the opportunity
             const result = await api.publishOpportunity(draftId, idToken);
 
             // Show success modal
@@ -278,6 +284,22 @@ function OpportunitiesContent() {
                 application_process: '',
                 contact_email: '',
                 has_indefinite_deadline: false,
+            });
+            setApplicationForm({
+                id: '',
+                title: 'Application Form',
+                description: '',
+                pages: [{
+                    id: 'page_1',
+                    title: 'Application Information',
+                    description: '',
+                    questions: []
+                }],
+                settings: {
+                    allowMultipleSubmissions: false,
+                    collectEmail: true,
+                    showProgressBar: true
+                }
             });
             setTagInput('');
             setSelectedTemplate('');
@@ -326,7 +348,7 @@ function OpportunitiesContent() {
 
         try {
             const idToken = await getIdToken(auth.currentUser!);
-            const submissionData = { ...formData, status: 'draft' } as Opportunity;
+            const submissionData = { ...formData, application_form: applicationForm, status: 'draft' } as Opportunity;
 
             let result;
             if (isEditMode && editId) {
@@ -578,24 +600,9 @@ function OpportunitiesContent() {
                         />
                         <label className="text-sm text-foreground">No specific deadline (ongoing opportunity)</label>
                     </div>
-                </div>
-            </div>
-        </motion.div>
-    );
 
-    const renderApplicationForm = () => (
-        <motion.div
-            key="application"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-        >
-            <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Application Details</h3>
-                <div className="space-y-6">
-
-                    <div>
+                    {/* Additional Details */}
+                    <div className="lg:col-span-2">
                         <label className="block text-sm font-medium text-foreground mb-2">
                             Benefits *
                         </label>
@@ -603,14 +610,14 @@ function OpportunitiesContent() {
                             name="benefits"
                             value={formData.benefits || ''}
                             onChange={handleChange}
-                            rows={4}
+                            rows={3}
                             className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
                             placeholder="What benefits will participants receive?"
                             required
                         />
                     </div>
 
-                    <div>
+                    <div className="lg:col-span-2">
                         <label className="block text-sm font-medium text-foreground mb-2">
                             Eligibility
                         </label>
@@ -618,40 +625,38 @@ function OpportunitiesContent() {
                             name="eligibility"
                             value={formData.eligibility || ''}
                             onChange={handleChange}
-                            rows={3}
+                            rows={2}
                             className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
                             placeholder="Who is eligible to apply?"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-2">
-                                Cost
-                            </label>
-                            <input
-                                type="text"
-                                name="cost"
-                                value={formData.cost || ''}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
-                                placeholder="Free, $50, etc."
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Cost
+                        </label>
+                        <input
+                            type="text"
+                            name="cost"
+                            value={formData.cost || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            placeholder="Free, $50, etc."
+                        />
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-2">
-                                Duration
-                            </label>
-                            <input
-                                type="text"
-                                name="duration"
-                                value={formData.duration || ''}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
-                                placeholder="2 weeks, 6 months, etc."
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                            Duration
+                        </label>
+                        <input
+                            type="text"
+                            name="duration"
+                            value={formData.duration || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
+                            placeholder="2 weeks, 6 months, etc."
+                        />
                     </div>
 
                     <div>
@@ -662,7 +667,7 @@ function OpportunitiesContent() {
                             name="application_process"
                             value={formData.application_process || ''}
                             onChange={handleChange}
-                            rows={4}
+                            rows={3}
                             className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm resize-none"
                             placeholder="How do students apply? What documents are needed?"
                         />
@@ -683,6 +688,17 @@ function OpportunitiesContent() {
                     </div>
                 </div>
             </div>
+        </motion.div>
+    );
+
+    const renderApplicationForm = () => (
+        <motion.div
+            key="application"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+        >
 
             {/* Application Form Builder */}
             <div className="bg-background-light rounded-gentle p-6 border-2 border-neutral-400">

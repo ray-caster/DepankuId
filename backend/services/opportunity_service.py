@@ -2,6 +2,7 @@
 from firebase_admin import firestore
 from config.settings import db
 from datetime import datetime
+from utils.logging_config import logger
 try:
     from services.algolia_service import algolia_service
     ALGOLIA_AVAILABLE = True
@@ -70,10 +71,18 @@ class OpportunityService:
         
         # Only add to Algolia if published
         if data.get('status') == 'published' and ALGOLIA_AVAILABLE:
-            algolia_data = data.copy()
-            algolia_data['objectID'] = doc_ref.id
-            algolia_data['createdAt'] = datetime.now().isoformat()
-            algolia_service.save_objects([algolia_data])
+            try:
+                algolia_data = data.copy()
+                algolia_data['objectID'] = doc_ref.id
+                algolia_data['createdAt'] = datetime.now().isoformat()
+                success = algolia_service.save_objects([algolia_data])
+                if success:
+                    logger.info(f"Successfully synced opportunity {doc_ref.id} to Algolia")
+                else:
+                    logger.warning(f"Failed to sync opportunity {doc_ref.id} to Algolia")
+            except Exception as e:
+                logger.error(f"Error syncing opportunity {doc_ref.id} to Algolia: {str(e)}")
+                algolia_data = None
         else:
             algolia_data = None
         

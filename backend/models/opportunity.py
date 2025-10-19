@@ -41,6 +41,7 @@ class Opportunity:
     has_indefinite_deadline: bool = False
     status: str = "published"  # 'draft', 'published', 'rejected'
     moderation_notes: Optional[str] = None
+    application_form: Optional[dict] = None  # Custom application form data
     
     def to_dict(self):
         data = asdict(self)
