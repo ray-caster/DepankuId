@@ -47,7 +47,21 @@ class ApplicationService:
             doc = application_ref.get()
             
             if doc.exists:
-                return doc.to_dict()
+                application_data = doc.to_dict()
+                # Transform data to match frontend expectations
+                transformed_data = {
+                    'id': application_data.get('id', doc.id),
+                    'opportunityId': application_data.get('opportunity_id', ''),
+                    'applicantId': application_data.get('user_id', ''),
+                    'applicantEmail': application_data.get('user_email', ''),
+                    'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
+                    'responses': application_data.get('responses', []),
+                    'status': application_data.get('status', 'pending'),
+                    'submittedAt': application_data.get('submitted_at', application_data.get('created_at', '')).isoformat() if hasattr(application_data.get('submitted_at', application_data.get('created_at', '')), 'isoformat') else str(application_data.get('submitted_at', application_data.get('created_at', ''))),
+                    'reviewedAt': application_data.get('reviewed_at', '').isoformat() if application_data.get('reviewed_at') and hasattr(application_data.get('reviewed_at'), 'isoformat') else str(application_data.get('reviewed_at', '')) if application_data.get('reviewed_at') else None,
+                    'notes': application_data.get('notes', '')
+                }
+                return transformed_data
             return None
             
         except Exception as e:
@@ -65,10 +79,23 @@ class ApplicationService:
             applications = []
             for doc in docs:
                 application_data = doc.to_dict()
-                applications.append(application_data)
+                # Transform data to match frontend expectations
+                transformed_data = {
+                    'id': application_data.get('id', doc.id),
+                    'opportunityId': application_data.get('opportunity_id', ''),
+                    'applicantId': application_data.get('user_id', ''),
+                    'applicantEmail': application_data.get('user_email', ''),
+                    'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
+                    'responses': application_data.get('responses', []),
+                    'status': application_data.get('status', 'pending'),
+                    'submittedAt': application_data.get('submitted_at', application_data.get('created_at', '')).isoformat() if hasattr(application_data.get('submitted_at', application_data.get('created_at', '')), 'isoformat') else str(application_data.get('submitted_at', application_data.get('created_at', ''))),
+                    'reviewedAt': application_data.get('reviewed_at', '').isoformat() if application_data.get('reviewed_at') and hasattr(application_data.get('reviewed_at'), 'isoformat') else str(application_data.get('reviewed_at', '')) if application_data.get('reviewed_at') else None,
+                    'notes': application_data.get('notes', '')
+                }
+                applications.append(transformed_data)
             
             # Sort by created_at (newest first)
-            applications.sort(key=lambda x: x.get('created_at', datetime.min), reverse=True)
+            applications.sort(key=lambda x: x.get('submittedAt', ''), reverse=True)
             
             return applications
             
@@ -87,10 +114,23 @@ class ApplicationService:
             applications = []
             for doc in docs:
                 application_data = doc.to_dict()
-                applications.append(application_data)
+                # Transform data to match frontend expectations
+                transformed_data = {
+                    'id': application_data.get('id', doc.id),
+                    'opportunityId': application_data.get('opportunity_id', ''),
+                    'applicantId': application_data.get('user_id', ''),
+                    'applicantEmail': application_data.get('user_email', ''),
+                    'applicantName': application_data.get('user_email', '').split('@')[0],  # Use email prefix as name
+                    'responses': application_data.get('responses', []),
+                    'status': application_data.get('status', 'pending'),
+                    'submittedAt': application_data.get('submitted_at', application_data.get('created_at', '')).isoformat() if hasattr(application_data.get('submitted_at', application_data.get('created_at', '')), 'isoformat') else str(application_data.get('submitted_at', application_data.get('created_at', ''))),
+                    'reviewedAt': application_data.get('reviewed_at', '').isoformat() if application_data.get('reviewed_at') and hasattr(application_data.get('reviewed_at'), 'isoformat') else str(application_data.get('reviewed_at', '')) if application_data.get('reviewed_at') else None,
+                    'notes': application_data.get('notes', '')
+                }
+                applications.append(transformed_data)
             
             # Sort by created_at (newest first)
-            applications.sort(key=lambda x: x.get('created_at', datetime.min), reverse=True)
+            applications.sort(key=lambda x: x.get('submittedAt', ''), reverse=True)
             
             return applications
             
