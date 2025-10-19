@@ -2,23 +2,27 @@
 
 import { useState } from 'react';
 
+interface FormQuestion {
+    id: string;
+    type: 'text' | 'textarea' | 'multiple_choice' | 'checkbox' | 'dropdown' | 'file' | 'video' | 'image';
+    title: string;
+    description: string;
+    required: boolean;
+    options?: string[];
+}
+
+interface FormPage {
+    id: string;
+    title: string;
+    description: string;
+    questions: FormQuestion[];
+}
+
 interface ApplicationForm {
     id: string;
     title: string;
     description: string;
-    pages: Array<{
-        id: string;
-        title: string;
-        description: string;
-        questions: Array<{
-            id: string;
-            title: string;
-            description: string;
-            type: string;
-            required: boolean;
-            options?: string[];
-        }>;
-    }>;
+    pages: FormPage[];
     settings: {
         allowMultipleSubmissions: boolean;
         collectEmail: boolean;
@@ -52,7 +56,7 @@ const templates: ApplicationForm[] = [
                         id: 'question_2',
                         title: 'Email Address',
                         description: 'Your primary email address',
-                        type: 'email',
+                        type: 'text',
                         required: true
                     },
                     {
@@ -308,7 +312,7 @@ const templates: ApplicationForm[] = [
                         id: 'question_2',
                         title: 'Date of Birth',
                         description: 'Your date of birth',
-                        type: 'date',
+                        type: 'text',
                         required: true
                     },
                     {
@@ -413,7 +417,7 @@ const templates: ApplicationForm[] = [
                         id: 'question_2',
                         title: 'Email Address',
                         description: 'Your primary email address',
-                        type: 'email',
+                        type: 'text',
                         required: true
                     },
                     {
@@ -519,8 +523,8 @@ export default function ApplicationFormTemplates({ onSelectTemplate }: Applicati
                     <div
                         key={template.id}
                         className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedTemplate === template.id
-                                ? 'border-primary-500 bg-primary-50'
-                                : 'border-neutral-300 hover:border-primary-400 hover:bg-neutral-50'
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-neutral-300 hover:border-primary-400 hover:bg-neutral-50'
                             }`}
                         onClick={() => handleSelectTemplate(template)}
                     >

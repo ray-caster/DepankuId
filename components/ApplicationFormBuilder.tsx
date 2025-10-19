@@ -8,14 +8,13 @@ import {
     PencilIcon,
     EyeIcon,
     DocumentTextIcon,
-    TemplateIcon,
+    DocumentDuplicateIcon,
     PhotoIcon,
     VideoCameraIcon,
     CheckIcon,
     XMarkIcon,
     ArrowUpIcon,
-    ArrowDownIcon,
-    DocumentDuplicateIcon
+    ArrowDownIcon
 } from '@heroicons/react/24/outline';
 import ApplicationFormTemplates from './ApplicationFormTemplates';
 
@@ -204,7 +203,7 @@ export default function ApplicationFormBuilder({
                             onClick={() => setShowTemplates(true)}
                             className="btn-secondary flex items-center gap-2"
                         >
-                            <TemplateIcon className="w-4 h-4" />
+                            <DocumentDuplicateIcon className="w-4 h-4" />
                             Templates
                         </button>
                         {onPreview && (

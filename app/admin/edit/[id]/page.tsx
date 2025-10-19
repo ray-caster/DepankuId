@@ -53,6 +53,25 @@ export default function EditOpportunityPage() {
     }
   });
 
+  const handleApplicationFormChange = (form: any) => {
+    setApplicationForm({
+      id: form.id || '',
+      title: form.title || 'Application Form',
+      description: form.description || '',
+      pages: form.pages || [{
+        id: 'page_1',
+        title: 'Application Information',
+        description: '',
+        questions: []
+      }],
+      settings: {
+        allowMultipleSubmissions: form.settings?.allowMultipleSubmissions || false,
+        collectEmail: form.settings?.collectEmail !== false,
+        showProgressBar: form.settings?.showProgressBar !== false
+      }
+    });
+  };
+
   // Check if user is admin
   useEffect(() => {
     const checkAdminSession = () => {
@@ -99,7 +118,22 @@ export default function EditOpportunityPage() {
 
         // Load application form if it exists
         if (opp.application_form) {
-          setApplicationForm(opp.application_form);
+          setApplicationForm({
+            id: opp.application_form.id || '',
+            title: opp.application_form.title || 'Application Form',
+            description: opp.application_form.description || '',
+            pages: opp.application_form.pages || [{
+              id: 'page_1',
+              title: 'Application Information',
+              description: '',
+              questions: []
+            }],
+            settings: {
+              allowMultipleSubmissions: opp.application_form.settings?.allowMultipleSubmissions || false,
+              collectEmail: opp.application_form.settings?.collectEmail !== false,
+              showProgressBar: opp.application_form.settings?.showProgressBar !== false
+            }
+          });
         }
       } else {
         setError('Opportunity not found');
@@ -525,7 +559,7 @@ export default function EditOpportunityPage() {
 
               <ApplicationFormBuilder
                 form={applicationForm}
-                onChange={setApplicationForm}
+                onChange={handleApplicationFormChange}
               />
             </div>
 
