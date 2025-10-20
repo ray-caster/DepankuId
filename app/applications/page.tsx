@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
@@ -46,6 +46,8 @@ interface Opportunity {
 export default function ApplicationsPage() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const opportunityId = searchParams.get('opportunity');
     const [applications, setApplications] = useState<Application[]>([]);
     const [opportunities, setOpportunities] = useState<Record<string, Opportunity>>({});
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -56,56 +58,106 @@ export default function ApplicationsPage() {
     const loadApplications = useCallback(async () => {
         try {
             setLoading(true);
+            setError(null);
             const idToken = await getIdToken();
             
-            // Get all opportunities first to get their details
-            const opportunitiesResponse = await api.getOpportunities();
-            const opportunitiesMap: Record<string, Opportunity> = {};
-            
-            if (opportunitiesResponse && opportunitiesResponse.length > 0) {
-                opportunitiesResponse.forEach((opp: any) => {
-                    opportunitiesMap[opp.id] = {
-                        id: opp.id,
-                        title: opp.title,
-                        organization: opp.organization,
-                        type: opp.type,
-                        location: opp.location,
-                        deadline: opp.deadline
-                    };
-                });
+            if (!idToken) {
+                setError('Authentication required');
+                return;
             }
-            setOpportunities(opportunitiesMap);
 
-            // Get applications for each opportunity
-            const allApplications: Application[] = [];
-            
-            for (const opportunityId of Object.keys(opportunitiesMap)) {
+            // If specific opportunity ID is provided, only load that opportunity's applications
+            if (opportunityId) {
                 try {
-                    const applications = await api.getOpportunityApplications(opportunityId, idToken!);
-                    if (applications && applications.length > 0) {
-                        const mappedApplications = applications.map(app => ({
-                            ...app,
-                            opportunity_id: app.opportunityId,
-                            responses: app.responses.map((response: any) => ({
-                                question: response.questionTitle,
-                                answer: Array.isArray(response.answer) ? response.answer.join(', ') : response.answer
-                            }))
-                        }));
-                        allApplications.push(...mappedApplications);
+                    // Get the specific opportunity details
+                    const opportunitiesResponse = await api.getOpportunities();
+                    const targetOpportunity = opportunitiesResponse.find((opp: any) => opp.id === opportunityId);
+                    
+                    if (targetOpportunity) {
+                        const opportunitiesMap = {
+                            [opportunityId]: {
+                                id: targetOpportunity.id,
+                                title: targetOpportunity.title,
+                                organization: targetOpportunity.organization,
+                                type: targetOpportunity.type,
+                                location: targetOpportunity.location,
+                                deadline: targetOpportunity.deadline
+                            }
+                        };
+                        setOpportunities(opportunitiesMap);
+
+                        // Get applications for this specific opportunity
+                        const applications = await api.getOpportunityApplications(opportunityId, idToken);
+                        if (applications && applications.length > 0) {
+                            const mappedApplications = applications.map(app => ({
+                                ...app,
+                                opportunity_id: app.opportunityId,
+                                responses: app.responses.map((response: any) => ({
+                                    question: response.questionTitle,
+                                    answer: Array.isArray(response.answer) ? response.answer.join(', ') : response.answer
+                                }))
+                            }));
+                            setApplications(mappedApplications);
+                        } else {
+                            setApplications([]);
+                        }
+                    } else {
+                        setError('Opportunity not found');
                     }
                 } catch (err) {
-                    console.warn(`Failed to load applications for opportunity ${opportunityId}:`, err);
+                    console.error('Error loading applications for specific opportunity:', err);
+                    setError('Failed to load applications for this opportunity');
                 }
-            }
+            } else {
+                // Load all applications (fallback)
+                const opportunitiesResponse = await api.getOpportunities();
+                const opportunitiesMap: Record<string, Opportunity> = {};
+                
+                if (opportunitiesResponse && opportunitiesResponse.length > 0) {
+                    opportunitiesResponse.forEach((opp: any) => {
+                        opportunitiesMap[opp.id] = {
+                            id: opp.id,
+                            title: opp.title,
+                            organization: opp.organization,
+                            type: opp.type,
+                            location: opp.location,
+                            deadline: opp.deadline
+                        };
+                    });
+                }
+                setOpportunities(opportunitiesMap);
 
-            setApplications(allApplications);
+                // Get applications for each opportunity
+                const allApplications: Application[] = [];
+                
+                for (const oppId of Object.keys(opportunitiesMap)) {
+                    try {
+                        const applications = await api.getOpportunityApplications(oppId, idToken);
+                        if (applications && applications.length > 0) {
+                            const mappedApplications = applications.map(app => ({
+                                ...app,
+                                opportunity_id: app.opportunityId,
+                                responses: app.responses.map((response: any) => ({
+                                    question: response.questionTitle,
+                                    answer: Array.isArray(response.answer) ? response.answer.join(', ') : response.answer
+                                }))
+                            }));
+                            allApplications.push(...mappedApplications);
+                        }
+                    } catch (err) {
+                        console.warn(`Failed to load applications for opportunity ${oppId}:`, err);
+                    }
+                }
+
+                setApplications(allApplications);
+            }
         } catch (err) {
             console.error('Error loading applications:', err);
             setError('Failed to load applications');
         } finally {
             setLoading(false);
         }
-    }, [getIdToken]);
+    }, [getIdToken, opportunityId]);
 
     useEffect(() => {
         if (user) {
@@ -185,10 +237,15 @@ export default function ApplicationsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-neutral-600">Loading applications...</p>
+            <div className="min-h-screen bg-neutral-50">
+                <Header />
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-neutral-600">
+                            {opportunityId ? 'Loading applications for this opportunity...' : 'Loading applications...'}
+                        </p>
+                    </div>
                 </div>
             </div>
         );
@@ -196,15 +253,18 @@ export default function ApplicationsPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-red-600 mb-4">{error}</p>
-                    <button 
-                        onClick={loadApplications}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                        Try Again
-                    </button>
+            <div className="min-h-screen bg-neutral-50">
+                <Header />
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-center">
+                        <p className="text-red-600 mb-4">{error}</p>
+                        <button 
+                            onClick={loadApplications}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                            Try Again
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -212,11 +272,27 @@ export default function ApplicationsPage() {
 
     if (applications.length === 0) {
         return (
-            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-                <div className="text-center">
-                    <EyeIcon className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">No Applications Yet</h2>
-                    <p className="text-neutral-600">Applications will appear here when users apply to your opportunities.</p>
+            <div className="min-h-screen bg-neutral-50">
+                <Header />
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-center">
+                        <EyeIcon className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+                        <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+                            {opportunityId ? 'No Applications for This Opportunity' : 'No Applications Yet'}
+                        </h2>
+                        <p className="text-neutral-600">
+                            {opportunityId 
+                                ? 'Applications will appear here when users apply to this opportunity.'
+                                : 'Applications will appear here when users apply to your opportunities.'
+                            }
+                        </p>
+                        <button 
+                            onClick={() => router.push('/dashboard')}
+                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                            Back to Dashboard
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -240,9 +316,17 @@ export default function ApplicationsPage() {
                             Back to Dashboard
                         </button>
                     </div>
-                    <h1 className="text-3xl font-bold text-neutral-900 mb-2">Application Reviews</h1>
+                    <h1 className="text-3xl font-bold text-neutral-900 mb-2">
+                        {opportunityId && opportunities[opportunityId] 
+                            ? `Applications for ${opportunities[opportunityId].title}`
+                            : 'Application Reviews'
+                        }
+                    </h1>
                     <p className="text-neutral-600">
-                        Reviewing application {currentIndex + 1} of {applications.length}
+                        {applications.length > 0 
+                            ? `Reviewing application ${currentIndex + 1} of ${applications.length}`
+                            : 'No applications found'
+                        }
                     </p>
                 </div>
 

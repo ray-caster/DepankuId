@@ -680,7 +680,7 @@ function DashboardContent() {
                                                         {/* View Applications Button */}
                                                         {opportunity.id && opportunity.status === 'published' && (
                                                             <button
-                                                                onClick={() => router.push('/applications')}
+                                                                onClick={() => router.push(`/applications?opportunity=${opportunity.id}`)}
                                                                 className="btn-secondary flex items-center justify-center gap-2 px-3"
                                                                 title="View Applications"
                                                             >
