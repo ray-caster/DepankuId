@@ -448,22 +448,6 @@ class API {
         }
     }
 
-    async updateApplicationStatus(opportunityId: string, applicationId: string, status: 'accepted' | 'rejected', notes?: string, idToken?: string): Promise<void> {
-        const token = idToken || await this.getIdToken();
-        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/applications/${applicationId}/status`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status, notes }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to update application status');
-        }
-    }
 
     async getOpportunityTemplates(): Promise<Record<string, OpportunityTemplate>> {
         const response = await fetch(`${this.baseURL}/api/opportunities/templates`);

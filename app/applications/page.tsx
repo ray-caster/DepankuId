@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
-import { API } from '@/lib/api';
+import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import { 
@@ -53,15 +53,7 @@ export default function ApplicationsPage() {
     const [updating, setUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const api = new API();
-
-    useEffect(() => {
-        if (user) {
-            loadApplications();
-        }
-    }, [user]);
-
-    const loadApplications = async () => {
+    const loadApplications = useCallback(async () => {
         try {
             setLoading(true);
             const idToken = await getIdToken();
@@ -70,8 +62,8 @@ export default function ApplicationsPage() {
             const opportunitiesResponse = await api.getOpportunities();
             const opportunitiesMap: Record<string, Opportunity> = {};
             
-            if (opportunitiesResponse.success && opportunitiesResponse.data) {
-                opportunitiesResponse.data.forEach((opp: any) => {
+            if (opportunitiesResponse && opportunitiesResponse.length > 0) {
+                opportunitiesResponse.forEach((opp: any) => {
                     opportunitiesMap[opp.id] = {
                         id: opp.id,
                         title: opp.title,
@@ -89,9 +81,17 @@ export default function ApplicationsPage() {
             
             for (const opportunityId of Object.keys(opportunitiesMap)) {
                 try {
-                    const applications = await api.getOpportunityApplications(opportunityId, idToken);
+                    const applications = await api.getOpportunityApplications(opportunityId, idToken!);
                     if (applications && applications.length > 0) {
-                        allApplications.push(...applications);
+                        const mappedApplications = applications.map(app => ({
+                            ...app,
+                            opportunity_id: app.opportunityId,
+                            responses: app.responses.map((response: any) => ({
+                                question: response.questionTitle,
+                                answer: Array.isArray(response.answer) ? response.answer.join(', ') : response.answer
+                            }))
+                        }));
+                        allApplications.push(...mappedApplications);
                     }
                 } catch (err) {
                     console.warn(`Failed to load applications for opportunity ${opportunityId}:`, err);
@@ -105,7 +105,13 @@ export default function ApplicationsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [getIdToken]);
+
+    useEffect(() => {
+        if (user) {
+            loadApplications();
+        }
+    }, [user, loadApplications]);
 
     const updateApplicationStatus = async (applicationId: string, status: 'accepted' | 'rejected', notes?: string) => {
         try {
@@ -116,7 +122,7 @@ export default function ApplicationsPage() {
             const application = applications.find(app => app.id === applicationId);
             if (!application) return;
 
-            await api.updateApplicationStatus(application.opportunity_id, applicationId, status, notes, idToken);
+            await api.updateApplicationStatus(applicationId, status, notes, idToken!);
             
             // Update local state
             setApplications(prev => prev.map(app => 

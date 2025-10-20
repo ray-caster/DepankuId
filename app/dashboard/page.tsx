@@ -28,7 +28,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import ApplicationManagement from '@/components/ApplicationManagement';
 
