@@ -716,7 +716,15 @@ class API {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch applications');
+            if (response.status === 401) {
+                throw new Error('Authentication failed. Please sign in again.');
+            } else if (response.status === 403) {
+                throw new Error('You do not have permission to view applications for this opportunity.');
+            } else if (response.status === 404) {
+                throw new Error('Opportunity not found.');
+            } else {
+                throw new Error(`Failed to fetch applications: ${response.status} ${response.statusText}`);
+            }
         }
 
         const data = await response.json();

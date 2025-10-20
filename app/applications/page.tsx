@@ -61,56 +61,69 @@ function ApplicationsContent() {
             setError(null);
             console.log('Loading applications for opportunity:', opportunityId);
             
-            const idToken = await getIdToken();
+            let idToken = await getIdToken();
             
             if (!idToken) {
                 setError('Authentication required');
+                setLoading(false);
                 return;
             }
+            
+            console.log('Got ID token, length:', idToken.length);
 
             // If specific opportunity ID is provided, only load that opportunity's applications
             if (opportunityId) {
                 try {
-                    // Get the specific opportunity details
-                    console.log('Fetching opportunities...');
+                    // Get applications for this specific opportunity directly
+                    console.log('Fetching applications for opportunity:', opportunityId);
+                    const applications = await api.getOpportunityApplications(opportunityId, idToken);
+                    console.log('Applications response:', applications);
+                    
+                    // Also get opportunity details for display
+                    console.log('Fetching opportunity details...');
                     const opportunitiesResponse = await api.getOpportunities();
-                    console.log('Opportunities response:', opportunitiesResponse);
                     const targetOpportunity = opportunitiesResponse.find((opp: any) => opp.id === opportunityId);
                     console.log('Target opportunity:', targetOpportunity);
                     
-                    if (targetOpportunity) {
+                    if (applications && applications.length > 0) {
+                        const mappedApplications = applications.map(app => ({
+                            ...app,
+                            opportunity_id: app.opportunityId,
+                            responses: app.responses.map((response: any) => ({
+                                question: response.questionTitle,
+                                answer: Array.isArray(response.answer) ? response.answer.join(', ') : response.answer
+                            }))
+                        }));
+                        setApplications(mappedApplications);
+                        
+                        // Set opportunity object with actual data
                         const opportunitiesMap: Record<string, Opportunity> = {
                             [opportunityId]: {
-                                id: targetOpportunity.id || '',
-                                title: targetOpportunity.title || '',
-                                organization: targetOpportunity.organization || '',
-                                type: targetOpportunity.type || 'research',
-                                location: targetOpportunity.location,
-                                deadline: targetOpportunity.deadline
+                                id: targetOpportunity?.id || opportunityId,
+                                title: targetOpportunity?.title || 'Opportunity Details',
+                                organization: targetOpportunity?.organization || '',
+                                type: targetOpportunity?.type || 'research',
+                                location: targetOpportunity?.location || '',
+                                deadline: targetOpportunity?.deadline || ''
                             }
                         };
                         setOpportunities(opportunitiesMap);
-
-                        // Get applications for this specific opportunity
-                        console.log('Fetching applications for opportunity:', opportunityId);
-                        const applications = await api.getOpportunityApplications(opportunityId, idToken);
-                        console.log('Applications response:', applications);
-                        if (applications && applications.length > 0) {
-                            const mappedApplications = applications.map(app => ({
-                                ...app,
-                                opportunity_id: app.opportunityId,
-                                responses: app.responses.map((response: any) => ({
-                                    question: response.questionTitle,
-                                    answer: Array.isArray(response.answer) ? response.answer.join(', ') : response.answer
-                                }))
-                            }));
-                            setApplications(mappedApplications);
-                        } else {
-                            console.log('No applications found for this opportunity');
-                            setApplications([]);
-                        }
                     } else {
-                        setError('Opportunity not found');
+                        console.log('No applications found for this opportunity');
+                        setApplications([]);
+                        
+                        // Set opportunity object with actual data even if no applications
+                        const opportunitiesMap: Record<string, Opportunity> = {
+                            [opportunityId]: {
+                                id: targetOpportunity?.id || opportunityId,
+                                title: targetOpportunity?.title || 'Opportunity Details',
+                                organization: targetOpportunity?.organization || '',
+                                type: targetOpportunity?.type || 'research',
+                                location: targetOpportunity?.location || '',
+                                deadline: targetOpportunity?.deadline || ''
+                            }
+                        };
+                        setOpportunities(opportunitiesMap);
                     }
                 } catch (err) {
                     console.error('Error loading applications for specific opportunity:', err);
