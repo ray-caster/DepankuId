@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity } from '@/lib/api';
@@ -680,7 +681,7 @@ function DashboardContent() {
                                                         {/* View Applications Button */}
                                                         {opportunity.id && opportunity.status === 'published' && (
                                                             <button
-                                                                onClick={() => setViewingApplicationsFor(opportunity.id!)}
+                                                                onClick={() => router.push('/applications')}
                                                                 className="btn-secondary flex items-center justify-center gap-2 px-3"
                                                                 title="View Applications"
                                                             >
