@@ -448,7 +448,6 @@ class API {
         }
     }
 
-
     async getOpportunityTemplates(): Promise<Record<string, OpportunityTemplate>> {
         const response = await fetch(`${this.baseURL}/api/opportunities/templates`);
 
@@ -709,29 +708,14 @@ class API {
     }
 
     async getOpportunityApplications(opportunityId: string, idToken: string): Promise<ApplicationSubmission[]> {
-        console.log('🌐 API: getOpportunityApplications called');
-        console.log('🌐 API: opportunityId:', opportunityId);
-        console.log('🌐 API: token length:', idToken.length);
-        console.log('🌐 API: URL:', `${this.baseURL}/api/opportunities/${opportunityId}/applications`);
-        
         const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/applications`, {
             headers: {
                 'Authorization': `Bearer ${idToken}`,
             },
         });
-        
-        console.log('🌐 API: Response status:', response.status);
 
         if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('Authentication failed. Please sign in again.');
-            } else if (response.status === 403) {
-                throw new Error('You do not have permission to view applications for this opportunity.');
-            } else if (response.status === 404) {
-                throw new Error('Opportunity not found.');
-            } else {
-                throw new Error(`Failed to fetch applications: ${response.status} ${response.statusText}`);
-            }
+            throw new Error('Failed to fetch applications');
         }
 
         const data = await response.json();

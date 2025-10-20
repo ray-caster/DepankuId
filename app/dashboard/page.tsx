@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import { api, Opportunity } from '@/lib/api';
@@ -28,6 +27,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import ApplicationManagement from '@/components/ApplicationManagement';
 
@@ -680,7 +680,7 @@ function DashboardContent() {
                                                         {/* View Applications Button */}
                                                         {opportunity.id && opportunity.status === 'published' && (
                                                             <button
-                                                                onClick={() => router.push(`/applications?opportunity=${opportunity.id}`)}
+                                                                onClick={() => setViewingApplicationsFor(opportunity.id!)}
                                                                 className="btn-secondary flex items-center justify-center gap-2 px-3"
                                                                 title="View Applications"
                                                             >

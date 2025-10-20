@@ -54,19 +54,44 @@ for origin in env_origins:
     if origin.strip() and origin.strip() not in ALLOWED_ORIGINS:
         ALLOWED_ORIGINS.append(origin.strip())
 
-# CORS configuration - let Flask-CORS handle everything
 CORS(app, 
-     resources={r"/*": {"origins": ALLOWED_ORIGINS}},
+     resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
      supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     expose_headers=["Content-Length", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
      always_send=True
 )
 
 # Log CORS configuration
 logger.info(f"CORS configured for origins: {ALLOWED_ORIGINS}")
 
-# Flask-CORS will handle all CORS automatically
+# Add global CORS handler for ASGI compatibility
+@app.before_request
+def handle_preflight():
+    try:
+        logger.info(f"Before request: {request.method} {request.path}")
+        logger.info(f"Origin: {request.headers.get('Origin')}")
+        
+        
+        if request.method == "OPTIONS":
+            origin = request.headers.get('Origin')
+            if origin in ALLOWED_ORIGINS:
+                response = jsonify({"message": "OK"})
+                response.headers.add("Access-Control-Allow-Origin", origin)
+                response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
+                response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
+                response.headers.add('Access-Control-Allow-Credentials', 'true')
+                return response
+            else:
+                # Reject unauthorized origins
+                return jsonify({"error": "Origin not allowed"}), 403
+    except Exception as e:
+        logger.error(f"Error in handle_preflight: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        # Don't return anything, let the request continue
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")
