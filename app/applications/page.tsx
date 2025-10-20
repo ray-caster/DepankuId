@@ -59,6 +59,8 @@ function ApplicationsContent() {
         try {
             setLoading(true);
             setError(null);
+            console.log('Loading applications for opportunity:', opportunityId);
+            
             const idToken = await getIdToken();
             
             if (!idToken) {
@@ -70,8 +72,11 @@ function ApplicationsContent() {
             if (opportunityId) {
                 try {
                     // Get the specific opportunity details
+                    console.log('Fetching opportunities...');
                     const opportunitiesResponse = await api.getOpportunities();
+                    console.log('Opportunities response:', opportunitiesResponse);
                     const targetOpportunity = opportunitiesResponse.find((opp: any) => opp.id === opportunityId);
+                    console.log('Target opportunity:', targetOpportunity);
                     
                     if (targetOpportunity) {
                         const opportunitiesMap: Record<string, Opportunity> = {
@@ -87,7 +92,9 @@ function ApplicationsContent() {
                         setOpportunities(opportunitiesMap);
 
                         // Get applications for this specific opportunity
+                        console.log('Fetching applications for opportunity:', opportunityId);
                         const applications = await api.getOpportunityApplications(opportunityId, idToken);
+                        console.log('Applications response:', applications);
                         if (applications && applications.length > 0) {
                             const mappedApplications = applications.map(app => ({
                                 ...app,
@@ -99,6 +106,7 @@ function ApplicationsContent() {
                             }));
                             setApplications(mappedApplications);
                         } else {
+                            console.log('No applications found for this opportunity');
                             setApplications([]);
                         }
                     } else {
@@ -106,7 +114,7 @@ function ApplicationsContent() {
                     }
                 } catch (err) {
                     console.error('Error loading applications for specific opportunity:', err);
-                    setError('Failed to load applications for this opportunity');
+                    setError(`Failed to load applications for this opportunity: ${err instanceof Error ? err.message : 'Unknown error'}`);
                 }
             } else {
                 // Load all applications (fallback)
@@ -164,6 +172,19 @@ function ApplicationsContent() {
             loadApplications();
         }
     }, [user, loadApplications]);
+
+    // Add timeout to prevent infinite loading
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (loading) {
+                console.error('Loading timeout - API calls may be failing');
+                setError('Loading timeout - please check your connection and try again');
+                setLoading(false);
+            }
+        }, 10000); // 10 second timeout
+
+        return () => clearTimeout(timeout);
+    }, [loading]);
 
     const updateApplicationStatus = async (applicationId: string, status: 'accepted' | 'rejected', notes?: string) => {
         try {
