@@ -54,8 +54,9 @@ for origin in env_origins:
     if origin.strip() and origin.strip() not in ALLOWED_ORIGINS:
         ALLOWED_ORIGINS.append(origin.strip())
 
+# More permissive CORS configuration for debugging
 CORS(app, 
-     resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
+     resources={r"/*": {"origins": ALLOWED_ORIGINS}},
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -76,22 +77,31 @@ def handle_preflight():
         
         if request.method == "OPTIONS":
             origin = request.headers.get('Origin')
-            if origin in ALLOWED_ORIGINS:
-                response = jsonify({"message": "OK"})
-                response.headers.add("Access-Control-Allow-Origin", origin)
-                response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
-                response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
-                response.headers.add('Access-Control-Allow-Credentials', 'true')
-                return response
-            else:
-                # Reject unauthorized origins
-                return jsonify({"error": "Origin not allowed"}), 403
+            logger.info(f"Handling preflight request for origin: {origin}")
+            
+            # Allow all origins for debugging
+            response = jsonify({"message": "OK"})
+            response.headers.add("Access-Control-Allow-Origin", origin or "*")
+            response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
+            response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
+            response.headers.add('Access-Control-Max-Age', '86400')
+            return response
     except Exception as e:
         logger.error(f"Error in handle_preflight: {str(e)}")
         logger.error(f"Exception type: {type(e).__name__}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
         # Don't return anything, let the request continue
+
+@app.after_request
+def after_request(response):
+    """Add CORS headers to all responses"""
+    origin = request.headers.get('Origin')
+    if origin:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")
