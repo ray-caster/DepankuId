@@ -709,11 +709,18 @@ class API {
     }
 
     async getOpportunityApplications(opportunityId: string, idToken: string): Promise<ApplicationSubmission[]> {
+        console.log('🌐 API: getOpportunityApplications called');
+        console.log('🌐 API: opportunityId:', opportunityId);
+        console.log('🌐 API: token length:', idToken.length);
+        console.log('🌐 API: URL:', `${this.baseURL}/api/opportunities/${opportunityId}/applications`);
+        
         const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/applications`, {
             headers: {
                 'Authorization': `Bearer ${idToken}`,
             },
         });
+        
+        console.log('🌐 API: Response status:', response.status);
 
         if (!response.ok) {
             if (response.status === 401) {

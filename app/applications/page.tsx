@@ -48,6 +48,11 @@ function ApplicationsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const opportunityId = searchParams.get('opportunity');
+    
+    console.log('🏗️ ApplicationsContent component mounted');
+    console.log('🏗️ opportunityId from URL:', opportunityId);
+    console.log('🏗️ user:', user ? 'logged in' : 'not logged in');
+    
     const [applications, setApplications] = useState<Application[]>([]);
     const [opportunities, setOpportunities] = useState<Record<string, Opportunity>>({});
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -56,14 +61,18 @@ function ApplicationsContent() {
     const [error, setError] = useState<string | null>(null);
 
     const loadApplications = useCallback(async () => {
+        console.log('🚀 loadApplications called');
         try {
             setLoading(true);
             setError(null);
             console.log('Loading applications for opportunity:', opportunityId);
             
+            console.log('🔑 Getting ID token...');
             let idToken = await getIdToken();
+            console.log('🔑 ID token result:', idToken ? 'Got token' : 'No token');
             
             if (!idToken) {
+                console.log('❌ No ID token, setting error');
                 setError('Authentication required');
                 setLoading(false);
                 return;
@@ -73,11 +82,13 @@ function ApplicationsContent() {
 
             // If specific opportunity ID is provided, only load that opportunity's applications
             if (opportunityId) {
+                console.log('📋 Processing specific opportunity:', opportunityId);
                 try {
                     // Get applications for this specific opportunity directly
-                    console.log('Fetching applications for opportunity:', opportunityId);
+                    console.log('🌐 Fetching applications for opportunity:', opportunityId);
+                    console.log('🌐 About to call api.getOpportunityApplications...');
                     const applications = await api.getOpportunityApplications(opportunityId, idToken);
-                    console.log('Applications response:', applications);
+                    console.log('✅ Applications response received:', applications);
                     
                     // Also get opportunity details for display
                     console.log('Fetching opportunity details...');
@@ -181,8 +192,12 @@ function ApplicationsContent() {
     }, [getIdToken, opportunityId]);
 
     useEffect(() => {
+        console.log('🔄 useEffect triggered, user:', user ? 'logged in' : 'not logged in');
         if (user) {
+            console.log('👤 User found, calling loadApplications...');
             loadApplications();
+        } else {
+            console.log('❌ No user, not calling loadApplications');
         }
     }, [user, loadApplications]);
 
