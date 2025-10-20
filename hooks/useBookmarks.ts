@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
-import { api, Opportunity } from '@/lib/api';
+import { api } from '@/lib/api';
+import { Opportunity } from '@/lib/constants';
 
 interface UseBookmarksReturn {
     bookmarks: Opportunity[];

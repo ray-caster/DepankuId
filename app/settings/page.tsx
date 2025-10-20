@@ -3,8 +3,11 @@
 import { useState, useEffect, Suspense } from 'react';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
+<<<<<<< HEAD
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 import ChangePassword from '@/components/ChangePassword';
+=======
+>>>>>>> parent of ac98dea (a)
 import { motion } from 'framer-motion';
 import {
     UserCircleIcon,
@@ -247,20 +250,22 @@ function SettingsContentInner() {
                                                 Profile Picture
                                             </label>
                                             <div className="flex items-center gap-4">
-                                                <ProfilePictureUpload
-                                                    currentPhotoURL={user?.photoURL || undefined}
-                                                    onPhotoUpdate={(newPhotoURL) => {
-                                                        // Update local state
-                                                        setProfileData(prev => ({
-                                                            ...prev,
-                                                            photoURL: newPhotoURL
-                                                        }));
-                                                    }}
-                                                    size="lg"
-                                                />
+                                                {user.photoURL ? (
+                                                    <Image
+                                                        src={user.photoURL}
+                                                        alt="Profile"
+                                                        width={80}
+                                                        height={80}
+                                                        className="rounded-full ring-4 ring-primary-300"
+                                                    />
+                                                ) : (
+                                                    <UserCircleIcon className="w-20 h-20 text-neutral-400" />
+                                                )}
                                                 <div>
-                                                    <p className="text-xs text-neutral-500">JPG, PNG or GIF. Max 2MB</p>
-                                                    <p className="text-xs text-neutral-400 mt-1">Click the camera icon to upload</p>
+                                                    <button className="btn-secondary text-sm">
+                                                        Change Photo
+                                                    </button>
+                                                    <p className="text-xs text-neutral-500 mt-1">JPG, PNG or GIF. Max 2MB</p>
                                                 </div>
                                             </div>
                                         </div>

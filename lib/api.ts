@@ -58,61 +58,6 @@ export interface Opportunity {
     created_by_email?: string;
     status?: 'published' | 'draft' | 'rejected';
     moderation_notes?: string;
-    application_form?: ApplicationForm;
-    applications?: ApplicationSubmission[];
-}
-
-export interface ApplicationForm {
-    id: string;
-    title: string;
-    description?: string;
-    pages: FormPage[];
-    settings: {
-        allowMultipleSubmissions: boolean;
-        collectEmail: boolean;
-        showProgressBar: boolean;
-    };
-}
-
-export interface FormPage {
-    id: string;
-    title: string;
-    description?: string;
-    questions: FormQuestion[];
-}
-
-export interface FormQuestion {
-    id: string;
-    type: 'text' | 'textarea' | 'multiple_choice' | 'checkbox' | 'dropdown' | 'file' | 'video' | 'image';
-    title: string;
-    description?: string;
-    required: boolean;
-    options?: string[];
-    placeholder?: string;
-    maxLength?: number;
-    fileTypes?: string[];
-    maxFileSize?: number;
-}
-
-export interface ApplicationSubmission {
-    id: string;
-    opportunityId: string;
-    applicantId: string;
-    applicantEmail: string;
-    applicantName: string;
-    responses: ApplicationResponse[];
-    status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
-    submittedAt: string;
-    reviewedAt?: string;
-    notes?: string;
-}
-
-export interface ApplicationResponse {
-    questionId: string;
-    questionTitle: string;
-    questionType: string;
-    answer: string | string[] | File[];
-    required: boolean;
 }
 
 export interface OpportunityTemplate {
@@ -547,6 +492,41 @@ class API {
         }
     }
 
+    async publishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/publish`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to publish opportunity');
+        }
+
+        return data;
+    }
+
+    async unpublishOpportunity(opportunityId: string, idToken: string): Promise<{ success: boolean; message: string }> {
+        const response = await fetch(`${this.baseURL}/api/opportunities/${opportunityId}/unpublish`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to unpublish opportunity');
+        }
+
+        return data;
+    }
 
     // Profile API methods
     async getProfile(idToken: string): Promise<any> {
@@ -684,6 +664,7 @@ class API {
         const data = await response.json();
         return data.data || [];
     }
+<<<<<<< HEAD
 
     // Application Management Methods
     async getApplicationStatus(opportunityId: string, idToken: string): Promise<{
@@ -825,6 +806,8 @@ class API {
         const data = await response.json();
         return data.data || [];
     }
+=======
+>>>>>>> parent of ac98dea (a)
 }
 
 export const api = new API();
