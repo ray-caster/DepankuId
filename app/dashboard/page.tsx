@@ -847,15 +847,29 @@ function DashboardContent() {
                                                                         } else if (application.submitted_at?._seconds) {
                                                                             timestamp = application.submitted_at._seconds * 1000;
                                                                         } else if (typeof application.submitted_at === 'string') {
-                                                                            timestamp = new Date(application.submitted_at).getTime();
+                                                                            // Handle ISO string format
+                                                                            const date = new Date(application.submitted_at);
+                                                                            if (isNaN(date.getTime())) {
+                                                                                return 'Recently';
+                                                                            }
+                                                                            return date.toLocaleDateString();
                                                                         } else if (typeof application.submitted_at === 'number') {
                                                                             timestamp = application.submitted_at;
                                                                         } else {
                                                                             return 'Recently';
                                                                         }
-                                                                        return new Date(timestamp).toLocaleDateString();
+
+                                                                        if (timestamp) {
+                                                                            const date = new Date(timestamp);
+                                                                            if (isNaN(date.getTime())) {
+                                                                                return 'Recently';
+                                                                            }
+                                                                            return date.toLocaleDateString();
+                                                                        }
+
+                                                                        return 'Recently';
                                                                     } catch (error) {
-                                                                        console.warn('Error parsing application date:', error);
+                                                                        console.warn('Error parsing application date:', error, application.submitted_at);
                                                                         return 'Recently';
                                                                     }
                                                                 })()}
