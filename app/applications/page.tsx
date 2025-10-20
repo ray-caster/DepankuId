@@ -74,12 +74,12 @@ export default function ApplicationsPage() {
                     const targetOpportunity = opportunitiesResponse.find((opp: any) => opp.id === opportunityId);
                     
                     if (targetOpportunity) {
-                        const opportunitiesMap = {
+                        const opportunitiesMap: Record<string, Opportunity> = {
                             [opportunityId]: {
-                                id: targetOpportunity.id,
-                                title: targetOpportunity.title,
-                                organization: targetOpportunity.organization,
-                                type: targetOpportunity.type,
+                                id: targetOpportunity.id || '',
+                                title: targetOpportunity.title || '',
+                                organization: targetOpportunity.organization || '',
+                                type: targetOpportunity.type || 'research',
                                 location: targetOpportunity.location,
                                 deadline: targetOpportunity.deadline
                             }
@@ -116,10 +116,10 @@ export default function ApplicationsPage() {
                 if (opportunitiesResponse && opportunitiesResponse.length > 0) {
                     opportunitiesResponse.forEach((opp: any) => {
                         opportunitiesMap[opp.id] = {
-                            id: opp.id,
-                            title: opp.title,
-                            organization: opp.organization,
-                            type: opp.type,
+                            id: opp.id || '',
+                            title: opp.title || '',
+                            organization: opp.organization || '',
+                            type: opp.type || 'research',
                             location: opp.location,
                             deadline: opp.deadline
                         };
