@@ -53,14 +53,8 @@ def publish_opportunity_options(opportunity_id):
     logger.info(f"Origin: {request.headers.get('Origin')}")
     logger.info(f"Headers: {dict(request.headers)}")
     
-    origin = request.headers.get('Origin')
-    response = jsonify({"message": "OK"})
-    if origin:
-        response.headers.add("Access-Control-Allow-Origin", origin)
-    response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin")
-    response.headers.add('Access-Control-Allow-Methods', "POST,OPTIONS")
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
+    # Let Flask-CORS handle the CORS headers
+    return jsonify({"message": "OK"}), 200
 
 # PUBLISH ROUTE - MOVED TO TOP FOR DEBUGGING
 @publish_bp.route('/<opportunity_id>/publish', methods=['POST'])

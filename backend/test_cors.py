@@ -39,12 +39,12 @@ def test_cors_configuration():
                     print(f"    {header}: {response.headers[header]}")
             
             if response.status_code == 200:
-                print("  ✅ OPTIONS request successful")
+                print("  [OK] OPTIONS request successful")
             else:
-                print(f"  ❌ OPTIONS request failed: {response.status_code}")
+                print(f"  [FAIL] OPTIONS request failed: {response.status_code}")
                 
         except requests.exceptions.RequestException as e:
-            print(f"  ❌ OPTIONS request error: {e}")
+            print(f"  [ERROR] OPTIONS request error: {e}")
         
         # Test GET request
         try:
@@ -52,12 +52,12 @@ def test_cors_configuration():
             print(f"  GET: {response.status_code}")
             
             if response.status_code in [200, 401, 403]:  # 401/403 are expected for auth endpoints
-                print("  ✅ GET request successful")
+                print("  [OK] GET request successful")
             else:
-                print(f"  ❌ GET request failed: {response.status_code}")
+                print(f"  [FAIL] GET request failed: {response.status_code}")
                 
         except requests.exceptions.RequestException as e:
-            print(f"  ❌ GET request error: {e}")
+            print(f"  [ERROR] GET request error: {e}")
 
 if __name__ == "__main__":
     test_cors_configuration()

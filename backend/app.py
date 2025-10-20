@@ -2,7 +2,6 @@
 Depanku.id Backend API - Modular Flask Application with ASGI Support
 """
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 import os
 import dotenv
 
@@ -54,68 +53,8 @@ for origin in env_origins:
     if origin.strip() and origin.strip() not in ALLOWED_ORIGINS:
         ALLOWED_ORIGINS.append(origin.strip())
 
-# Configure CORS with comprehensive settings
-CORS(app, 
-     resources={
-         r"/api/*": {
-             "origins": ALLOWED_ORIGINS,
-             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-             "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
-             "expose_headers": ["Content-Length", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
-             "supports_credentials": True,
-             "max_age": 3600
-         }
-     },
-     supports_credentials=True,
-     always_send=True
-)
-
-# Log CORS configuration
-logger.info(f"CORS configured for origins: {ALLOWED_ORIGINS}")
-
-# Add global CORS handler for ASGI compatibility
-@app.before_request
-def handle_preflight():
-    try:
-        logger.info(f"Before request: {request.method} {request.path}")
-        logger.info(f"Origin: {request.headers.get('Origin')}")
-        
-        if request.method == "OPTIONS":
-            origin = request.headers.get('Origin')
-            if origin in ALLOWED_ORIGINS:
-                response = jsonify({"message": "OK"})
-                response.headers.add("Access-Control-Allow-Origin", origin)
-                response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
-                response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
-                response.headers.add('Access-Control-Allow-Credentials', 'true')
-                response.headers.add('Access-Control-Max-Age', '3600')
-                return response
-            else:
-                # Reject unauthorized origins
-                logger.warning(f"Rejected origin: {origin}")
-                return jsonify({"error": "Origin not allowed"}), 403
-    except Exception as e:
-        logger.error(f"Error in handle_preflight: {str(e)}")
-        logger.error(f"Exception type: {type(e).__name__}")
-        import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        # Don't return anything, let the request continue
-
-# Add after_request handler to ensure CORS headers are always sent
-@app.after_request
-def after_request(response):
-    """Add CORS headers to all responses"""
-    try:
-        origin = request.headers.get('Origin')
-        if origin in ALLOWED_ORIGINS:
-            response.headers.add("Access-Control-Allow-Origin", origin)
-            response.headers.add('Access-Control-Allow-Credentials', 'true')
-            response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers")
-            response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
-    except Exception as e:
-        logger.error(f"Error in after_request: {str(e)}")
-    
-    return response
+# CORS is handled by production infrastructure (Cloudflare/CDN/Load Balancer)
+# No manual CORS implementation needed to avoid duplicate headers
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")
@@ -157,18 +96,6 @@ def test_cors():
     logger.info(f"CORS test endpoint called: {request.method}")
     logger.info(f"Origin: {request.headers.get('Origin')}")
     logger.info(f"Headers: {dict(request.headers)}")
-    
-    if request.method == 'OPTIONS':
-        origin = request.headers.get('Origin')
-        if origin in ALLOWED_ORIGINS:
-            response = jsonify({"message": "CORS test OK"})
-            response.headers.add("Access-Control-Allow-Origin", origin)
-            response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With,Accept,Origin")
-            response.headers.add('Access-Control-Allow-Methods', "GET,POST,OPTIONS")
-            response.headers.add('Access-Control-Allow-Credentials', 'true')
-            return response
-        else:
-            return jsonify({"error": "Origin not allowed"}), 403
     
     return jsonify({
         "message": "CORS test successful",
