@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
@@ -43,7 +43,7 @@ interface Opportunity {
     deadline?: string;
 }
 
-export default function ApplicationsPage() {
+function ApplicationsContent() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -490,5 +490,23 @@ export default function ApplicationsPage() {
                 </motion.div>
             </div>
         </div>
+    );
+}
+
+export default function ApplicationsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-neutral-50">
+                <Header />
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-neutral-600">Loading applications...</p>
+                    </div>
+                </div>
+            </div>
+        }>
+            <ApplicationsContent />
+        </Suspense>
     );
 }
