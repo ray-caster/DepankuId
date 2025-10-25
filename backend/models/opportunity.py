@@ -42,6 +42,8 @@ class Opportunity:
     status: str = "published"  # 'draft', 'published', 'rejected'
     moderation_notes: Optional[str] = None
     application_form: Optional[dict] = None  # Custom application form data
+    images: Optional[List[str]] = None  # List of image URLs or base64 strings
+    additional_info: Optional[dict] = None  # Custom fields
     
     def to_dict(self):
         data = asdict(self)

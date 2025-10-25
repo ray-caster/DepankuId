@@ -168,7 +168,19 @@ function OpportunitiesContent() {
                 }
 
                 // Load existing images and custom fields
-                setUploadedImages(opportunity.images || []);
+                // Convert blob URLs to base64 if needed
+                const images = opportunity.images || [];
+                const processedImages = images.map(img => {
+                    // If it's a blob URL, we need to convert it to base64
+                    if (img.startsWith('blob:')) {
+                        // For now, we'll skip blob URLs as they're not accessible
+                        // In a real app, you'd need to store base64 or upload to a storage service
+                        return null;
+                    }
+                    return img;
+                }).filter(Boolean); // Remove null values
+                
+                setUploadedImages(processedImages);
                 setCustomFields(opportunity.additional_info || {});
             }
         } catch (error) {
