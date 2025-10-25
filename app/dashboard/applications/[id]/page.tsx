@@ -357,6 +357,61 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
                                             </div>
                                         )}
 
+                                        {currentApplication.status === 'accepted' && (
+                                            <div className="flex gap-4 mt-8 pt-6 border-t border-neutral-200">
+                                                <div className="flex-1 bg-green-50 border border-green-200 rounded-lg p-4">
+                                                    <div className="flex items-center gap-2 text-green-800">
+                                                        <CheckIcon className="w-5 h-5" />
+                                                        <span className="font-medium">Application Accepted</span>
+                                                    </div>
+                                                    <p className="text-sm text-green-700 mt-1">
+                                                        This application has been accepted. You can revoke the acceptance if needed.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const notes = prompt('Add notes for revoking acceptance (optional):');
+                                                        handleStatusUpdate(currentApplication.id!, 'rejected', notes || 'Acceptance revoked');
+                                                    }}
+                                                    disabled={updating === currentApplication.id}
+                                                    className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                                >
+                                                    {updating === currentApplication.id ? (
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                    ) : (
+                                                        <XMarkIcon className="w-4 h-4" />
+                                                    )}
+                                                    Revoke Acceptance
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {currentApplication.status === 'rejected' && (
+                                            <div className="flex gap-4 mt-8 pt-6 border-t border-neutral-200">
+                                                <div className="flex-1 bg-red-50 border border-red-200 rounded-lg p-4">
+                                                    <div className="flex items-center gap-2 text-red-800">
+                                                        <XMarkIcon className="w-5 h-5" />
+                                                        <span className="font-medium">Application Rejected</span>
+                                                    </div>
+                                                    <p className="text-sm text-red-700 mt-1">
+                                                        This application has been rejected. You can change your decision if needed.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleStatusUpdate(currentApplication.id!, 'accepted')}
+                                                    disabled={updating === currentApplication.id}
+                                                    className="btn-primary flex items-center gap-2"
+                                                >
+                                                    {updating === currentApplication.id ? (
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                    ) : (
+                                                        <CheckIcon className="w-4 h-4" />
+                                                    )}
+                                                    Accept Instead
+                                                </button>
+                                            </div>
+                                        )}
+
                                         {/* Navigation */}
                                         <div className="flex justify-between mt-6 pt-6 border-t border-neutral-200">
                                             <button

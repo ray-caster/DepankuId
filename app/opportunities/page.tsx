@@ -145,6 +145,23 @@ function OpportunitiesContent() {
                 setFormData(opportunity);
                 setIsDraft(opportunity.status === 'draft');
                 setDraftId(opportunityId);
+
+                // Load existing application form if it exists
+                if (opportunity.application_form) {
+                    setApplicationForm(opportunity.application_form);
+                } else {
+                    // Reset to default if no form exists
+                    setApplicationForm({
+                        id: '',
+                        title: 'Application Form',
+                        description: '',
+                        pages: [{
+                            id: 'page_1',
+                            title: 'Page 1',
+                            questions: []
+                        }]
+                    });
+                }
             }
         } catch (error) {
             console.error('Failed to load opportunity for edit:', error);
