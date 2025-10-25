@@ -43,6 +43,8 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
             if (!idToken) return;
 
             const apps = await api.getOpportunityApplications(opportunityId, idToken);
+            console.log('Fetched applications:', apps);
+            console.log('First application:', apps[0]);
             setApplications(apps);
         } catch (err) {
             console.error('Failed to load applications:', err);
@@ -199,8 +201,8 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
                                             key={app.id}
                                             onClick={() => setCurrentIndex(index)}
                                             className={`w-full text-left p-3 rounded-lg transition-colors ${index === currentIndex
-                                                    ? 'bg-primary-100 border-2 border-primary-300'
-                                                    : 'hover:bg-neutral-100 border-2 border-transparent'
+                                                ? 'bg-primary-100 border-2 border-primary-300'
+                                                : 'hover:bg-neutral-100 border-2 border-transparent'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -215,8 +217,8 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
                                                         {app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : 'Unknown date'}
                                                     </div>
                                                     <div className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${app.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                                            app.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                                'bg-yellow-100 text-yellow-700'
+                                                        app.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                            'bg-yellow-100 text-yellow-700'
                                                         }`}>
                                                         {app.status}
                                                     </div>
@@ -256,8 +258,8 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
                                                             {currentApplication.submitted_at ? new Date(currentApplication.submitted_at).toLocaleDateString() : 'Unknown date'}
                                                         </div>
                                                         <div className={`px-2 py-1 rounded-full text-xs font-medium ${currentApplication.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                                                currentApplication.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                                    'bg-yellow-100 text-yellow-700'
+                                                            currentApplication.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                                'bg-yellow-100 text-yellow-700'
                                                             }`}>
                                                             {currentApplication.status}
                                                         </div>
@@ -322,9 +324,11 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
                                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                                 <h4 className="text-sm font-medium text-yellow-800 mb-2">Debug Info (temporary)</h4>
                                                 <div className="text-xs text-yellow-700">
-                                                    <div>Answers type: {typeof currentApplication.answers}</div>
-                                                    <div>Is array: {Array.isArray(currentApplication.answers) ? 'Yes' : 'No'}</div>
-                                                    <div>Answers content: {JSON.stringify(currentApplication.answers, null, 2)}</div>
+                                                    <div>Full application object:</div>
+                                                    <pre className="mt-2 p-2 bg-yellow-100 rounded text-xs overflow-auto max-h-40">
+                                                        {JSON.stringify(currentApplication, null, 2)}
+                                                    </pre>
+                                                    <div className="mt-2">Available fields: {Object.keys(currentApplication).join(', ')}</div>
                                                 </div>
                                             </div>
 
