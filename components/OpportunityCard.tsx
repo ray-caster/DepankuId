@@ -140,10 +140,10 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                                     onClick={openImageModal}
                                 >
                                     {(() => {
-                                        const imageToShow = opportunity.images && opportunity.images.length > 0 
-                                            ? opportunity.images[currentImageIndex] 
+                                        const imageToShow = opportunity.images && opportunity.images.length > 0
+                                            ? opportunity.images[currentImageIndex]
                                             : opportunity.thumbnail;
-                                        
+
                                         if (!imageToShow || imageToShow.startsWith('blob:')) {
                                             return (
                                                 <div className="w-full h-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
@@ -206,7 +206,7 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     </div>
                 ) : (
                     /* Placeholder when no images available */
-                    <div 
+                    <div
                         className="relative h-48 bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden rounded-t-comfort flex items-center justify-center cursor-pointer hover:from-primary-100 hover:to-primary-150 transition-all duration-300"
                         onClick={openDetailModal}
                     >
