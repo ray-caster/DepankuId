@@ -183,7 +183,7 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     </div>
                 )}
 
-                <div className="p-6 flex flex-col h-full gap-5">
+                <div className="p-6 flex flex-col gap-5">
                     {/* Header with better spacing */}
                     <div className="flex items-start justify-between gap-4">
                         <h3 className="text-xl font-bold text-foreground group-hover:text-primary-800 transition-colors leading-snug flex-1">
@@ -264,7 +264,7 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     )}
 
                     {/* Action buttons */}
-                    <div className="mt-auto pt-5 border-t border-neutral-200">
+                    <div className="pt-5 border-t border-neutral-200">
                         <div className="flex items-center justify-between gap-4">
                             <button
                                 onClick={openDetailModal}

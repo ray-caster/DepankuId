@@ -50,6 +50,24 @@ class AlgoliaService:
         logger.warning("Async save failed, trying synchronous fallback")
         return self._save_objects_sync(objects)
     
+    def _clean_data_for_algolia(self, obj: Dict[str, Any]) -> Dict[str, Any]:
+        """Clean data for Algolia by removing large fields that cause payload issues"""
+        cleaned = obj.copy()
+        
+        # Remove large fields that can cause Algolia payload issues
+        fields_to_remove = ['images', 'application_form', 'additional_info']
+        for field in fields_to_remove:
+            if field in cleaned:
+                del cleaned[field]
+        
+        # Truncate very long text fields
+        text_fields = ['description', 'benefits', 'eligibility', 'application_process']
+        for field in text_fields:
+            if field in cleaned and cleaned[field] and len(str(cleaned[field])) > 1000:
+                cleaned[field] = str(cleaned[field])[:1000] + "..."
+        
+        return cleaned
+
     def _save_objects_sync(self, objects: List[Dict[str, Any]]) -> bool:
         """Synchronous fallback for saving objects to Algolia"""
         try:
@@ -64,12 +82,13 @@ class AlgoliaService:
                 'Content-Type': 'application/json'
             }
             
-            # Prepare batch operations
+            # Prepare batch operations with cleaned data
             operations = []
             for obj in objects:
+                cleaned_obj = self._clean_data_for_algolia(obj)
                 operations.append({
                     "action": "addObject",
-                    "body": obj
+                    "body": cleaned_obj
                 })
             
             payload = {"requests": operations}
@@ -171,7 +190,9 @@ class AlgoliaService:
                     if hasattr(algolia_obj['deadline'], 'isoformat'):
                         algolia_obj['deadline'] = algolia_obj['deadline'].isoformat()
                 
-                objects.append(algolia_obj)
+                # Clean the object for Algolia (remove large fields)
+                cleaned_obj = self._clean_data_for_algolia(algolia_obj)
+                objects.append(cleaned_obj)
             
             if not objects:
                 logger.warning("No objects to sync to Algolia")
