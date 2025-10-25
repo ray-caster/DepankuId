@@ -279,7 +279,7 @@ function OpportunitiesContent() {
         try {
             const idToken = await getIdToken(auth.currentUser!);
 
-            // First, update the draft with the current application form
+            // Prepare update data
             const updateData: Opportunity = {
                 title: formData.title || '',
                 description: formData.description || '',
@@ -291,13 +291,21 @@ function OpportunitiesContent() {
                 images: uploadedImages,
                 additional_info: customFields
             };
-            await api.updateOpportunity(draftId, updateData, idToken);
 
-            // Then publish the opportunity
-            const result = await api.publishOpportunity(draftId, idToken);
+            // Check if this is an update to a published opportunity
+            const isUpdate = isEditMode && formData.status === 'published';
+            
+            if (isUpdate) {
+                // For published opportunities, just update and keep status as published
+                updateData.status = 'published';
+                await api.updateOpportunity(draftId, updateData, idToken);
+            } else {
+                // For new opportunities or drafts, update then publish
+                await api.updateOpportunity(draftId, updateData, idToken);
+                await api.publishOpportunity(draftId, idToken);
+            }
 
             // Show success modal with appropriate message
-            const isUpdate = isEditMode && formData.status === 'published';
             setSuccessData({
                 title: isUpdate ? 'Opportunity Updated!' : 'Opportunity Published!',
                 message: isUpdate
