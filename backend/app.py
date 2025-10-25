@@ -53,8 +53,42 @@ for origin in env_origins:
     if origin.strip() and origin.strip() not in ALLOWED_ORIGINS:
         ALLOWED_ORIGINS.append(origin.strip())
 
-# CORS is handled by production infrastructure (Cloudflare/CDN/Load Balancer)
-# No manual CORS implementation needed to avoid duplicate headers
+# CORS handling - production infrastructure is not adding CORS headers
+@app.after_request
+def after_request(response):
+    """Add CORS headers to all responses"""
+    origin = request.headers.get('Origin')
+    
+    # Check if origin is in allowed list
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+    else:
+        # For development, allow localhost
+        if origin and ('localhost' in origin or '127.0.0.1' in origin):
+            response.headers['Access-Control-Allow-Origin'] = origin
+    
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Max-Age'] = '3600'
+    
+    return response
+
+@app.before_request
+def handle_preflight():
+    """Handle preflight OPTIONS requests"""
+    if request.method == 'OPTIONS':
+        origin = request.headers.get('Origin')
+        if origin in ALLOWED_ORIGINS:
+            response = jsonify({'message': 'CORS preflight successful'})
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '3600'
+            return response
+        else:
+            return jsonify({'error': 'CORS policy violation'}), 403
 
 # Setup logging and error handling
 logger.info("Initializing Depanku.id Backend API v2.1")
