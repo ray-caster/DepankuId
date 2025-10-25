@@ -178,8 +178,8 @@ function OpportunitiesContent() {
                         return null;
                     }
                     return img;
-                }).filter(Boolean); // Remove null values
-                
+                }).filter((img): img is string => img !== null); // Remove null values and type guard
+
                 setUploadedImages(processedImages);
                 setCustomFields(opportunity.additional_info || {});
             }
