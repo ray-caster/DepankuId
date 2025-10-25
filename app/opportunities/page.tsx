@@ -12,6 +12,7 @@ import { ErrorManager, AppError } from '@/lib/errors';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import ApplicationFormBuilder from '@/components/ApplicationFormBuilder';
+import Image from 'next/image';
 import {
     SparklesIcon,
     DocumentDuplicateIcon,
@@ -293,47 +294,50 @@ function OpportunitiesContent() {
             });
             setShowSuccessModal(true);
 
-            setIsDraft(false);
-            setDraftId(null);
+            // Only reset form if creating a new opportunity, not when updating
+            if (!isUpdate) {
+                setIsDraft(false);
+                setDraftId(null);
 
-            // Reset form after successful publishing
-            setFormData({
-                title: '',
-                description: '',
-                type: 'research',
-                organization: '',
-                location: '',
-                deadline: '',
-                url: '',
-                tags: [],
-                social_media: {},
-                benefits: '',
-                eligibility: '',
-                cost: '',
-                duration: '',
-                application_process: '',
-                contact_email: '',
-                has_indefinite_deadline: false,
-            });
-            setApplicationForm({
-                id: '',
-                title: 'Application Form',
-                description: '',
-                pages: [{
-                    id: 'page_1',
-                    title: 'Application Information',
+                // Reset form after successful publishing
+                setFormData({
+                    title: '',
                     description: '',
-                    questions: []
-                }],
-                settings: {
-                    allowMultipleSubmissions: false,
-                    collectEmail: true,
-                    showProgressBar: true
-                }
-            });
-            setTagInput('');
-            setSelectedTemplate('');
-            setCurrentSection('basic');
+                    type: 'research',
+                    organization: '',
+                    location: '',
+                    deadline: '',
+                    url: '',
+                    tags: [],
+                    social_media: {},
+                    benefits: '',
+                    eligibility: '',
+                    cost: '',
+                    duration: '',
+                    application_process: '',
+                    contact_email: '',
+                    has_indefinite_deadline: false,
+                });
+                setApplicationForm({
+                    id: '',
+                    title: 'Application Form',
+                    description: '',
+                    pages: [{
+                        id: 'page_1',
+                        title: 'Application Information',
+                        description: '',
+                        questions: []
+                    }],
+                    settings: {
+                        allowMultipleSubmissions: false,
+                        collectEmail: true,
+                        showProgressBar: true
+                    }
+                });
+                setTagInput('');
+                setSelectedTemplate('');
+                setCurrentSection('basic');
+            }
 
             // Trigger Algolia sync
             await api.syncAlgolia();
@@ -491,8 +495,13 @@ function OpportunitiesContent() {
         setUploadingImages(true);
         try {
             const uploadPromises = files.map(async (file) => {
-                // For now, create a local URL - in production, upload to a storage service
-                return URL.createObjectURL(file);
+                // Convert file to base64 for persistent storage
+                return new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
             });
 
             const newImageUrls = await Promise.all(uploadPromises);
@@ -508,7 +517,6 @@ function OpportunitiesContent() {
     const removeImage = (index: number) => {
         setUploadedImages(prev => {
             const newImages = [...prev];
-            URL.revokeObjectURL(newImages[index]); // Clean up the object URL
             newImages.splice(index, 1);
             return newImages;
         });
@@ -856,11 +864,15 @@ function OpportunitiesContent() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {uploadedImages.map((image, index) => (
                                     <div key={index} className="relative group">
-                                        <img
-                                            src={image}
-                                            alt={`Upload ${index + 1}`}
-                                            className="w-full h-24 object-cover rounded-lg"
-                                        />
+                                        <div className="relative w-full h-24 rounded-lg overflow-hidden">
+                                            <Image
+                                                src={image}
+                                                alt={`Upload ${index + 1}`}
+                                                fill
+                                                className="object-cover"
+                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                                            />
+                                        </div>
                                         <button
                                             onClick={() => removeImage(index)}
                                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1271,7 +1283,13 @@ function OpportunitiesContent() {
 
             <SuccessModal
                 isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    // If updating an existing opportunity, redirect to dashboard
+                    if (isEditMode && formData.status === 'published') {
+                        router.push('/dashboard');
+                    }
+                }}
                 title={successData?.title || 'Success'}
                 message={successData?.message || 'Operation completed successfully'}
             />

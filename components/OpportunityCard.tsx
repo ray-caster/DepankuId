@@ -20,6 +20,7 @@ import { api } from '@/lib/api';
 import { getCategoryBadgeClasses, getCategoryLabel, OpportunityType } from '@/lib/categoryColors';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface OpportunityCardProps {
     opportunity: Opportunity;
@@ -129,17 +130,23 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                     <div className="relative h-48 bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden rounded-t-comfort">
                         <div className="relative w-full h-full">
                             <AnimatePresence mode="wait">
-                                <motion.img
+                                <motion.div
                                     key={currentImageIndex}
                                     initial={{ opacity: 0, scale: 1.1 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ duration: 0.3 }}
-                                    src={opportunity.images[currentImageIndex]}
-                                    alt={`${opportunity.title} - Image ${currentImageIndex + 1}`}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full relative cursor-pointer"
                                     onClick={openImageModal}
-                                />
+                                >
+                                    <Image
+                                        src={opportunity.images[currentImageIndex]}
+                                        alt={`${opportunity.title} - Image ${currentImageIndex + 1}`}
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    />
+                                </motion.div>
                             </AnimatePresence>
 
                             {/* Image Navigation */}
@@ -311,11 +318,13 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                             className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="relative">
-                                <img
-                                    src={opportunity.images?.[currentImageIndex]}
+                            <div className="relative w-full h-[80vh]">
+                                <Image
+                                    src={opportunity.images?.[currentImageIndex] || ''}
                                     alt={`${opportunity.title} - Image ${currentImageIndex + 1}`}
-                                    className="w-full h-auto max-h-[80vh] object-contain"
+                                    fill
+                                    className="object-contain"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
                                 />
 
                                 {/* Close button */}
@@ -391,17 +400,23 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                                             <h3 className="text-lg font-semibold text-foreground">Images</h3>
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                                 {opportunity.images.map((image, index) => (
-                                                    <img
+                                                    <div
                                                         key={index}
-                                                        src={image}
-                                                        alt={`${opportunity.title} - Image ${index + 1}`}
-                                                        className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                                        className="relative w-full h-32 rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                                                         onClick={() => {
                                                             setCurrentImageIndex(index);
                                                             setShowImageModal(true);
                                                             setShowDetailModal(false);
                                                         }}
-                                                    />
+                                                    >
+                                                        <Image
+                                                            src={image}
+                                                            alt={`${opportunity.title} - Image ${index + 1}`}
+                                                            fill
+                                                            className="object-cover"
+                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                                        />
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
