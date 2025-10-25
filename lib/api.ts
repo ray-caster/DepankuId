@@ -82,6 +82,8 @@ export interface Opportunity {
     created_by_email?: string;
     status?: 'published' | 'draft' | 'rejected';
     moderation_notes?: string;
+    images?: string[]; // Array of image URLs
+    additional_info?: Record<string, any>; // Custom fields
 }
 
 export interface OpportunityTemplate {

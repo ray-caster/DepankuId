@@ -97,6 +97,9 @@ function OpportunitiesContent() {
     const [draftId, setDraftId] = useState<string | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
+    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+    const [uploadingImages, setUploadingImages] = useState(false);
+    const [customFields, setCustomFields] = useState<Record<string, any>>({});
     const [loadingEdit, setLoadingEdit] = useState(false);
 
     // Auto-save functionality - only for drafts
@@ -162,6 +165,10 @@ function OpportunitiesContent() {
                         }]
                     });
                 }
+
+                // Load existing images and custom fields
+                setUploadedImages(opportunity.images || []);
+                setCustomFields(opportunity.additional_info || {});
             }
         } catch (error) {
             console.error('Failed to load opportunity for edit:', error);
@@ -374,6 +381,8 @@ function OpportunitiesContent() {
                 tags: formData.tags || [],
                 ...formData,
                 application_form: applicationForm,
+                images: uploadedImages,
+                additional_info: customFields,
                 status: 'draft'
             };
 
@@ -462,6 +471,93 @@ function OpportunitiesContent() {
                 [name]: processedValue,
             }));
         }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        // Check if adding these files would exceed the limit
+        if (uploadedImages.length + files.length > 10) {
+            alert('Maximum 10 images allowed');
+            return;
+        }
+
+        setUploadingImages(true);
+        try {
+            const uploadPromises = files.map(async (file) => {
+                // For now, create a local URL - in production, upload to a storage service
+                return URL.createObjectURL(file);
+            });
+
+            const newImageUrls = await Promise.all(uploadPromises);
+            setUploadedImages(prev => [...prev, ...newImageUrls]);
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            alert('Error uploading images. Please try again.');
+        } finally {
+            setUploadingImages(false);
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setUploadedImages(prev => {
+            const newImages = [...prev];
+            URL.revokeObjectURL(newImages[index]); // Clean up the object URL
+            newImages.splice(index, 1);
+            return newImages;
+        });
+    };
+
+    const addCustomField = () => {
+        const fieldKey = `field_${Date.now()}`;
+        setCustomFields(prev => ({
+            ...prev,
+            [fieldKey]: ''
+        }));
+    };
+
+    const updateCustomFieldKey = (index: number, newKey: string) => {
+        const entries = Object.entries(customFields);
+        const newFields: Record<string, any> = {};
+
+        entries.forEach(([key, value], i) => {
+            if (i === index) {
+                newFields[newKey] = value;
+            } else {
+                newFields[key] = value;
+            }
+        });
+
+        setCustomFields(newFields);
+    };
+
+    const updateCustomFieldValue = (index: number, newValue: string) => {
+        const entries = Object.entries(customFields);
+        const newFields: Record<string, any> = {};
+
+        entries.forEach(([key, value], i) => {
+            if (i === index) {
+                newFields[key] = newValue;
+            } else {
+                newFields[key] = value;
+            }
+        });
+
+        setCustomFields(newFields);
+    };
+
+    const removeCustomField = (index: number) => {
+        const entries = Object.entries(customFields);
+        const newFields: Record<string, any> = {};
+
+        entries.forEach(([key, value], i) => {
+            if (i !== index) {
+                newFields[key] = value;
+            }
+        });
+
+        setCustomFields(newFields);
     };
 
     const nextSection = () => {
@@ -712,6 +808,120 @@ function OpportunitiesContent() {
                             className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-comfort focus:outline-none focus:border-primary-500 text-sm"
                             placeholder="contact@organization.com"
                         />
+                    </div>
+                </div>
+
+                {/* Image Upload Section */}
+                <div className="mt-6">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                        Images (up to 10)
+                    </label>
+                    <div className="space-y-4">
+                        {/* Upload Area */}
+                        <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
+                            <input
+                                type="file"
+                                id="image-upload"
+                                multiple
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                                disabled={uploadingImages || uploadedImages.length >= 10}
+                            />
+                            <label
+                                htmlFor="image-upload"
+                                className={`cursor-pointer ${uploadingImages || uploadedImages.length >= 10 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                <div className="text-neutral-500 mb-2">
+                                    <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                                <p className="text-sm text-neutral-600">
+                                    {uploadingImages ? 'Uploading...' : uploadedImages.length >= 10 ? 'Maximum 10 images reached' : 'Click to upload images'}
+                                </p>
+                                <p className="text-xs text-neutral-500 mt-1">
+                                    {uploadedImages.length}/10 images uploaded
+                                </p>
+                            </label>
+                        </div>
+
+                        {/* Image Preview */}
+                        {uploadedImages.length > 0 && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {uploadedImages.map((image, index) => (
+                                    <div key={index} className="relative group">
+                                        <img
+                                            src={image}
+                                            alt={`Upload ${index + 1}`}
+                                            className="w-full h-24 object-cover rounded-lg"
+                                        />
+                                        <button
+                                            onClick={() => removeImage(index)}
+                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <XMarkIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Custom Fields Section */}
+                <div className="mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <label className="block text-sm font-medium text-foreground">
+                            Additional Information
+                        </label>
+                        <button
+                            type="button"
+                            onClick={addCustomField}
+                            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                        >
+                            + Add Field
+                        </button>
+                    </div>
+                    <div className="space-y-4">
+                        {Object.entries(customFields).map(([key, value], index) => (
+                            <div key={index} className="flex gap-4 items-end">
+                                <div className="flex-1">
+                                    <label className="block text-xs font-medium text-neutral-600 mb-1">
+                                        Field Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={key}
+                                        onChange={(e) => updateCustomFieldKey(index, e.target.value)}
+                                        className="w-full px-3 py-2 bg-white border border-neutral-300 rounded focus:outline-none focus:border-primary-500 text-sm"
+                                        placeholder="e.g., Age Requirement"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="block text-xs font-medium text-neutral-600 mb-1">
+                                        Value
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={value}
+                                        onChange={(e) => updateCustomFieldValue(index, e.target.value)}
+                                        className="w-full px-3 py-2 bg-white border border-neutral-300 rounded focus:outline-none focus:border-primary-500 text-sm"
+                                        placeholder="e.g., 18-25 years old"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => removeCustomField(index)}
+                                    className="p-2 text-red-500 hover:text-red-700"
+                                >
+                                    <XMarkIcon className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                        {Object.keys(customFields).length === 0 && (
+                            <p className="text-sm text-neutral-500 italic">No additional fields added yet</p>
+                        )}
                     </div>
                 </div>
             </div>
