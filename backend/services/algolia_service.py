@@ -54,19 +54,32 @@ class AlgoliaService:
         """Clean data for Algolia by removing large fields that cause payload issues"""
         cleaned = obj.copy()
         
+        # Debug logging
+        logger.info(f"Cleaning data for Algolia - Original keys: {list(obj.keys())}")
+        logger.info(f"Images field: {obj.get('images', 'NOT_FOUND')}")
+        
         # Handle images - keep only the first image as thumbnail for search results
         if 'images' in cleaned and cleaned['images']:
             images = cleaned['images']
+            logger.info(f"Images found: {len(images)} images, first: {images[0] if images else 'None'}")
             if isinstance(images, list) and len(images) > 0:
                 # Keep only the first image as thumbnail, but filter out blob URLs
                 first_image = images[0]
                 if not first_image.startswith('blob:'):
                     cleaned['thumbnail'] = first_image
+                    logger.info(f"Set thumbnail: {first_image}")
                 else:
                     cleaned['thumbnail'] = None
+                    logger.info("Filtered out blob URL thumbnail")
             else:
                 cleaned['thumbnail'] = None
+                logger.info("No valid images for thumbnail")
             del cleaned['images']  # Remove the full images array
+        else:
+            logger.info("No images field found or images is empty")
+        
+        logger.info(f"Final cleaned data keys: {list(cleaned.keys())}")
+        logger.info(f"Final thumbnail: {cleaned.get('thumbnail', 'NOT_FOUND')}")
         
         # Remove other large fields that can cause Algolia payload issues
         fields_to_remove = ['application_form', 'additional_info']

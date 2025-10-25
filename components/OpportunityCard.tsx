@@ -37,6 +37,21 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
     const [showImageModal, setShowImageModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
 
+    // Debug logging
+    const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+    console.log('OpportunityCard Debug:', {
+        id: opportunity.id || opportunity.objectID,
+        title: opportunity.title,
+        hasImages: !!opportunity.images,
+        imagesLength: opportunity.images?.length || 0,
+        images: opportunity.images,
+        hasThumbnail: !!opportunity.thumbnail,
+        thumbnail: opportunity.thumbnail,
+        unifiedImages: images,
+        unifiedImagesLength: images.length,
+        allKeys: Object.keys(opportunity)
+    });
+
     // Check if user has already applied to this opportunity
     useEffect(() => {
         const checkApplicationStatus = async () => {

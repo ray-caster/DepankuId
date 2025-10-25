@@ -98,10 +98,14 @@ class OpportunityService:
         # Handle Algolia based on status
         if ALGOLIA_AVAILABLE:
             if data.get('status') == 'published':
-                # Add/update in Algolia
-                algolia_data = data.copy()
-                algolia_data['objectID'] = opportunity_id
-                algolia_service.save_objects([algolia_data])
+                # Get the full opportunity data from database to ensure we have all fields
+                doc = doc_ref.get()
+                if doc.exists:
+                    full_data = doc.to_dict()
+                    full_data['objectID'] = opportunity_id
+                    # Merge with update data to ensure latest changes are included
+                    full_data.update(data)
+                    algolia_service.save_objects([full_data])
             elif data.get('status') == 'draft':
                 # Remove from Algolia if it was published before
                 algolia_service.delete_objects([opportunity_id])
