@@ -112,3 +112,4 @@ curl -X OPTIONS -H "Origin: https://www.depanku.id" -v https://api.depanku.id/ap
 3. Test frontend functionality
 4. Monitor for CORS errors
 5. If issues persist, investigate production infrastructure
+

@@ -10,19 +10,12 @@ import {
     BookmarkIcon as BookmarkOutlineIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-<<<<<<< HEAD
 import { memo, useState, useEffect } from 'react';
-=======
-import { memo } from 'react';
->>>>>>> parent of ac98dea (a)
 import { useAuth } from './AuthProvider';
 import { api } from '@/lib/api';
 import { getCategoryBadgeClasses, getCategoryLabel, OpportunityType } from '@/lib/categoryColors';
 import { useBookmarks } from '@/hooks/useBookmarks';
-<<<<<<< HEAD
 import Link from 'next/link';
-=======
->>>>>>> parent of ac98dea (a)
 
 interface OpportunityCardProps {
     opportunity: Opportunity;
@@ -33,7 +26,6 @@ interface OpportunityCardProps {
 function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false, onBookmarkChange }: OpportunityCardProps) {
     const { user, getIdToken } = useAuth();
     const { isBookmarked, toggleBookmark } = useBookmarks();
-<<<<<<< HEAD
     const [hasApplied, setHasApplied] = useState(false);
     const [checkingApplicationStatus, setCheckingApplicationStatus] = useState(false);
 
@@ -64,8 +56,6 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
 
         checkApplicationStatus();
     }, [user, opportunity.id, opportunity.objectID, getIdToken]);
-=======
->>>>>>> parent of ac98dea (a)
 
     const handleBookmark = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -81,30 +71,10 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
             return;
         }
 
-<<<<<<< HEAD
         // Redirect to application page
         const opportunityId = opportunity.id || opportunity.objectID;
         if (opportunityId) {
             window.location.href = `/application/${opportunityId}`;
-=======
-        try {
-            const idToken = await getIdToken();
-            if (idToken) {
-                // Track application
-                await api.trackApplication(opportunity.id || opportunity.objectID || '', idToken);
-            }
-
-            // Open the opportunity URL
-            if (opportunity.url) {
-                window.open(opportunity.url, '_blank', 'noopener,noreferrer');
-            }
-        } catch (error) {
-            console.error('Error tracking application:', error);
-            // Still open the URL even if tracking fails
-            if (opportunity.url) {
-                window.open(opportunity.url, '_blank', 'noopener,noreferrer');
-            }
->>>>>>> parent of ac98dea (a)
         }
     };
 

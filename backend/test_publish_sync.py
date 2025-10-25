@@ -59,3 +59,4 @@ def test_publish_sync():
 
 if __name__ == "__main__":
     test_publish_sync()
+

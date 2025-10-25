@@ -11,6 +11,7 @@ import ErrorModal, { ModerationErrorModal, SuccessModal } from '@/components/Err
 import { ErrorManager, AppError } from '@/lib/errors';
 import { api, Opportunity, OpportunityTemplate, SocialMediaLinks } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import ApplicationFormBuilder from '@/components/ApplicationFormBuilder';
 import {
     SparklesIcon,
     DocumentDuplicateIcon,
@@ -687,7 +688,6 @@ function OpportunitiesContent() {
                     </div>
                 </div>
             </div>
-<<<<<<< HEAD
         </motion.div>
     );
 
@@ -712,8 +712,6 @@ function OpportunitiesContent() {
                     isEditing={true}
                 />
             </div>
-=======
->>>>>>> parent of ac98dea (a)
         </motion.div>
     );
 

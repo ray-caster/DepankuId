@@ -20,14 +20,10 @@ import {
     PencilIcon,
     ArrowPathIcon,
     EyeIcon,
-<<<<<<< HEAD
     EyeSlashIcon,
     DocumentTextIcon,
     XCircleIcon,
     MagnifyingGlassIcon
-=======
-    EyeSlashIcon
->>>>>>> parent of ac98dea (a)
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
@@ -46,19 +42,19 @@ interface DeadlineEvent {
 function DashboardContent() {
     const { user, getIdToken } = useAuth();
     const router = useRouter();
-    const { bookmarks, loading: bookmarksLoading, refreshBookmarks } = useBookmarks();
+    const { bookmarks, loading: bookmarksLoading, refreshBookmarks, toggleBookmark } = useBookmarks();
     const [myOpportunities, setMyOpportunities] = useState<Opportunity[]>([]);
     const [loadingMyOpps, setLoadingMyOpps] = useState(false);
     const [myApplications, setMyApplications] = useState<any[]>([]);
     const [loadingMyApps, setLoadingMyApps] = useState(false);
     const [deadlineEvents, setDeadlineEvents] = useState<DeadlineEvent[]>([]);
-    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities'>('bookmarks');
+    const [activeView, setActiveView] = useState<'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications'>('bookmarks');
     const [publishingId, setPublishingId] = useState<string | null>(null);
 
     // Load active view from localStorage on mount
     useEffect(() => {
-        const savedView = localStorage.getItem('dashboardActiveView') as 'bookmarks' | 'gantt' | 'myOpportunities';
-        if (savedView && ['bookmarks', 'gantt', 'myOpportunities'].includes(savedView)) {
+        const savedView = localStorage.getItem('dashboardActiveView') as 'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications';
+        if (savedView && ['bookmarks', 'gantt', 'myOpportunities', 'myApplications'].includes(savedView)) {
             setActiveView(savedView);
         }
     }, []);
@@ -196,6 +192,15 @@ function DashboardContent() {
             await loadMyOpportunities();
         }
     }, [activeView, refreshBookmarks, loadMyOpportunities]);
+
+    const handleRemoveBookmark = useCallback(async (opportunityId: string) => {
+        const opportunity = bookmarks.find(bookmark => 
+            bookmark.id === opportunityId || bookmark.objectID === opportunityId
+        );
+        if (opportunity) {
+            await toggleBookmark(opportunity);
+        }
+    }, [bookmarks, toggleBookmark]);
 
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -791,7 +796,6 @@ function DashboardContent() {
                                         ))}
                                     </div>
                                 )
-<<<<<<< HEAD
                             ) : activeView === 'myApplications' ? (
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between">
@@ -926,8 +930,6 @@ function DashboardContent() {
                                         </div>
                                     )}
                                 </div>
-=======
->>>>>>> parent of ac98dea (a)
                             ) : (
                                 <div className="group relative bg-background-light rounded-gentle p-6 sm:p-8 border-2 border-neutral-400 hover:border-primary-400 transition-all duration-300"
                                     style={{

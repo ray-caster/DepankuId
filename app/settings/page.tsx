@@ -3,11 +3,8 @@
 import { useState, useEffect, Suspense } from 'react';
 import { AuthProvider, useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
-<<<<<<< HEAD
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 import ChangePassword from '@/components/ChangePassword';
-=======
->>>>>>> parent of ac98dea (a)
 import { motion } from 'framer-motion';
 import {
     UserCircleIcon,

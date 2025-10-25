@@ -55,6 +55,7 @@ export interface Opportunity {
     contact_email?: string;
     has_indefinite_deadline?: boolean;
     created_by_uid?: string;
+    application_form?: any;
     created_by_email?: string;
     status?: 'published' | 'draft' | 'rejected';
     moderation_notes?: string;
@@ -664,7 +665,6 @@ class API {
         const data = await response.json();
         return data.data || [];
     }
-<<<<<<< HEAD
 
     // Application Management Methods
     async getApplicationStatus(opportunityId: string, idToken: string): Promise<{
@@ -806,8 +806,6 @@ class API {
         const data = await response.json();
         return data.data || [];
     }
-=======
->>>>>>> parent of ac98dea (a)
 }
 
 export const api = new API();
