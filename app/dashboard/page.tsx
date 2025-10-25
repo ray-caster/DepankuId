@@ -60,7 +60,7 @@ function DashboardContent() {
     }, []);
 
     // Save active view to localStorage when it changes
-    const handleViewChange = (view: 'bookmarks' | 'gantt' | 'myOpportunities') => {
+    const handleViewChange = (view: 'bookmarks' | 'gantt' | 'myOpportunities' | 'myApplications') => {
         setActiveView(view);
         localStorage.setItem('dashboardActiveView', view);
     };
@@ -201,6 +201,11 @@ function DashboardContent() {
             await toggleBookmark(opportunity);
         }
     }, [bookmarks, toggleBookmark]);
+
+    const handleViewApplications = useCallback((opportunityId: string) => {
+        // Navigate to application management screen
+        router.push(`/dashboard/applications/${opportunityId}`);
+    }, [router]);
 
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -466,6 +471,16 @@ function DashboardContent() {
                                 )}
                             </button>
                             <button
+                                onClick={() => handleViewChange('myApplications')}
+                                className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'myApplications'
+                                    ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
+                                    : 'text-neutral-600 hover:text-neutral-900'
+                                    }`}
+                            >
+                                <DocumentTextIcon className="w-5 h-5" />
+                                My Applications
+                            </button>
+                            <button
                                 onClick={() => handleViewChange('gantt')}
                                 className={`flex items-center gap-2 px-4 py-3 font-medium transition-all whitespace-nowrap ${activeView === 'gantt'
                                     ? 'text-primary-600 border-b-2 border-primary-600 -mb-0.5'
@@ -672,6 +687,15 @@ function DashboardContent() {
                                                             >
                                                                 <LinkIcon className="w-4 h-4" />
                                                             </a>
+                                                        )}
+                                                        {opportunity.id && opportunity.status === 'published' && (
+                                                            <button
+                                                                onClick={() => handleViewApplications(opportunity.id!)}
+                                                                className="btn-secondary flex items-center justify-center gap-2 px-3"
+                                                            >
+                                                                <DocumentTextIcon className="w-4 h-4" />
+                                                                Applications
+                                                            </button>
                                                         )}
                                                         <button
                                                             onClick={() => opportunity.id && handleDeleteOpportunity(opportunity.id)}
