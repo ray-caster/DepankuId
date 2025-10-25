@@ -54,8 +54,22 @@ class AlgoliaService:
         """Clean data for Algolia by removing large fields that cause payload issues"""
         cleaned = obj.copy()
         
-        # Remove large fields that can cause Algolia payload issues
-        fields_to_remove = ['images', 'application_form', 'additional_info']
+        # Handle images - keep only the first image as thumbnail for search results
+        if 'images' in cleaned and cleaned['images']:
+            images = cleaned['images']
+            if isinstance(images, list) and len(images) > 0:
+                # Keep only the first image as thumbnail, but filter out blob URLs
+                first_image = images[0]
+                if not first_image.startswith('blob:'):
+                    cleaned['thumbnail'] = first_image
+                else:
+                    cleaned['thumbnail'] = None
+            else:
+                cleaned['thumbnail'] = None
+            del cleaned['images']  # Remove the full images array
+        
+        # Remove other large fields that can cause Algolia payload issues
+        fields_to_remove = ['application_form', 'additional_info']
         for field in fields_to_remove:
             if field in cleaned:
                 del cleaned[field]

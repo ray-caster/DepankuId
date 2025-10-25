@@ -84,6 +84,7 @@ export interface Opportunity {
     moderation_notes?: string;
     images?: string[]; // Array of image URLs
     additional_info?: Record<string, any>; // Custom fields
+    thumbnail?: string; // Single thumbnail image for search results
 }
 
 export interface OpportunityTemplate {

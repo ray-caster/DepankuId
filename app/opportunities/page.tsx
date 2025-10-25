@@ -294,7 +294,7 @@ function OpportunitiesContent() {
 
             // Check if this is an update to a published opportunity
             const isUpdate = isEditMode && formData.status === 'published';
-            
+
             if (isUpdate) {
                 // For published opportunities, just update and keep status as published
                 updateData.status = 'published';
