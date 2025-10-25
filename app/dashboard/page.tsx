@@ -194,7 +194,7 @@ function DashboardContent() {
     }, [activeView, refreshBookmarks, loadMyOpportunities]);
 
     const handleRemoveBookmark = useCallback(async (opportunityId: string) => {
-        const opportunity = bookmarks.find(bookmark => 
+        const opportunity = bookmarks.find(bookmark =>
             bookmark.id === opportunityId || bookmark.objectID === opportunityId
         );
         if (opportunity) {
@@ -612,7 +612,7 @@ function DashboardContent() {
                                                     </div>
 
                                                     <div className="flex flex-wrap gap-2 mb-4">
-                                                        {opportunity.tags.slice(0, 5).map(tag => (
+                                                        {opportunity.tags.slice(0, 5).map((tag: string) => (
                                                             <span key={tag} className="px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full text-xs flex items-center gap-1">
                                                                 <TagIcon className="w-3 h-3" />
                                                                 #{tag}
@@ -648,8 +648,8 @@ function DashboardContent() {
                                                                 }}
                                                                 disabled={publishingId === opportunity.id}
                                                                 className={`flex items-center gap-2 px-3 py-2 rounded-comfort transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${opportunity.status === 'published'
-                                                                        ? 'bg-orange-600 text-white hover:bg-orange-700'
-                                                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                                                    ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                                                    : 'bg-green-600 text-white hover:bg-green-700'
                                                                     }`}
                                                             >
                                                                 {publishingId === opportunity.id ? (
@@ -768,7 +768,7 @@ function DashboardContent() {
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2 mb-4">
-                                                    {opportunity.tags.slice(0, 5).map(tag => (
+                                                    {opportunity.tags.slice(0, 5).map((tag: string) => (
                                                         <span key={tag} className="px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full text-xs flex items-center gap-1">
                                                             <TagIcon className="w-3 h-3" />
                                                             {tag}

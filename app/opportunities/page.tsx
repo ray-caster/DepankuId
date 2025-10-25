@@ -73,6 +73,16 @@ function OpportunitiesContent() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [showSocialMedia, setShowSocialMedia] = useState(false);
+    const [applicationForm, setApplicationForm] = useState<any>({
+        id: '',
+        title: 'Application Form',
+        description: '',
+        pages: [{
+            id: 'page_1',
+            title: 'Page 1',
+            questions: []
+        }]
+    });
 
     // Error modal states
     const [showErrorModal, setShowErrorModal] = useState(false);
