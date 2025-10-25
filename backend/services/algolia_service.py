@@ -18,38 +18,10 @@ class AlgoliaService:
     
     def _run_async_safely(self, coro):
         """Safely run async operations in sync context"""
-        try:
-            # Try to get the current event loop
-            try:
-                loop = asyncio.get_running_loop()
-                # We're in an async context, use ThreadPoolExecutor
-                def run_in_new_loop():
-                    new_loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(new_loop)
-                    try:
-                        return new_loop.run_until_complete(coro)
-                    finally:
-                        new_loop.close()
-                
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(run_in_new_loop)
-                    return future.result(timeout=30)  # 30 second timeout
-            except RuntimeError:
-                # No running loop, we can create one
-                return asyncio.run(coro)
-        except Exception as e:
-            logger.error(f"Error running async operation: {str(e)}")
-            # Fallback: try to run synchronously
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                try:
-                    return loop.run_until_complete(coro)
-                finally:
-                    loop.close()
-            except Exception as fallback_error:
-                logger.error(f"Fallback async operation also failed: {str(fallback_error)}")
-                return False
+        # For now, skip async operations entirely to avoid event loop issues
+        # and rely on the synchronous fallback
+        logger.warning("Skipping async operation to avoid event loop issues, using sync fallback")
+        return False
     
     async def save_objects_async(self, objects: List[Dict[str, Any]]) -> bool:
         """Save objects to Algolia asynchronously"""
@@ -66,10 +38,51 @@ class AlgoliaService:
     
     def save_objects(self, objects: List[Dict[str, Any]]) -> bool:
         """Save objects to Algolia synchronously"""
+        # Try async approach first
         async def _save():
             return await self.save_objects_async(objects)
         
-        return self._run_async_safely(_save())
+        result = self._run_async_safely(_save())
+        if result:
+            return result
+        
+        # Fallback: Use synchronous approach if async fails
+        logger.warning("Async save failed, trying synchronous fallback")
+        return self._save_objects_sync(objects)
+    
+    def _save_objects_sync(self, objects: List[Dict[str, Any]]) -> bool:
+        """Synchronous fallback for saving objects to Algolia"""
+        try:
+            # Use the synchronous client if available
+            import requests
+            import json
+            
+            url = f"https://{ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/{self.index_name}/batch"
+            headers = {
+                'X-Algolia-API-Key': ALGOLIA_ADMIN_API_KEY,
+                'X-Algolia-Application-Id': ALGOLIA_APP_ID,
+                'Content-Type': 'application/json'
+            }
+            
+            # Prepare batch operations
+            operations = []
+            for obj in objects:
+                operations.append({
+                    "action": "addObject",
+                    "body": obj
+                })
+            
+            payload = {"requests": operations}
+            
+            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            response.raise_for_status()
+            
+            logger.info(f"Successfully saved {len(objects)} objects to Algolia (sync fallback)")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Sync fallback also failed: {str(e)}")
+            return False
     
     async def delete_objects_async(self, object_ids: List[str]) -> bool:
         """Delete objects from Algolia asynchronously"""
@@ -127,10 +140,55 @@ class AlgoliaService:
     
     def sync_all(self, opportunities: List[Dict[str, Any]]) -> int:
         """Sync all opportunities to Algolia synchronously"""
+        # Try async approach first
         async def _sync():
             return await self.sync_all_async(opportunities)
         
-        return self._run_async_safely(_sync())
+        result = self._run_async_safely(_sync())
+        if result is not False and result is not None:
+            return result
+        
+        # Fallback: Use synchronous approach if async fails
+        logger.warning("Async sync_all failed, trying synchronous fallback")
+        return self._sync_all_sync(opportunities)
+    
+    def _sync_all_sync(self, opportunities: List[Dict[str, Any]]) -> int:
+        """Synchronous fallback for syncing all opportunities to Algolia"""
+        try:
+            # Prepare objects for Algolia
+            objects = []
+            for opp in opportunities:
+                algolia_obj = opp.copy()
+                algolia_obj['objectID'] = opp.get('id', opp.get('objectID'))
+                algolia_obj['id'] = opp.get('id', opp.get('objectID'))
+                
+                # Convert datetime objects to ISO strings
+                if 'createdAt' in algolia_obj and algolia_obj['createdAt']:
+                    if hasattr(algolia_obj['createdAt'], 'isoformat'):
+                        algolia_obj['createdAt'] = algolia_obj['createdAt'].isoformat()
+                
+                if 'deadline' in algolia_obj and algolia_obj['deadline']:
+                    if hasattr(algolia_obj['deadline'], 'isoformat'):
+                        algolia_obj['deadline'] = algolia_obj['deadline'].isoformat()
+                
+                objects.append(algolia_obj)
+            
+            if not objects:
+                logger.warning("No objects to sync to Algolia")
+                return 0
+            
+            # Use the synchronous save method
+            success = self._save_objects_sync(objects)
+            if success:
+                logger.info(f"Successfully synced {len(objects)} opportunities to Algolia (sync fallback)")
+                return len(objects)
+            else:
+                logger.error("Failed to sync opportunities to Algolia (sync fallback)")
+                return 0
+                
+        except Exception as e:
+            logger.error(f"Error in sync_all fallback: {str(e)}")
+            return 0
     
     async def clear_index_async(self) -> bool:
         """Clear all objects from the Algolia index"""
