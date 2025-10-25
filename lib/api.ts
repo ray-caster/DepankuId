@@ -38,11 +38,15 @@ export interface ApplicationSubmission {
     id?: string;
     opportunity_id: string;
     user_id: string;
-    answers: any;
+    answers?: any;
+    responses?: any[];
     status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
     submitted_at?: string;
     reviewed_at?: string;
     notes?: string;
+    applicantName?: string;
+    applicantEmail?: string;
+    applicantId?: string;
 }
 
 export interface ApplicationResponse {

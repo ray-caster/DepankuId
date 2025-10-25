@@ -43,8 +43,6 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
             if (!idToken) return;
 
             const apps = await api.getOpportunityApplications(opportunityId, idToken);
-            console.log('Fetched applications:', apps);
-            console.log('First application:', apps[0]);
             setApplications(apps);
         } catch (err) {
             console.error('Failed to load applications:', err);
@@ -270,48 +268,42 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
 
                                         {/* Application Content */}
                                         <div className="space-y-6">
+                                            {/* Applicant Information */}
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-foreground mb-4">Applicant Information</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="bg-neutral-50 p-4 rounded-lg">
+                                                        <div className="text-sm font-medium text-neutral-700 mb-1">Name</div>
+                                                        <div className="text-sm text-neutral-600">{currentApplication.applicantName || 'Not provided'}</div>
+                                                    </div>
+                                                    <div className="bg-neutral-50 p-4 rounded-lg">
+                                                        <div className="text-sm font-medium text-neutral-700 mb-1">Email</div>
+                                                        <div className="text-sm text-neutral-600">{currentApplication.applicantEmail || 'Not provided'}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             {/* Application Answers */}
                                             <div>
                                                 <h3 className="text-lg font-semibold text-foreground mb-4">Application Details</h3>
                                                 <div className="space-y-4">
-                                                    {currentApplication.answers ? (
-                                                        Array.isArray(currentApplication.answers) ? (
-                                                            // Handle array format (ApplicationResponse[])
-                                                            currentApplication.answers.map((answer: any, index: number) => (
-                                                                <div key={index} className="border-l-4 border-primary-200 pl-4">
-                                                                    <div className="text-sm font-medium text-neutral-700 mb-1">
-                                                                        {answer.questionTitle || answer.question_id || `Question ${index + 1}`}
-                                                                    </div>
-                                                                    <div className="text-sm text-neutral-600">
-                                                                        {Array.isArray(answer.answer) ? answer.answer.join(', ') : String(answer.answer || 'No answer provided')}
-                                                                    </div>
-                                                                    {answer.questionType && (
-                                                                        <div className="text-xs text-neutral-500 mt-1">
-                                                                            Type: {answer.questionType}
-                                                                        </div>
-                                                                    )}
+                                                    {currentApplication.responses && Array.isArray(currentApplication.responses) && currentApplication.responses.length > 0 ? (
+                                                        currentApplication.responses.map((response: any, index: number) => (
+                                                            <div key={response.questionId || index} className="border-l-4 border-primary-200 pl-4">
+                                                                <div className="text-sm font-medium text-neutral-700 mb-1">
+                                                                    {response.questionTitle || `Question ${index + 1}`}
+                                                                    {response.required && <span className="text-red-500 ml-1">*</span>}
                                                                 </div>
-                                                            ))
-                                                        ) : typeof currentApplication.answers === 'object' ? (
-                                                            // Handle object format (key-value pairs)
-                                                            Object.entries(currentApplication.answers).map(([key, value]) => (
-                                                                <div key={key} className="border-l-4 border-primary-200 pl-4">
-                                                                    <div className="text-sm font-medium text-neutral-700 mb-1">
-                                                                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                                                    </div>
-                                                                    <div className="text-sm text-neutral-600">
-                                                                        {Array.isArray(value) ? value.join(', ') : String(value)}
-                                                                    </div>
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            // Handle primitive values
-                                                            <div className="border-l-4 border-primary-200 pl-4">
                                                                 <div className="text-sm text-neutral-600">
-                                                                    {String(currentApplication.answers)}
+                                                                    {Array.isArray(response.answer) ? response.answer.join(', ') : String(response.answer || 'No answer provided')}
                                                                 </div>
+                                                                {response.questionType && (
+                                                                    <div className="text-xs text-neutral-500 mt-1">
+                                                                        Type: {response.questionType}
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        )
+                                                        ))
                                                     ) : (
                                                         <div className="text-neutral-600 italic">
                                                             No application details available
@@ -320,17 +312,6 @@ function ApplicationManagementContent({ opportunityId }: ApplicationManagementPr
                                                 </div>
                                             </div>
 
-                                            {/* Debug Information (temporary) */}
-                                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                                <h4 className="text-sm font-medium text-yellow-800 mb-2">Debug Info (temporary)</h4>
-                                                <div className="text-xs text-yellow-700">
-                                                    <div>Full application object:</div>
-                                                    <pre className="mt-2 p-2 bg-yellow-100 rounded text-xs overflow-auto max-h-40">
-                                                        {JSON.stringify(currentApplication, null, 2)}
-                                                    </pre>
-                                                    <div className="mt-2">Available fields: {Object.keys(currentApplication).join(', ')}</div>
-                                                </div>
-                                            </div>
 
                                             {/* Review Notes */}
                                             {currentApplication.notes && (
