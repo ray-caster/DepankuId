@@ -126,7 +126,7 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
             >
                 {/* Image Carousel */}
                 {opportunity.images && opportunity.images.length > 0 && (
-                    <div className="relative h-48 bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden">
+                    <div className="relative h-48 bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden rounded-t-comfort">
                         <div className="relative w-full h-full">
                             <AnimatePresence mode="wait">
                                 <motion.img

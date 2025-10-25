@@ -254,7 +254,7 @@ function OpportunitiesContent() {
 
     const handlePublish = async () => {
         if (!user || !draftId) {
-            const error = ErrorManager.getError('OPP_006', 'Publishing Opportunity');
+            const error = ErrorManager.getError('OPP_006', isEditMode ? 'Updating Opportunity' : 'Publishing Opportunity');
             setCurrentError(error);
             setShowErrorModal(true);
             return;
@@ -274,17 +274,22 @@ function OpportunitiesContent() {
                 organization: formData.organization || '',
                 tags: formData.tags || [],
                 ...formData,
-                application_form: applicationForm
+                application_form: applicationForm,
+                images: uploadedImages,
+                additional_info: customFields
             };
             await api.updateOpportunity(draftId, updateData, idToken);
 
             // Then publish the opportunity
             const result = await api.publishOpportunity(draftId, idToken);
 
-            // Show success modal
+            // Show success modal with appropriate message
+            const isUpdate = isEditMode && formData.status === 'published';
             setSuccessData({
-                title: 'Opportunity Published!',
-                message: 'Your opportunity has been successfully published and is now visible to users.'
+                title: isUpdate ? 'Opportunity Updated!' : 'Opportunity Published!',
+                message: isUpdate
+                    ? 'Your opportunity has been successfully updated and is now visible to users.'
+                    : 'Your opportunity has been successfully published and is now visible to users.'
             });
             setShowSuccessModal(true);
 
@@ -350,7 +355,7 @@ function OpportunitiesContent() {
                 if (error instanceof Error && (error as any).appError) {
                     appError = (error as any).appError;
                 } else {
-                    appError = ErrorManager.getErrorFromException(error, 'Publishing Opportunity');
+                    appError = ErrorManager.getErrorFromException(error, isEditMode ? 'Updating Opportunity' : 'Publishing Opportunity');
                 }
                 setCurrentError(appError);
                 setShowErrorModal(true);
@@ -1208,12 +1213,12 @@ function OpportunitiesContent() {
                                                 {loading ? (
                                                     <>
                                                         <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                                                        Publishing...
+                                                        {isEditMode && formData.status === 'published' ? 'Updating...' : 'Publishing...'}
                                                     </>
                                                 ) : (
                                                     <>
                                                         <SparklesIcon className="w-4 h-4" />
-                                                        Publish
+                                                        {isEditMode && formData.status === 'published' ? 'Update' : 'Publish'}
                                                     </>
                                                 )}
                                             </button>
