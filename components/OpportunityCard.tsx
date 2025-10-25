@@ -88,15 +88,17 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
 
     const nextImage = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (opportunity.images && opportunity.images.length > 0) {
-            setCurrentImageIndex((prev) => (prev + 1) % opportunity.images!.length);
+        const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+        if (images.length > 0) {
+            setCurrentImageIndex((prev) => (prev + 1) % images.length);
         }
     };
 
     const prevImage = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (opportunity.images && opportunity.images.length > 0) {
-            setCurrentImageIndex((prev) => (prev - 1 + opportunity.images!.length) % opportunity.images!.length);
+        const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+        if (images.length > 0) {
+            setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
         }
     };
 
@@ -118,7 +120,7 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.3 }}
                 className="group cursor-pointer relative bg-white/50 backdrop-blur-xl rounded-comfort overflow-hidden border border-neutral-200/60
-                         hover:border-primary-300/60 transition-all duration-300"
+                     hover:border-primary-300/60 transition-all duration-300"
                 style={{
                     boxShadow: '0 4px 12px -2px oklch(0% 0 0 / 0.06), 0 2px 8px -2px oklch(0% 0 0 / 0.04)',
                     backdropFilter: 'blur(16px) saturate(180%)',
@@ -126,7 +128,11 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                 }}
             >
                 {/* Image Carousel */}
-                {(opportunity.images && opportunity.images.length > 0) || opportunity.thumbnail ? (
+                {(() => {
+                    // Create a unified images array from either full images or thumbnail
+                    const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                    return images.length > 0;
+                })() ? (
                     <div className="relative h-48 bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden rounded-t-comfort">
                         <div className="relative w-full h-full">
                             <AnimatePresence mode="wait">
@@ -140,9 +146,9 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                                     onClick={openImageModal}
                                 >
                                     {(() => {
-                                        const imageToShow = opportunity.images && opportunity.images.length > 0
-                                            ? opportunity.images[currentImageIndex]
-                                            : opportunity.thumbnail;
+                                        // Create unified images array
+                                        const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                        const imageToShow = images[currentImageIndex];
 
                                         if (!imageToShow || imageToShow.startsWith('blob:')) {
                                             return (
@@ -171,29 +177,38 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                             </AnimatePresence>
 
                             {/* Image Navigation */}
-                            {opportunity.images && opportunity.images.length > 1 && (
-                                <>
-                                    <button
-                                        onClick={prevImage}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all backdrop-blur-sm"
-                                    >
-                                        <ChevronLeftIcon className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        onClick={nextImage}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all backdrop-blur-sm"
-                                    >
-                                        <ChevronRightIcon className="w-4 h-4" />
-                                    </button>
-                                </>
-                            )}
+                            {(() => {
+                                const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                return images.length > 1;
+                            })() && (
+                                    <>
+                                        <button
+                                            onClick={prevImage}
+                                            className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all backdrop-blur-sm"
+                                        >
+                                            <ChevronLeftIcon className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={nextImage}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all backdrop-blur-sm"
+                                        >
+                                            <ChevronRightIcon className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                )}
 
                             {/* Image Counter */}
-                            {opportunity.images && opportunity.images.length > 1 && (
-                                <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/40 text-white text-xs rounded-full backdrop-blur-sm">
-                                    {currentImageIndex + 1} / {opportunity.images.length}
-                                </div>
-                            )}
+                            {(() => {
+                                const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                return images.length > 1;
+                            })() && (
+                                    <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/40 text-white text-xs rounded-full backdrop-blur-sm">
+                                        {currentImageIndex + 1} / {(() => {
+                                            const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                            return images.length;
+                                        })()}
+                                    </div>
+                                )}
 
                             {/* View Images Button */}
                             <button
@@ -356,7 +371,11 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="relative w-full h-[80vh]">
-                                {opportunity.images?.[currentImageIndex]?.startsWith('blob:') ? (
+                                {(() => {
+                                    const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                    const currentImage = images[currentImageIndex];
+                                    return currentImage?.startsWith('blob:');
+                                })() ? (
                                     <div className="w-full h-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
                                         <div className="text-center text-neutral-500">
                                             <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -368,7 +387,10 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                                     </div>
                                 ) : (
                                     <Image
-                                        src={opportunity.images?.[currentImageIndex] || ''}
+                                        src={(() => {
+                                            const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                            return images[currentImageIndex] || '';
+                                        })()}
                                         alt={`${opportunity.title} - Image ${currentImageIndex + 1}`}
                                         fill
                                         className="object-contain"
@@ -385,22 +407,25 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                                 </button>
 
                                 {/* Navigation */}
-                                {opportunity.images && opportunity.images.length > 1 && (
-                                    <>
-                                        <button
-                                            onClick={prevImage}
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all"
-                                        >
-                                            <ChevronLeftIcon className="w-6 h-6" />
-                                        </button>
-                                        <button
-                                            onClick={nextImage}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all"
-                                        >
-                                            <ChevronRightIcon className="w-6 h-6" />
-                                        </button>
-                                    </>
-                                )}
+                                {(() => {
+                                    const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                    return images.length > 1;
+                                })() && (
+                                        <>
+                                            <button
+                                                onClick={prevImage}
+                                                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all"
+                                            >
+                                                <ChevronLeftIcon className="w-6 h-6" />
+                                            </button>
+                                            <button
+                                                onClick={nextImage}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all"
+                                            >
+                                                <ChevronRightIcon className="w-6 h-6" />
+                                            </button>
+                                        </>
+                                    )}
 
                                 {/* Image counter */}
                                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/50 text-white text-sm rounded-full backdrop-blur-sm">
@@ -444,43 +469,49 @@ function OpportunityCard({ opportunity, isBookmarked: initialBookmarked = false,
                                 {/* Content */}
                                 <div className="p-6 space-y-6">
                                     {/* Images */}
-                                    {opportunity.images && opportunity.images.length > 0 && (
-                                        <div className="space-y-4">
-                                            <h3 className="text-lg font-semibold text-foreground">Images</h3>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                {opportunity.images.map((image, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="relative w-full h-32 rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
-                                                        onClick={() => {
-                                                            setCurrentImageIndex(index);
-                                                            setShowImageModal(true);
-                                                            setShowDetailModal(false);
-                                                        }}
-                                                    >
-                                                        {image.startsWith('blob:') ? (
-                                                            <div className="w-full h-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
-                                                                <div className="text-center text-neutral-500">
-                                                                    <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                    </svg>
-                                                                    <p className="text-xs">N/A</p>
+                                    {(() => {
+                                        const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                        return images.length > 0;
+                                    })() && (
+                                            <div className="space-y-4">
+                                                <h3 className="text-lg font-semibold text-foreground">Images</h3>
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                    {(() => {
+                                                        const images = opportunity.images || (opportunity.thumbnail ? [opportunity.thumbnail] : []);
+                                                        return images;
+                                                    })().map((image, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="relative w-full h-32 rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                                                            onClick={() => {
+                                                                setCurrentImageIndex(index);
+                                                                setShowImageModal(true);
+                                                                setShowDetailModal(false);
+                                                            }}
+                                                        >
+                                                            {image.startsWith('blob:') ? (
+                                                                <div className="w-full h-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
+                                                                    <div className="text-center text-neutral-500">
+                                                                        <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                        </svg>
+                                                                        <p className="text-xs">N/A</p>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        ) : (
-                                                            <Image
-                                                                src={image}
-                                                                alt={`${opportunity.title} - Image ${index + 1}`}
-                                                                fill
-                                                                className="object-cover"
-                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                            ) : (
+                                                                <Image
+                                                                    src={image}
+                                                                    alt={`${opportunity.title} - Image ${index + 1}`}
+                                                                    fill
+                                                                    className="object-cover"
+                                                                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
                                     {/* Basic Information */}
                                     <div className="space-y-4">
